@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Wallet</title>
+</head>
+
+<body>
+<h1>Wallet</h1>
+<form action="" method="POST">
+  Connect to:<br>
+  <input type="text" name="url" value="http://stormy-everglades-34766.herokuapp.com/transactions/send" size="70">
+  <br><br>
+  Wallet private key:<br>
+  <input type="text" name="wallet_priv_key" value="1e8e5fa0e1a4a8ddbaca57a8d260a2f991d1d57b3808d5a90d4b3049073c970b" size="70">
+  <br><br>
+  Wallet address:<br>
+  <!--{{ pub_addr }}<br>-->
+  <input type="text" name="wallet_addr" size="70" value={{ pub_addr }}>
+  <br><br>
+  <input type="submit" name="action" value="Sign in">
+  <br><br><br>
+  Recipient address:<br>
+  <input type="text" name="recipient_addr" value="255eb98d31880f6c5ce9180970c9fd65d17053f1" size="70">
+  <br><br>
+  Number of coins:<br>
+  <input type="number" name="no_of_coins" value="50" size="20">
+  <br><br>
+  <input type="submit" name="action" value="Send coins">
+  <br><br>
+  Response:<br>
+  {{ response }}
+  <br><br>
+</form> 
+</body>
+
+</html>
