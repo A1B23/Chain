@@ -139,7 +139,7 @@ def getBalance(address):
         found = False
         if (address in m_AllBalances):
             found = True
-            ret['curBalance'] = m_AllBalances[address]['curBalance']
+            ret['confirmedBalance'] = m_AllBalances[address]['curBalance']
             #ret['confirmedBalance'] = ???m_AllBalances[address]['curBalance']
 
         for tx in m_pendingTX:

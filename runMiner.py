@@ -10,19 +10,19 @@ from project.utils import getFutureTimeStamp
 from threading import Thread
 
 candidate = {}
+
 cfg = {
     'zero_string': '00000000000000000000000000000',
     'maxNonce': 2147483647,  #typical Java max, so stick to it to avoid endless search
     'peer': -1,
     'miner_address': -1,
     'mode': 'n', #by default keep mining, if started with 'y', miner will wait for user
-    'pulling': True
+    'pulling': False
 }
 
 # requires for GET to the blockchain network
 def miner_get(url):
-    #TODO put this into main node as well with content type etc....
-    print("Attempt to connect to "+url)
+    #TODO put application type tec. this into main node as well with content type etc....
     response = requests.get(url, headers={'content-type': 'application/json', 'accept': 'application/json'})
     return response
 
@@ -41,33 +41,47 @@ def getEstimatedTimeStamp():
     # the decision
     return getFutureTimeStamp(candidate['difficulty']*1000) #TODO test
 
+def pull():
+    if (cfg['mode'] == "y"):
+        print("enter m <return> to start mining")
+        choice = "s"
+        cfg['pulling'] = False
+        while (choice != "m"):
+            choice = input().lower()
 
-def pullCandidate():
-    while True:
-        print("==== First Stage : Request a mining to Node ===================")
-        if (cfg['mode'] == "y"):
-            print("enter m <return> to start mining")
-            choice = "s"
-            while (choice != "m"):
-                choice = input().lower()
+    if (cfg['pulling'] == True):
+        return #already pulling
 
-        cfg['pulling'] = True
+    cfg['pulling'] = True
+    while (cfg['pulling'] == True):
+        print("==== First Stage : Request mining data from Node: "+str(cfg['peer']))
         try:
             resp_text = getCandidate()
-            if ((len(candidate) ==0 ) or (candidate['blockDataHash'] != resp_text['blockDataHash'])):
+            if ((len(candidate) == 0) or (candidate['blockDataHash'] != resp_text['blockDataHash'])):
+                candidate.clear()
                 candidate['blockDataHash'] = resp_text['blockDataHash']
                 candidate['difficulty'] = resp_text['difficulty']
                 candidate['dateCreated'] = getEstimatedTimeStamp()
                 candidate['fixDat'] = candidate['blockDataHash'] + "|" + candidate['dateCreated'] + "|"
                 candidate['nonce'] = random.randint(0, cfg['maxNonce'])  # avoid that each miner starts at same level
-                candidate['oriNonce'] = candidate['nonce']  #prepare to avoid unneccessary looping
+                candidate['oriNonce'] = candidate['nonce']  # prepare to avoid unneccessary looping
+                cfg['pulling'] = False
+                return
         except Exception:
-            print("No/Invalid peer reply, retry...."+str(cfg['peer']))
-            sleep(1)    # no peer, give a bit of time to recover, keep the 'pulling' flag to avoid waste of calc power
-            continue
-        cfg['pulling'] = False
-        sleep(int(resp_text['difficulty']/2))
-        cfg['pulling'] = False  # just confirm finish pulling in case of race condition with failed submission
+            print("No/Invalid peer reply, retry....")
+            sleep(5)  # no peer, give a bit of time to recover, keep the 'pulling' flag to avoid waste of calc power
+
+    return
+
+def pullCandidate():
+    while True:
+        try:
+            pull()
+            sleep(int(candidate['difficulty']/2))
+            cfg['pulling'] = False  # just confirm finish pulling in case of race condition with failed submission
+        except Exception:
+            print("Pulling candidate block failed...")
+
 
 def doMine():
     # miners continue to try to mine
@@ -79,45 +93,43 @@ def doMine():
             foundSolution = False
 
             while (foundSolution == False):
-                if (cfg['pulling'] == True):
+                if ((cfg['pulling'] == True) or (len(candidate) == 0)):
                     sleep(1)
-                    continue
+                else:
+                    candidate['nonce'] = (candidate['nonce'] + 1) % cfg['maxNonce']  # increment modulus max
+                    if (candidate['nonce'] == candidate['oriNonce']):
+                        break
 
-                candidate['nonce'] = (candidate['nonce'] + 1) % cfg['maxNonce']  # increment modulus max
-                if (candidate['nonce'] == candidate['oriNonce']):
-                    break
+                    minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
 
-                minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
+                    if minedBlockHash[:candidate['difficulty']] == cfg['zero_string'][:candidate['difficulty']]:
+                        foundSolution = True
 
-                if minedBlockHash[:candidate['difficulty']] == cfg['zero_string'][:candidate['difficulty']]:
-                    foundSolution = True
+            if (foundSolution == True):
+                # After finding a hashcode, now submit the mined block by POST
+                # Data for POST
+                data = {
+                    "blockDataHash": candidate['blockDataHash'],
+                    "dateCreated": candidate['dateCreated'],
+                    "nonce": str(candidate['nonce']),
+                    "blockHash": minedBlockHash
+                }
 
-            if (foundSolution == False):
-                # TODO try additional pulling?
-                print("Full circle completed, mining stopped, awaiting next candidate block")
-                sleep(1)
-                continue
-            # After finding a hashcode, now submit the mined block by POST
-            # Data for POST
-            data = {
-                "blockDataHash": candidate['blockDataHash'],
-                "dateCreated": candidate['dateCreated'],
-                "nonce": str(candidate['nonce']),
-                "blockHash": minedBlockHash
-            }
-
-            print("==== Second Stage : Post for mining result with Data to Node :", data)
-            resp = requests.post(cfg['peer'] + "mining/submit-mined-block", json=data)
-            print("==== Second Stage : Response Received(Return code): ", resp.status_code)
-            if (resp.status_code == 200):
-                print("==========================")
-                print("      MINING SUCCESS ")
-                print("==========================")
-            else:
-                print("Error message: ", resp_text['errorMsg'])
+                print("==== Second Stage : Post for mining result with Data to Node :", data)
+                resp = requests.post(cfg['peer'] + "mining/submit-mined-block", json=data)
+                #print("==== Second Stage : Response Received(Return code): ", resp.status_code)
+                if (resp.status_code == 200):
+                    print("==========================")
+                    print("      MINING SUCCESS ")
+                    print("==========================")
+                else:
+                    print("Error message: ", resp_text['errorMsg'])
         except Exception:
-            print("Exception occurred... pause ...")
-            cfg['pulling'] = True # set flag as if pulling to wait for new candidate being pulled
+            print("Exception occurred... clear and refresh candidate")
+
+        #print("Full circle completed, mining stopped/completed, getting candidate block")
+        candidate.clear()
+        pull()
 
 
 def main():

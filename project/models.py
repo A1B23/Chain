@@ -1,4 +1,5 @@
-# Your models here.
+#This file contains data models and references used by multiple player, like node, wallet
+# etc. The modules may have their own model data structures as well
 
 defSig = "0000000000000000000000000000000000000000000000000000000000000000"
 defPub = "00000000000000000000000000000000000000000000000000000000000000000"
@@ -29,7 +30,7 @@ m_cfg = {
     "peers": {},
     "maxPeers": -1,
     "minPeers": -1,
-    "peerDrop" : 5, # how often can a peer not reply when checked
+    "peerDrop": 5, # how often can a peer not reply when checked
     "peersCheck": 10, # TODO how many second to wait to check all peers again
     # 0 means all commands accepted, POST blocks against get
     # 1 means we are reloading the entire blocks at startup, so until this is finished, no reply
