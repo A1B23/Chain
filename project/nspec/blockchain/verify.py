@@ -2,6 +2,7 @@ from project.utils import *
 from project.nspec.blockchain.modelBC import *
 from copy import deepcopy
 from project.pclass import c_peer
+from project.nspec.blockchain.balance import *
 
 
 firstTime = [True]
@@ -32,48 +33,14 @@ def verifyBasicTX(trans,isCoinBase,ref):
     if (not isinstance(trans['value'], int)):
         colErr = colErr + "Value must be integer, you sent: " + str(trans['value'])
     else:
+        #TODO confirm that 0 value transactions are allowed per slides
         if (trans['value'] < 0):
             colErr = colErr + "Minimun value 0 micro-coins, you sent: " + str(trans['value'])
     return colErr
 
 
-def verifySenderBalance(trx):
-    if (not 'from' in trx):
-        return "Invalid transaction, no 'from' field"
-    isCoinBase = (trx['from'] == defAdr)
 
-    if (isCoinBase):
-        # TODO set the corrctt checking parameter instead
-        #return verifyBasicTX(trx, isCoinBase, m_staticTransactionRef)
-        err=""
-    else:
-        err = verifyBasicTX(trx, isCoinBase, m_staticTransactionRef)
-
-    if (len(err)>0):
-        return err
-
-    addrFrom = trx['from']
-    #TODO remove this convencience default faucet after testing!!!!
-    if (not trx['from'] in m_BalanceInfo):
-        # TODO remove this after initial tests, which gives anyone 50 from scratch
-        newInfo = deepcopy(m_staticBalanceInfo)
-        m_BalanceInfo.update({addrFrom: newInfo})
-    #end of TODO remove temporaray
-
-
-    if (not addrFrom in m_BalanceInfo):
-        return "Invalid TX, no account registered with any balance for: " + str(addrFrom)
-
-    value = trx['value']
-    fee = trx['fee']
-    total = value + fee
-    # TODO is this comparison corrcet with confirmedBalance???
-    if (total > m_BalanceInfo[addrFrom]['balance']['confirmedBalance']):
-        # TODO is this unsuccesfull? Or still go to block chain??
-        return "Insufficient funds"
-    return ""
-
-def verifyBlock(block):
+def verifyBlockAndAllTX(block):
     m, l, f = checkRequiredFields(block, m_completeBlock, [],False)
     if (block['index']==0):
         #special case for genesis bloc
@@ -92,13 +59,13 @@ def verifyBlock(block):
     if (block['index'] == len(m_Blocks)):
         isCoinBase = True
         for trans in block['transactions']:
-            ret = verifyBasicTX(trans,isCoinBase,m_staticTransactionRef)
+            ret = verifyBasicTX(trans, isCoinBase, m_staticTransactionRef)
             if (len(ret)>0):
                 return ret
             isCoinBase = False
     return ""
 
-def receivedNewTransaction(trans,fromPeer,share):
+def receivedNewTransaction(trans, fromPeer, share):
     # only basic checks so far, more needed
     # we must check that each field exists
     colErr = verifyBasicTX(trans,False,m_transaction) #such can never be coinbase, so False!
@@ -144,16 +111,18 @@ def receivedNewTransaction(trans,fromPeer,share):
         }
 
         m_BufferMinerCandidates.clear()
-        addrTo = trans['to']
-        value = trans['value']
-        total = value + trans['fee']
-        #TODO update the checking balance maybe???
-        #updatePendingBalance(addrTo,trans,len(m_Blocks),value)
+        #addrTo = trans['to']
+        #value = trans['value']
+        #total = value + trans['fee']
+        #TODO we need to clear the mtempBuffer when a new block is found or mined else
+        #TODO all the tx accumulate
+        #if (updateConfirmPendingBalance(m_pendingTX,True) == True):
         if (share):
-            c_peer.sendAsynchPOSTToPeers("/transactions/send",passOn,fromPeer)
+            c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn, fromPeer)
             return jsonify(response), 201 #201 as per slide 38
         return ""
     return errMsg(colErr,400)
+
 
 def initPendingTX():
     if (firstTime[0] == True):
@@ -162,7 +131,7 @@ def initPendingTX():
             if (m_cfg['peers'][peer]['active'] == True):
                 txList, ret = c_peer.sendGETToPeer(peer+"/transactions/pending")
                 for tx in txList:
-                    receivedNewTransaction(tx,"",False)
+                    receivedNewTransaction(tx, "", False)
                 break
 
 

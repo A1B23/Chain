@@ -11,12 +11,12 @@ from project.classes import c_blockchainNode
 from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
 
-if __name__ == "__main__":
+def main():
     #m_cfg['type'] = "Miner"
     #m_cfg['type'] = "Wallet"
     m_cfg['type'] = "BCNode"
     parser = ArgumentParser()
-    host,port = init(parser)
+    host, port = init(parser)
 
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
@@ -29,4 +29,7 @@ if __name__ == "__main__":
     thread.start()
 
     app.run(host=host, port=port,threaded=True)
+
+if __name__ == "__main__":
+    main()
 

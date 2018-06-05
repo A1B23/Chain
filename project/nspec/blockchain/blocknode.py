@@ -24,7 +24,7 @@ class blockChainNode:
         sysout['m_Blocks'] = m_Blocks
         sysout['m_BufferMinerCandidates'] = m_BufferMinerCandidates
         sysout['m_stats'] = m_stats
-        sysout['balances'] = m_BalanceInfo #I save buffer for info, but it is not loaded
+        sysout['balances'] = m_AllBalances #I save buffer for info, but it is not loaded
         return sysout
 
 
@@ -40,7 +40,7 @@ class blockChainNode:
         m_peerInfo.clear()
         m_peerInfo.update(sysIn['m_peerInfo'])
         m_Blocks.clear()
-        m_BalanceInfo.clear()   # I don't load BalanceInfo form file as it is calculated on the fly
+        m_AllBalances.clear()   # I don't load BalanceInfo form file as it is calculated on the fly
         for block in sysIn['m_Blocks']:
             if (len(m_Blocks) == 0):
                 # TODO verify all fields are the same not only there!!!
@@ -71,12 +71,16 @@ class blockChainNode:
                 if (cand['countRepeat']<5):
                     return jsonify(cand), 200 #if nothing has changed, return same block
 
-        candidateMiner = dict(m_candidateMiner)
+        candidateMiner = deepcopy(m_candidateMiner)
         candidateMiner['rewardAddress'] = minerAddress
         m_candidateBlock['minedBy'] = minerAddress
         fees = 0
         for tx in m_candidateBlock['transactions']:
-            fees = fees + tx['fee']
+            if (len(tx) >0):    #otherwise it is empty coinbase
+                fees = fees + tx['fee']
+            else:
+                if (fees>0):
+                    errMsg("Invalid empty TX in block",404)
         candidateMiner['index'] = len(m_Blocks) #m_candidateBlock['index']
         candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions'])-1 # -1 is for coinbase
         candidateMiner['expectedReward'] = candidateMiner['expectedReward'] +fees
@@ -157,17 +161,3 @@ class blockChainNode:
         return jsonify(response), 404
 
 
-    #TODO the genesis block TX is still missing, whioch shows how many coins went to faucet!!!!
-    def getBalance(self,address):
-        if (address in m_BalanceInfo):
-            return setOK(m_BalanceInfo[address]['balance'])
-        return errMsg("Invalid address", 404)
-
-
-    def getAllBalances(self):
-        ret = {}
-        for balAddr in m_BalanceInfo:
-            bal = m_BalanceInfo[balAddr]['balance']['confirmedBalance']
-            if (bal != 0):
-                ret.update({balAddr: bal})
-        return setOK(ret)

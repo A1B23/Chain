@@ -9,7 +9,7 @@ from project.classes import c_blockchainNode
 from project.controller import *
 from project.pclass import c_peer
 
-if __name__ == "__main__":
+def main():
     parser = ArgumentParser()
     host,port = init(parser)
     #m_cfg['type'] = "Miner"
@@ -21,3 +21,6 @@ if __name__ == "__main__":
     thread.start()
 
     app.run(host=host, port=port,threaded=False)
+
+if __name__ == "__main__":
+    main()

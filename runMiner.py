@@ -10,18 +10,20 @@ from project.utils import getFutureTimeStamp
 from threading import Thread
 
 candidate = {}
-cfg = {'zero_string': '00000000000000000000000000000',
-       'maxNonce': 2147483647,  #typical Java max, so stick to it to avoid endless search
-       'peer': -1,
-       'miner_address': -1,
-       'mode': 'n', #by default keep mining, if started with 'y', miner will wait for user
-       'pulling': True
-    }
+cfg = {
+    'zero_string': '00000000000000000000000000000',
+    'maxNonce': 2147483647,  #typical Java max, so stick to it to avoid endless search
+    'peer': -1,
+    'miner_address': -1,
+    'mode': 'n', #by default keep mining, if started with 'y', miner will wait for user
+    'pulling': True
+}
 
 # requires for GET to the blockchain network
-def miner_get(url, data=None):
+def miner_get(url):
     #TODO put this into main node as well with content type etc....
-    response = requests.get(url, data=data, headers={'content-type': 'application/json', 'accept': 'application/json'})
+    print("Attempt to connect to "+url)
+    response = requests.get(url, headers={'content-type': 'application/json', 'accept': 'application/json'})
     return response
 
 
@@ -37,7 +39,8 @@ def getEstimatedTimeStamp():
     # and we want to adjust difficulty based on actual calculatoin power, then the
     # timestamp will not work, but this assumes the timestamp is a crucial element for
     # the decision
-    return getFutureTimeStamp(candidate['difficulty']*1000)
+    return getFutureTimeStamp(candidate['difficulty']*1000) #TODO test
+
 
 def pullCandidate():
     while True:
@@ -51,7 +54,7 @@ def pullCandidate():
         cfg['pulling'] = True
         try:
             resp_text = getCandidate()
-            if candidate['blockDataHash'] != resp_text['blockDataHash']:
+            if ((len(candidate) ==0 ) or (candidate['blockDataHash'] != resp_text['blockDataHash'])):
                 candidate['blockDataHash'] = resp_text['blockDataHash']
                 candidate['difficulty'] = resp_text['difficulty']
                 candidate['dateCreated'] = getEstimatedTimeStamp()
@@ -84,7 +87,7 @@ def doMine():
                 if (candidate['nonce'] == candidate['oriNonce']):
                     break
 
-                minedBlockHash = hashlib.sha256((fx + str(candidate['nonce'])).encode("utf8")).hexdigest()
+                minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
 
                 if minedBlockHash[:candidate['difficulty']] == cfg['zero_string'][:candidate['difficulty']]:
                     foundSolution = True
@@ -104,8 +107,7 @@ def doMine():
             }
 
             print("==== Second Stage : Post for mining result with Data to Node :", data)
-            resp = requests.post(peer + "mining/submit-mined-block", json=data)
-            resp_text = json.loads(resp.text)
+            resp = requests.post(cfg['peer'] + "mining/submit-mined-block", json=data)
             print("==== Second Stage : Response Received(Return code): ", resp.status_code)
             if (resp.status_code == 200):
                 print("==========================")
@@ -118,11 +120,9 @@ def doMine():
             cfg['pulling'] = True # set flag as if pulling to wait for new candidate being pulled
 
 
-# main function : miner start from here
 def main():
-    parser = ArgumentParser()  # Albert
-    parser.add_argument('-a', '--address', action="store", dest="address", help="miner address", default="spam1")
-    # Albert parser.add_option('-u', '--url', action="store", dest="url", help="url of a node", default="spam2")
+    parser = ArgumentParser()  # TODO extend and integrate to initarg
+    parser.add_argument('-a', '--address', default="ab2018", help="miner address")
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
     parser.add_argument('-hip', '--host', default="127.0.0.80", help='hostname/IP')
     parser.add_argument('-con', '--connect', default="127.0.0.2", help='list of 127.0.0.x peers to send messages')
@@ -134,6 +134,8 @@ def main():
     cfg['miner_address'] = args.address
     cfg['mode'] = args.mode
     cfg['peer'] = args.connect + ":" + str(args.port) + "/"
+    if (not cfg['peer'][:4] == 'http'):
+        cfg['peer'] = "http://"+cfg['peer']
     print("miner_address: ", cfg['miner_address'], "peer url: ", cfg['peer'])
     cfg['pulling'] = True
     thread = Thread(target=pullCandidate)
@@ -141,7 +143,6 @@ def main():
     doMine()        #TODO adjust to thread an include flask to communicate with the node
 
 
-#TODO add the same to main node so that is can be called programmatically as well
 if __name__ == "__main__":
     main()
     #test = "df8f114897188bcc68b97ebe2b673d3c92de986024abe565df0a4f8702c1742b|2018-02-11T20:31:32.397Z|1453826"

@@ -1,5 +1,5 @@
 # Your models here.
-from project.models import defAdr,defNodeID,defHash,defPub,defSig,m_SingleBalance
+from project.models import defAdr,defNodeID,defHash,defPub,defSig,m_TemplateSingleBalance,defFaucet,defGenesisDate
 from copy import deepcopy
 
 m_Blocks = []
@@ -55,8 +55,9 @@ m_staticTransactionRef = {
 }
 
 m_staticBalanceInfo = {
-        "balance": deepcopy(m_SingleBalance),
-        "info": []
+    "curBalance": 0,
+    "createdInBlock": -1,
+    "confirm": []
 }
 
 m_candidateMiner = {
@@ -91,9 +92,9 @@ m_static_emptyBlock = {
 }
 
 m_candidateBlock = {
-    "index":0,
-    "transactions":[{}],
-    "difficulty":5,
+    "index": 0,
+    "transactions": [{}], # first is empty for coinbase
+    "difficulty": 5,
     "minedBy": defAdr,
     # changes with new faucet address
     "blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
@@ -118,20 +119,20 @@ m_genesisSet = [
     #NAPCoin
     {
         "index":0,
-        "transactions":[{
+        "transactions": [{
             "from": defAdr,
             # faucet address
-            "to":"faucetAddress",
-            "value":1000000000000,
-            "fee":0,
-            "dateCreated":"2018-00-00T00:00:00.000Z",
-            "data":"genesis tx",
+            "to": defFaucet,
+            "value": 1000000000000,
+            "fee": 0,
+            "dateCreated": defGenesisDate,
+            "data": "genesis tx",
             "senderPubKey": defPub,
             #changes with new faucet address
-            "transactionDataHash":"8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2",
-            "senderSignature":[defSig,defSig],
-            "minedInBlockIndex":0,
-            "transferSuccessful":True
+            "transactionDataHash": "8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2",
+            "senderSignature": [defSig, defSig],
+            "minedInBlockIndex": 0,
+            "transferSuccessful": True
         }],
         "difficulty":0,
         "minedBy":defAdr,
@@ -144,7 +145,11 @@ m_genesisSet = [
     }
 ]
 
-m_BalanceInfo = {}
+m_AllBalances = {}
+m_balHistory = {
+    #blockNumber: m_singleBalance
+}
+m_candidateBlockBalance = {}
 m_completeBlock = deepcopy(m_genesisSet[1])
 m_added = {
     "prevBlockHash": 0

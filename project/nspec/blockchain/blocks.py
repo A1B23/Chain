@@ -2,13 +2,16 @@ from flask import Flask, jsonify, request
 from project.models import *
 from project.nspec.blockchain.modelBC import *
 from copy import deepcopy
-from project.utils import d, checkRequiredFields, isSameChain, createNewBalance
+from project.utils import d, checkRequiredFields, isSameChain
+from project.nspec.blockchain.balance import addNewRealBalance
 from project.pclass import c_peer
 from project.nspec.blockchain.verify import *
+from project.nspec.blockchain.balance import *
 from threading import Thread
 
 
 class blockchain:
+
     def setNetBasedOnChainID(self,id):
         # the id is the blochhash, so find the index and the
         useID = 1 #just default value
@@ -23,6 +26,7 @@ class blockchain:
         return jsonify(response), 200
 
     def initChain(self):
+        # TODO the genesis block TX is still missing in balances, which shows how many coins went to faucet!!!!
         m_Blocks.clear()
         if useNet == 0:
             m_info['about'] = "SoftUniChain/0.9-csharp"
@@ -35,11 +39,12 @@ class blockchain:
         m_info['cumulativeDifficulty'] = m_info['currentDifficulty']
         m_info['confirmedTransactions'] = len(m_genesisSet[useNet]['transactions'])
         m_info['pendingTransactions'] = 0
+        m_balHistory.clear()
 
         m_pendingTX.clear()
-        m_BalanceInfo.clear()
+        m_AllBalances.clear()
         m_BufferMinerCandidates.clear()
-        createNewBalance(defAdr)
+        addNewRealBalance(defAdr,0)
         #m_Blocks.append(m_genesisSet[useNet])
         err = self.verifyThenAddBlock(m_genesisSet[useNet])
         if (len(err)>0):
@@ -121,8 +126,9 @@ class blockchain:
 
     def prepareNewCandidateBlock(self):
         m_candidateBlock.clear()
+        m_candidateBlockBalance.clear()
         m_candidateBlock.update(deepcopy(m_static_emptyBlock)) #contains coinbase
-        m_candidateBlock['index']= len(m_Blocks)
+        m_candidateBlock['index'] = len(m_Blocks)
         m_candidateBlock['transactions'].append(deepcopy(m_coinBase))
         m_BufferMinerCandidates.clear()
         for tx in m_pendingTX:
@@ -132,6 +138,7 @@ class blockchain:
 
     def getMissingBlocksFromPeer(self, base,peer):
         m_BufferMinerCandidates.clear()
+        m_candidateBlockBalance.clear()
         while True:
             url = base + str(len(m_Blocks))
             res, stat = c_peer.sendGETToPeer(url)
@@ -189,43 +196,18 @@ class blockchain:
         else:
             return errMsg("Invalid block structure", 400)
 
-    def updateAllBalancesFor(self,addr,trx,blockIndex,value):
-        # TODO update the safeBalance and the pending balance as well!!!
-        m_BalanceInfo[addr]['balance']['confirmedBalance'] = m_BalanceInfo[addr]['balance']['confirmedBalance'] + value
-        nxt = {"blockIndex": blockIndex, "TX": deepcopy(trx)}
-        m_BalanceInfo[addr]['info'].append(nxt)
-        if (trx['transactionDataHash'] in m_pendingTX):
-            updatePendingBalance(addr,trx,blockIndex,value)
-
-
-    def checkUpdateBalance(self, trx, blockIndex):
-        #verify TX is a valid TX before processing!!!
-        err = verifySenderBalance(trx)
-        if (len(err)>0):
-            return err
-
-        addrTo = trx['to']
-        value = trx['value']
-        total = value+trx['fee']
-        if (not addrTo in m_BalanceInfo):
-            createNewBalance(addrTo)
-
-        self.updateAllBalancesFor(trx['from'], trx, blockIndex, -total)
-        self.updateAllBalancesFor(addrTo, trx, blockIndex, value)
-        if (trx['transactionDataHash'] in m_pendingTX):
-            del m_pendingTX[trx['transactionDataHash']]
-        return ""
-
 
     def verifyThenAddBlock(self, block):
-        err = verifyBlock(block)
+        #check structure of block and TX, but not yet the balances
+        err = verifyBlockAndAllTX(block)
         if (len(err)) > 0:
             return err
+
+        #structures are all corrcet so now check balances and update them
+        err = confirmUpdateBalances(block['transactions'], block['index'])
+        if (len(err) > 0):
+            return err
         # clear all transactions involved in the block
-        for trx in block['transactions']:
-            err = self.checkUpdateBalance(trx, block['index'])
-            if (len(err) > 0):
-                return err
         m_Blocks.append(deepcopy(block))
         # get urlblocks
         # clear the transaction in the block for ours

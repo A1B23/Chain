@@ -2,12 +2,10 @@ import time
 import random
 import requests
 import json
-
 import datetime
 import hashlib
 from flask import jsonify
 from project.models import *
-from project.nspec.blockchain.modelBC import m_BalanceInfo, m_staticBalanceInfo
 from copy import deepcopy
 
 #Call this for debuggin print to screen which needs to be removed at the end
@@ -31,7 +29,8 @@ def sha256ToHex(data):
 
 
 def getFutureTimeStamp(addedTime):
-    timestamp = (datetime.datetime.now()+addedTime).isoformat()
+    #TODO add a few sseconds addedTime, which depends on difficulty to the time stamp
+    timestamp = (datetime.datetime.now()).isoformat()
     timestamp = timestamp + "Z"
     return timestamp
 
@@ -118,15 +117,6 @@ def isSameChain(detail):
     return True
     #TODO adjust this return (detail['about'] == m_info['about']) and (detail['chainId'] == m_info['chainId'])
 
-def createNewBalance(addr):
-    newInfo = deepcopy(m_staticBalanceInfo)
-    m_BalanceInfo.update({addr: newInfo})
 
-def updatePendingBalance(addr, trx, blockIndex, value):
-    if (not addr in m_BalanceInfo):
-        createNewBalance(addr)
-    m_BalanceInfo[addr]['balance']['pendingBalance'] = m_BalanceInfo[addr]['balance']['pendingBalance'] + value
-    nxt = {"blockIndex": blockIndex, "TX": deepcopy(trx)}
-    m_BalanceInfo[addr]['info'].append(nxt)
 
 

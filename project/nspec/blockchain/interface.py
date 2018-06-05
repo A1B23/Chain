@@ -6,6 +6,8 @@ from project.classes import c_blockchainNode
 # this is the dummy function only, your function comes from the import!
 from project.pclass import c_peer
 from project.nspec.blockchain.verify import *
+from project.nspec.blockchain.balance import *
+
 
 firstCall = True
 class chainInterface:
@@ -36,9 +38,9 @@ class chainInterface:
                 return c_blockchainNode.c_tx.getTXForAddress(linkInfo['address'])
             else:
                 if ("balance" in url):
-                    return c_blockchainNode.getBalance(linkInfo['address'])
+                    return getBalance(linkInfo['address'])
         elif (urlID == "balan"):
-            return c_blockchainNode.getAllBalances()
+            return getAllBalances()
         elif (urlID == "load/"):
             c_blockchainNode.c_blockchainHandler.initChain()
             with open(linkInfo["file"], "r") as myFile:

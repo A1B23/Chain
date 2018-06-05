@@ -57,11 +57,11 @@ rem ###################### Miner hard coded parameters
 set typeDir=Miner
 rem we keep the sam address as blockchain above!
 set con=2
-set col=5C
-set manual=y
-start cmd.exe /K "color %col% & title=Miner_to_%con% & %myPyPath% runMiner.py --connect http://127.0.0.%con% --port %port% -a ae1f%con% -man %manual%"
+set col=5B
+set mode=y
+start cmd.exe /K "color %col% & title=Miner_to_%con% & %myPyPath% runMiner.py --connect http://127.0.0.%con% --port %port% -a ae1f%con% -mod %mode%"
 set con=4
-start cmd.exe /K "color %col% & title=Miner_to_%con% & %myPyPath% runMiner.py --connect http://127.0.0.%con% --port %port% -a ae2f%con% -man %manual%"
+start cmd.exe /K "color %col% & title=Miner_to_%con% & %myPyPath% runMiner.py --connect http://127.0.0.%con% --port %port% -a ae2f%con% -mod %mode%"
 
 pause
 set typeDir=Blockchain
