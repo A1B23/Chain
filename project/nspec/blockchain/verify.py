@@ -66,62 +66,46 @@ def verifyBlockAndAllTX(block):
     return ""
 
 def receivedNewTransaction(trans, fromPeer, share):
-    # only basic checks so far, more needed
-    # we must check that each field exists
-    colErr = verifyBasicTX(trans,False,m_transaction) #such can never be coinbase, so False!
+    # Checks for missing / invalid fields / invalid field values
+    colErr = verifyBasicTX(trans, False, m_transaction) #such can never be coinbase, so False!
 
     if (colErr == ""):
         trx = deepcopy(trans)
         passOn = deepcopy(trans)
-        del trx["senderSignature"]
-        hasHash = False
-        if ("transactionDataHash" in trans):
-            compare = trans["transactionDataHash"]
-            del trx["transactionDataHash"]
-            hasHash = True
+        del trx["senderSignature"]  # this must be excluded from the hash
+        hash = sha256ToHex(m_transaction_order, trx)
 
-        hash = sha256ToHex(trx)
-        if (hasHash and str(hash) != str(compare)):
-            #TODO Wallet sends wrong format of transactionHash
-            test = 0
-            #return errMsg("Wrong transactionDataHash",400)
-        trans["transactionDataHash"]=hash
+        #TODO Validates the transaction public key, validates the signature
+        # valid = verify(generator_secp256k1, pub_key, tran_hash, tran_signature)
+        # print("Is signature valid? " + str(valid))
+
+        # Calculates the transaction data hash (unique transaction ID)
+        trans["transactionDataHash"]= hash
+
+        # Checks for collisions -> duplicated transactions are skipped
         if hash in m_pendingTX:
             return errMsg("Duplicate TX received",400)
-        ## need to check the date and the signature etc....
-        #TODO For each received transaction the Node does the following:
-        #TODO Checks for missing / invalid fields / invalid field values
-        #Calculates the transaction data hash (unique transaction ID)
-        #Checks for collisions  duplicated transactions are skipped
-        #Validates the transaction public key, validates the signature
-        #Checks the sender account balance to be >= value + fee
-        #Checks whether value >= 0 and fee > 10 (min fee)
-        #Puts the transaction in the "pending transactions" pool
-        #Sends the transaction to all peer nodes through the REST API
-        #It goes from peer to peer until it reaches the entire network
 
+        #TODO Checks the sender account balance to be >= value + fee
+        #TODO Checks whether value >= 0 and fee > 10 (min fee)
+
+        #Puts the transaction in the "pending transactions" pool
         m_pendingTX.update({trans['transactionDataHash']:deepcopy(trans)})
         trans["transferSuccessful"]= True
         trans["minedInBlockIndex"] = len(m_Blocks)
         m_candidateBlock['transactions'].append(deepcopy(trans))
         m_info['pendingTransactions'] = len(m_pendingTX)
-        response = {
-            "transactionDataHash": trans["transactionDataHash"],
-            "Wallet": "sends TXHash in int instead of hex, so it is ignored...and should be removed!"
-        }
+        response = {"transactionDataHash": hash}
 
         m_BufferMinerCandidates.clear()
-        #addrTo = trans['to']
-        #value = trans['value']
-        #total = value + trans['fee']
-        #TODO we need to clear the mtempBuffer when a new block is found or mined else
-        #TODO all the tx accumulate
-        #if (updateConfirmPendingBalance(m_pendingTX,True) == True):
         if (share):
+            # Sends the transaction to all peer nodes through the REST API
+            # It goes from peer to peer until it reaches the entire network
+            #TODO do we still need this 'fromPeer'?
             c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn, fromPeer)
             return jsonify(response), 201 #201 as per slide 38
-        return ""
-    return errMsg(colErr,400)
+        return #nothing returmed, nothing sent
+    return errMsg(colErr, 400)
 
 
 def initPendingTX():
@@ -133,5 +117,3 @@ def initPendingTX():
                 for tx in txList:
                     receivedNewTransaction(tx, "", False)
                 break
-
-

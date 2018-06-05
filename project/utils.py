@@ -23,9 +23,10 @@ def jsonToStr(jsonDict):
     return tran_json
 
 
-def sha256ToHex(data):
-    hash_bytes = hashlib.sha256(jsonToStr(data).encode("utf8")).digest()
-    return hex(int.from_bytes(hash_bytes, byteorder="big"))[2:]
+def sha256ToHex(ref, data):
+    toStr = putDataInOrder(ref, data)
+    tst = toStr.encode("utf8")
+    return hashlib.sha256(toStr.encode("utf8")).hexdigest()
 
 
 def getFutureTimeStamp(addedTime):
@@ -117,6 +118,17 @@ def isSameChain(detail):
     return True
     #TODO adjust this return (detail['about'] == m_info['about']) and (detail['chainId'] == m_info['chainId'])
 
+def putDataInOrder(order,data):
+    ret = "{"
+    for item in order:
+        if (item in data):
+            ret = ret + '"' + item + '":'
+            if (isinstance(data[item], int)):
+                ret = ret + str(data[item]) +','
+            else:
+                ret = ret + '"' + str(data[item]) + '",'
+    ret =  ret[:-1] +"}"
+    return ret
 
 
 

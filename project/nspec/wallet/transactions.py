@@ -3,7 +3,10 @@ from pycoin.ecdsa import generator_secp256k1, sign, verify
 from urllib.parse import urlparse
 from flask import Flask, jsonify, request
 import hashlib, os, json, binascii, datetime, requests
+from project.utils import sha256ToHex,putDataInOrder
+from project.models import m_transaction_order
 
+myHash = {}
 peerURL = "https://stormy-everglades-34766.herokuapp.com" #Albert
 
 def generate_private_key() -> str:
@@ -16,9 +19,10 @@ def ripemd160(msg: str) -> str:
   return hash_bytes.hex()
 
 def sha256(msg: str) -> int:
-  hash_bytes = hashlib.sha256(msg.encode("utf8")).digest()
+  msg2 = msg.encode("utf8")
+  hash_bytes = hashlib.sha256(msg2).digest()
   return int.from_bytes(hash_bytes, byteorder="big")
-  
+
 def private_key_hex_to_int(private_key_hex: str):
   return int(private_key_hex, 16) 
   
@@ -56,25 +60,31 @@ def send_txn(priv_key_hex, receiver_addr, msg, value):
     transaction = {"from": pub_addr, "to": receiver_addr, "value": value, "fee": 20, 
     "dateCreated": timestamp, "data": msg, "senderPubKey": pub_key_compressed}
 
+    # transaction = {"from":"0000000000000000000000000000000000000000","to":"f3a1e69b6176052fcc4a3248f1c5a91dea308ca9",
+    #                "value":1000000000000,"fee":0,"dateCreated":"2018-01-01T00:00:00.000Z","data":"genesis tx",
+    #                "senderPubKey":"00000000000000000000000000000000000000000000000000000000000000000"}
+    #  #              "transactionDataHash":"8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2",
+
     json_encoder = json.JSONEncoder(separators=(',',':'))
     tran_json = json_encoder.encode(transaction)
-    print("transaction (json): ", tran_json)
+    #print("transaction (json): ", tran_json)
 
     # Hash and sign
-    tran_hash = sha256(tran_json)
+    tran_hash = sha256(putDataInOrder(m_transaction_order, transaction))
     print("transaction hash (sha256): ", hex(tran_hash)[2:])
+    myHash.update({"hash": hex(tran_hash)[2:]})
     tran_signature = sign(generator_secp256k1, priv_key_int, tran_hash)
 
     element1 = str(hex(tran_signature[0]))[2:]
     element2 = str(hex(tran_signature[1]))[2:]
     tran_signature_str = (element1,element2)
-    
-    print("transaction signature: ", tran_signature_str)
-    
+
+    #print("transaction signature: ", tran_signature_str)
+
     # Signed txn (appended hash and signature)
-    signed_txn = {"from": pub_addr, "to": receiver_addr, "value": value, "fee": 20, 
-    "dateCreated": timestamp, "data": msg, "senderPubKey": pub_key_compressed,
-    "transactionDataHash": tran_hash, "senderSignature": tran_signature_str}
+    signed_txn = {"from": pub_addr, "to": receiver_addr, "value": value, "fee": 20,
+        "dateCreated": timestamp, "data": msg, "senderPubKey": pub_key_compressed,
+        "senderSignature": tran_signature_str}
 
     print("Signed Txn: ",signed_txn)
 

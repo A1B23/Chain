@@ -6,6 +6,7 @@ m_Blocks = []
 m_newBlock = {}
 m_pendingTX = {}
 m_BufferMinerCandidates = {}
+minBlockReward = 5000000
 
 
 m_stats = {
@@ -64,7 +65,7 @@ m_candidateMiner = {
     "index": 1,
     "transactionsIncluded": 0,
     "difficulty": 5,
-    "expectedReward": 5000000 , ## don't chnange this
+    "expectedReward": minBlockReward , ## don't chnange this
     "rewardAddress": "",
     "blockDataHash": "15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
 }

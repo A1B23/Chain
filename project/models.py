@@ -83,3 +83,34 @@ m_permittedPOST = [
     "/mining/submit-mined-block"  # TODO POST
 ]
 
+m_signed_txn_order = [
+    "from",
+    "to",
+    "value",
+    "fee",
+    "dateCreated",
+    "data",
+    "senderPubKey",
+    "transactionDataHash",
+    "senderSignature"
+]
+
+m_transaction_order = [
+    "from",
+    "to",
+    "value",
+    "fee",
+    "dateCreated",
+    "data",
+    "senderPubKey"
+]
+
+m_candidateMiner_order = [
+    "index",
+    "transactionsIncluded",
+    "difficulty",
+    "expectedReward",
+    "rewardAddress"
+]
+
+

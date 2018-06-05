@@ -69,7 +69,9 @@ class blockChainNode:
                 ### If there is no solution and no miner can find a solution, then unless a new tx
                 ### comes in the network hangs, so need to limit the number of reuse here and change the timestamp
                 if (cand['countRepeat']<5):
-                    return jsonify(cand), 200 #if nothing has changed, return same block
+                    cand2 = deepcopy(cand)
+                    del cand2['countRepeat']
+                    return jsonify(cand2), 200 #if nothing has changed, return same block
 
         candidateMiner = deepcopy(m_candidateMiner)
         candidateMiner['rewardAddress'] = minerAddress
@@ -82,18 +84,21 @@ class blockChainNode:
                 if (fees>0):
                     errMsg("Invalid empty TX in block",404)
         candidateMiner['index'] = len(m_Blocks) #m_candidateBlock['index']
-        candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions'])-1 # -1 is for coinbase
+        candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions']) #inlcudes coinbase
         candidateMiner['expectedReward'] = candidateMiner['expectedReward'] +fees
         coinBase = deepcopy(m_coinBase)
         coinBase['to'] = minerAddress
         coinBase['dateCreated'] = getTime()
         coinBase['value'] = candidateMiner['expectedReward']
         coinBase['minedInBlockIndex'] = len(m_Blocks)
-        coinBase['transactionDataHash'] =sha256ToHex(m_candidateBlock)
+        coinBase['transactionDataHash'] = sha256ToHex(m_transaction_order, coinBase)
         m_candidateBlock['transactions'][0] = coinBase #just overwrite first TX, miner gets money for empty as well
+        # now the block is done, hash it for miner
+        #TODO does the hash for the miner have to be in specific order of data
+        candidateMiner['blockDataHash'] = sha256ToHex(m_candidateMiner_order,m_candidateBlock)
         #need to calculate now the hash for this specific miner based candidateBlock
-        candidateMiner['countRepeat'] = 0
-        m_BufferMinerCandidates[minerAddress] = candidateMiner
+        m_BufferMinerCandidates[minerAddress] = deepcopy(candidateMiner)
+        m_BufferMinerCandidates[minerAddress]['countRepeat'] = 0
         return jsonify(candidateMiner), 200
 
     def minerFoundSolution(self,minerSolution):

@@ -7,6 +7,7 @@ from project.nspec.wallet.transactions import *
 from project.pclass import c_peer
 from project.models import m_info
 
+
 class wallet:
     def form_post(self,request):
         if request.form['action'] == 'Sign in':
