@@ -54,12 +54,16 @@ def verifyBlockAndAllTX(block):
         else:
             return "Missing field(s): "+str(m)
 
+    #TODO check the hash of the blockhash!
+    #blockHash = sha256ToHex(m_Miner_order, block) or use the update as we need to inlccude each TX below!!!
+
     #TODO check the blocks time is greater than the last one
     # check the index of the block is correct, skip else and abort
     if (block['index'] == len(m_Blocks)):
         isCoinBase = True
         for trans in block['transactions']:
             ret = verifyBasicTX(trans, isCoinBase, m_staticTransactionRef)
+            #TODO add TX to block has!
             if (len(ret)>0):
                 return ret
             isCoinBase = False

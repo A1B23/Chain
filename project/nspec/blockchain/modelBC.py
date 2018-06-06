@@ -6,7 +6,7 @@ m_Blocks = []
 m_newBlock = {}
 m_pendingTX = {}
 m_BufferMinerCandidates = {}
-minBlockReward = 5000000
+minBlockReward = 50000
 
 
 m_stats = {
@@ -17,7 +17,7 @@ m_stats = {
 m_coinBase = {
     "from": defAdr,     # fix
     "to": "9a9f082f37270ff54c5ca4204a0e4da6951fe917",       # miners address received via GET
-    "value": 5000350,                                       # sum of all transaction fees
+    "value": -1,                                       # sum of all transaction fees
     "fee": 0,                                               # miners don't pay fees, so zero
     "dateCreated": "2018-02-10T17:53:48.972Z",              # coinBase creation timestamp, mining time must be later
     "data": "coinbase tx",
@@ -30,7 +30,7 @@ m_coinBase = {
 m_transaction = {
     "from": defAdr,
     "to": "9a9f082f37270ff54c5ca4204a0e4da6951fe917",
-    "value": 5000350,
+    "value": 0,
     "fee": 0,
     "dateCreated":  "2018-02-10T17:53:48.972Z",
     "data": "coinbase tx",
@@ -44,7 +44,7 @@ m_transaction = {
 m_staticTransactionRef = {
     "from": defAdr,
     "to": "9a9f082f37270ff54c5ca4204a0e4da6951fe917",
-    "value": 5000350,
+    "value": 0,
     "fee": 0,
     "dateCreated":  "2018-02-10T17:53:48.972Z",
     "data": "coinbase tx",
@@ -78,9 +78,10 @@ m_minerFoundNonce = {
 }
 
 m_static_emptyBlock = {
-    "index":0,
-    "transactions":[],
-    "difficulty":5,
+    "index": 0,
+    "transactions": [{}],   #reserve the first for coinbase
+    "difficulty": 5,
+    "prevBlockHash": defHash,
     "minedBy": defAdr,
     # changes with new faucet address
     "blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",

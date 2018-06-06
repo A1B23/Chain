@@ -129,8 +129,10 @@ class blockchain:
         m_candidateBlockBalance.clear()
         m_candidateBlock.update(deepcopy(m_static_emptyBlock)) #contains coinbase
         m_candidateBlock['index'] = len(m_Blocks)
-        m_candidateBlock['transactions'].append(deepcopy(m_coinBase))
+        m_candidateBlock['prevBlockHash'] = m_Blocks[-1]['blockHash']
         m_BufferMinerCandidates.clear()
+
+        #TODO add a maximum number for TX here
         for tx in m_pendingTX:
             m_candidateBlock['transactions'].append(tx)
         # TODO add all leftover transactions

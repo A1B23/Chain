@@ -9,6 +9,7 @@ from project.nspec.blockchain.transact import transactions
 from project.nspec.blockchain.blocks import blockchain
 from project.nspec.blockchain.modelBC import *
 from project.pclass import c_peer
+from project.models import m_Miner_order
 
 class blockChainNode:
     c_tx = transactions()
@@ -82,9 +83,8 @@ class blockChainNode:
                 fees = fees + tx['fee']
             else:
                 if (fees>0):
-                    errMsg("Invalid empty TX in block",404)
+                    errMsg("Invalid empty TX in block", 404)
         candidateMiner['index'] = len(m_Blocks) #m_candidateBlock['index']
-        candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions']) #inlcudes coinbase
         candidateMiner['expectedReward'] = candidateMiner['expectedReward'] +fees
         coinBase = deepcopy(m_coinBase)
         coinBase['to'] = minerAddress
@@ -93,9 +93,22 @@ class blockChainNode:
         coinBase['minedInBlockIndex'] = len(m_Blocks)
         coinBase['transactionDataHash'] = sha256ToHex(m_transaction_order, coinBase)
         m_candidateBlock['transactions'][0] = coinBase #just overwrite first TX, miner gets money for empty as well
+        candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions']) #inlcudes coinbase
         # now the block is done, hash it for miner
-        #TODO does the hash for the miner have to be in specific order of data
-        candidateMiner['blockDataHash'] = sha256ToHex(m_candidateMiner_order,m_candidateBlock)
+        #the hash for the miner have to be in specific order of data
+        #TODO can this bve calculated and stored before the addd miner address thingy?
+        forHash = "{"
+        for txs in m_candidateMiner_order:
+            if (txs == 'transactions'):
+                forHash = forHash + '"' + txs + '":['
+                for tx in m_candidateBlock['transactions']:
+                    #TODO sendersingature is still not expanded corrcetly!!!
+                    forHash = forHash + putDataInOrder(m_txorderForBlockHash,tx)
+                forHash = forHash + "],"
+            else:
+                forHash = forHash + addItem(txs, m_candidateBlock[txs])
+        forHash = forHash[:-1] + "}"
+        candidateMiner['blockDataHash'] = sha256StrToHex(forHash)
         #need to calculate now the hash for this specific miner based candidateBlock
         m_BufferMinerCandidates[minerAddress] = deepcopy(candidateMiner)
         m_BufferMinerCandidates[minerAddress]['countRepeat'] = 0
@@ -121,20 +134,23 @@ class blockChainNode:
                 fail = fail or (len(sol) < dif)
                 fail = fail or (sol[:dif] != ("0" * dif))
                 if (fail):
-                    response = {
-                        "errorMsg": "Submitted blockDataHash does not fulfill difficulty "
-                    }
-                    return jsonify(response), 400
+                    #TODO check 400 code
+                    return errMsg("Submitted blockDataHash does not fulfill difficulty ", 400)
 
-                # TODO need to calculate hash base don nonce and then compare
+                # calculate hash based on nonce and then compare
+                blockHash = makeMinerHash(minerSolution)
+                if (blockHash != minerSolution['blockHash']):
+                    #TODO check 400 code
+                    return errMsg("Incorrect block data hash", 400)
+
                 # TODO timestamp must be bigger than when the candidate was sent, nut
                 # TODO timestap cannot be too far into the future, maybe allow 1 minute?
 
+                # TODO is this double updtae with minerdareCreated to TX and block creation correct???
                 m_candidateBlock['transactions'][0]['dateCreated'] = minerSolution['dateCreated']
                 m_candidateBlock['transactions'][0]['to'] = minerAddress
                 m_candidateBlock['minedBy'] = minerAddress
                 m_candidateBlock['blockHash'] = minerSolution['blockHash']
-                m_candidateBlock['prevBlockHash'] = m_Blocks[-1]['blockHash']
                 m_candidateBlock['nonce'] = minerSolution['nonce']
                 m_candidateBlock['dateCreated'] = minerSolution['dateCreated']
                 err = self.c_blockchainHandler.verifyThenAddBlock(m_candidateBlock)

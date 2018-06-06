@@ -9,7 +9,7 @@ import random
 from project.utils import getFutureTimeStamp
 from threading import Thread
 from project.nspec.blockchain.modelBC import m_candidateMiner, minBlockReward
-from project.utils import checkRequiredFields
+from project.utils import checkRequiredFields, makeMinerHash
 from project.models import defHash
 
 candidate = {}
@@ -70,8 +70,9 @@ def isDataValid(resp_text):
     return True
 
 
-def pull(isHard):
-    if (isHard == False):
+def pull():
+    # TODO this isHard is wrong, after successful mine he still continues looping
+    if (len(candidate) == 0):
         if (cfg['mode'] == "y"):
             print("enter m <return> to start mining")
             choice = "s"
@@ -113,8 +114,8 @@ def pull(isHard):
 def pullCandidate():
     while True:
         try:
-            print("Initiate another pull for refresh")
-            pull(len(candidate)>0)
+            print("Initiate timed pull for refresh")
+            pull()
             sleep(int(candidate['difficulty']/2))
             cfg['pulling'] = False  # just confirm finish pulling in case of race condition with failed submission
         except Exception:
@@ -130,6 +131,7 @@ def doMine():
             # Request and wait a response from the N/W
             foundSolution = False
             count=0
+            show = 0
             while (foundSolution == False):
                 if ((cfg['pulling'] == True) or (len(candidate) == 0)):
                     print("Wait for pulling to complete...")
@@ -137,12 +139,15 @@ def doMine():
                 else:
                     candidate['nonce'] = (candidate['nonce'] + 1) % cfg['maxNonce']  # increment modulus max
                     count = count + 1
-                    # if (count > 1000):
-                    #     print(str(count) + " "+str(candidate['nonce']))
-                    if (count >= cfg['maxNonce']):
-                        print("MAx loop reacher")
-                        break
+                    show = show + 1
+                    if (show > 5000):
+                        print(str(count) + " "+str(candidate['nonce']))
+                        show = 0
 
+                    if (count >= cfg['maxNonce']):
+                        print("Max loop reached")
+                        break
+                    #this doe snot use the make minershash as it is optimised for fixdata
                     minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
 
                     if minedBlockHash[:candidate['difficulty']] == cfg['zero_string'][:candidate['difficulty']]:
@@ -173,7 +178,7 @@ def doMine():
             print("Exception occurred... clear and refresh candidate")
 
         candidate.clear()
-        pull(False)
+        pull()
 
 
 def main():

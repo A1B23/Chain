@@ -24,8 +24,9 @@ def jsonToStr(jsonDict):
 
 
 def sha256ToHex(ref, data):
-    toStr = putDataInOrder(ref, data)
-    tst = toStr.encode("utf8")
+    return sha256StrToHex(putDataInOrder(ref, data))
+
+def sha256StrToHex(toStr):
     return hashlib.sha256(toStr.encode("utf8")).hexdigest()
 
 
@@ -92,13 +93,13 @@ def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):
     return missing, (len(check) - len(myReference)), fails
 
 
-def checkSameFields(check,myReference,sameLen):
+def checkSameFields(check, myReference, sameLen):
     colErr=""
     for chk in myReference:
         if not chk in check:
             if (colErr != ""):
                 colErr = colErr + " and "
-            colErr = colErr + "'"+chk+"'"
+            colErr = colErr + "'" + chk + "'"
     if (colErr != ""):
         colErr = "Invalid structure: field " + colErr + " is missing"
     if sameLen:
@@ -107,28 +108,50 @@ def checkSameFields(check,myReference,sameLen):
     return colErr
 
 
-def errMsg(msg,code):
-    return jsonify({"errorMsg":msg}),code
+def errMsg(msg, code):
+    return jsonify({"errorMsg": msg}), code
 
 
 def setOK(data):
-    return jsonify(data),200
+    return jsonify(data), 200
+
 
 def isSameChain(detail):
     return True
     #TODO adjust this return (detail['about'] == m_info['about']) and (detail['chainId'] == m_info['chainId'])
 
-def putDataInOrder(order,data):
-    ret = "{"
+
+def addItem(item, element):
+    ret = '"' + item + '":'
+    if (isinstance(element, int)):
+        return ret + str(element) + ','
+    # elif (isinstance(element, list)):
+         # TODO this must be resolved properly, see senderSig
+    #     lst = ""
+    #     for sx in element:
+    #         lst = lst + addItem(sx,element[sx])
+    #     if (len(lst) > 0):
+    #       return ret+ "[" + lst[:-1] + "],"
+    #     return ret+ "[],"
+    else:
+        return ret + '"' + str(element) + '",'
+
+
+def putDataInOrder(order, data):
+    #We deliberately ignore additional data in the data structure, if any present
+    ret = ""
     for item in order:
         if (item in data):
-            ret = ret + '"' + item + '":'
-            if (isinstance(data[item], int)):
-                ret = ret + str(data[item]) +','
-            else:
-                ret = ret + '"' + str(data[item]) + '",'
-    ret =  ret[:-1] +"}"
-    return ret
+            ret = ret + addItem(item, data[item])
+    if (len(ret) > 0):
+        return "{" + ret[:-1] + "}"
+    return "{}"
+
+
+def makeMinerHash(candidate):
+    data = candidate['blockDataHash'] + "|" + candidate['dateCreated'] + "|" + str(candidate['nonce'])
+    return hashlib.sha256(data.encode("utf8")).hexdigest()
+
 
 
 

@@ -105,12 +105,37 @@ m_transaction_order = [
     "senderPubKey"
 ]
 
+m_txorderForBlockHash = [
+    "from",
+    "to",
+    "value",
+    "fee",
+    "dateCreated",
+    "data",
+    "senderPubKey"
+    "transactionDataHash",
+    "senderSignature",
+    "minedInBlockIndex",
+    "transferSuccessful"
+]
+
 m_candidateMiner_order = [
     "index",
-    "transactionsIncluded",
+    "transactions",
     "difficulty",
-    "expectedReward",
-    "rewardAddress"
+    "prevBlockHash",
+    "minedBy",
+    #"blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
 ]
+
+m_Miner_order = [
+    "blockDataHash",
+    "dateCreated",
+    "nonce"
+]
+
+#TODO block data has
+#Fields order: "index", "transactions", "difficulty", "prevBlockHash" (when exists), "minedBy"
+
 
 
