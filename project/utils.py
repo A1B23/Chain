@@ -113,6 +113,8 @@ def errMsg(msg, code):
 
 
 def setOK(data):
+    if (isinstance(data, str)):
+        return jsonify({"message": data}), 200
     return jsonify(data), 200
 
 
@@ -121,30 +123,32 @@ def isSameChain(detail):
     #TODO adjust this return (detail['about'] == m_info['about']) and (detail['chainId'] == m_info['chainId'])
 
 
-def addItem(item, element):
-    ret = '"' + item + '":'
+def addItem(element):
     if (isinstance(element, int)):
-        return ret + str(element) + ','
-    # elif (isinstance(element, list)):
-         # TODO this must be resolved properly, see senderSig
-    #     lst = ""
-    #     for sx in element:
-    #         lst = lst + addItem(sx,element[sx])
-    #     if (len(lst) > 0):
-    #       return ret+ "[" + lst[:-1] + "],"
-    #     return ret+ "[],"
+        return str(element) + ','
+    elif (isinstance(element, list)):
+        lst = "["
+        for sx in element:
+            lst = lst + addItem(sx)
+        if (len(lst) > 1):
+            return lst[:-1] + "],"
+        return "[],"
     else:
-        return ret + '"' + str(element) + '",'
+        return '"' + str(element) + '",'
+
+
+def addItems(item, element):
+    return '"' + item + '":' + addItem(element)
 
 
 def putDataInOrder(order, data):
     #We deliberately ignore additional data in the data structure, if any present
-    ret = ""
+    ret = "{"
     for item in order:
         if (item in data):
-            ret = ret + addItem(item, data[item])
-    if (len(ret) > 0):
-        return "{" + ret[:-1] + "}"
+            ret = ret + addItems(item, data[item])
+    if (len(ret) > 1):
+        return ret[:-1] + "}"
     return "{}"
 
 

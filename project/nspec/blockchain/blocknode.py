@@ -45,7 +45,7 @@ class blockChainNode:
         for block in sysIn['m_Blocks']:
             if (len(m_Blocks) == 0):
                 # TODO verify all fields are the same not only there!!!
-                m, l, f = checkRequiredFields(block, m_genesisSet[0], [],False)
+                m, l, f = checkRequiredFields(block, m_genesisSet[0], [], False)
                 if (len(m) == 0):
                     # TODO revert if loading failed!?!?!
                     m_Blocks.append(block)
@@ -62,7 +62,7 @@ class blockChainNode:
         m_BufferMinerCandidates.update(sysIn['m_BufferMinerCandidates'])
         m_stats.update(sysIn['m_stats'])
 
-    def getMinerCandidate(self,minerAddress):
+    def getMinerCandidate(self, minerAddress):
         if minerAddress in m_BufferMinerCandidates:
             cand = m_BufferMinerCandidates[minerAddress]
             if cand['index'] == m_candidateBlock['index']:
@@ -95,53 +95,44 @@ class blockChainNode:
         m_candidateBlock['transactions'][0] = coinBase #just overwrite first TX, miner gets money for empty as well
         candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions']) #inlcudes coinbase
         # now the block is done, hash it for miner
-        #the hash for the miner have to be in specific order of data
-        #TODO can this bve calculated and stored before the addd miner address thingy?
+        # need to calculate now the hash for this specific miner based candidateBlock
+        # the hash for the miner has to be in specific order of data
         forHash = "{"
         for txs in m_candidateMiner_order:
             if (txs == 'transactions'):
                 forHash = forHash + '"' + txs + '":['
                 for tx in m_candidateBlock['transactions']:
-                    #TODO sendersingature is still not expanded corrcetly!!!
-                    forHash = forHash + putDataInOrder(m_txorderForBlockHash,tx)
+                    forHash = forHash + putDataInOrder(m_txorderForBlockHash, tx)
                 forHash = forHash + "],"
             else:
-                forHash = forHash + addItem(txs, m_candidateBlock[txs])
-        forHash = forHash[:-1] + "}"
-        candidateMiner['blockDataHash'] = sha256StrToHex(forHash)
-        #need to calculate now the hash for this specific miner based candidateBlock
+                forHash = forHash + addItems(txs, m_candidateBlock[txs])
+        candidateMiner['blockDataHash'] = sha256StrToHex(forHash[:-1] + "}")
+        print("Generate new candidate for miner: " + minerAddress + " with " + candidateMiner['blockDataHash'])
         m_BufferMinerCandidates[minerAddress] = deepcopy(candidateMiner)
         m_BufferMinerCandidates[minerAddress]['countRepeat'] = 0
         return jsonify(candidateMiner), 200
 
     def minerFoundSolution(self,minerSolution):
-        #we must check it all
+        # TODO we must check it all
         #{"blockDataHash": "15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
         # "dateCreated": "2018-05-20T04:36:36Z", "nonce": "735530",
         # "blockHash": "0000020135f1c30b68733e9805f52fdc758fff4b07149929edbd995d30167ae1"}
         colErr = checkSameFields(minerSolution,m_minerFoundNonce,True)
         if (colErr != ""):
-            response = {
-                "errorMsg": colErr
-            }
-            return jsonify(response), 400
+            return errMsg(colErr, 400)
         for minerAddress in m_BufferMinerCandidates:
             known = m_BufferMinerCandidates[minerAddress]
             if known['blockDataHash'] == minerSolution['blockDataHash']:
                 sol = minerSolution['blockHash']
-                fail = False
                 dif = known['difficulty']
-                fail = fail or (len(sol) < dif)
-                fail = fail or (sol[:dif] != ("0" * dif))
+                fail = (len(sol) < dif) or (sol[:dif] != ("0" * dif))
                 if (fail):
-                    #TODO check 400 code
-                    return errMsg("Submitted blockDataHash does not fulfill difficulty ", 400)
+                    return errMsg("Submitted block hash does not fulfill difficulty ", 400)
 
                 # calculate hash based on nonce and then compare
                 blockHash = makeMinerHash(minerSolution)
                 if (blockHash != minerSolution['blockHash']):
-                    #TODO check 400 code
-                    return errMsg("Incorrect block data hash", 400)
+                    return errMsg("Incorrect block hash", 400)
 
                 # TODO timestamp must be bigger than when the candidate was sent, nut
                 # TODO timestap cannot be too far into the future, maybe allow 1 minute?
@@ -154,31 +145,21 @@ class blockChainNode:
                 m_candidateBlock['nonce'] = minerSolution['nonce']
                 m_candidateBlock['dateCreated'] = minerSolution['dateCreated']
                 err = self.c_blockchainHandler.verifyThenAddBlock(m_candidateBlock)
-                if (len(err)>0):
-                    response = {
-                        "message": "Internal error on setting up block"
-                    }
-                    return jsonify(response), 200
+                if (len(err) > 0):
+                    return errMsg("Internal error on setting up block",400)
                 toPeer = dict(m_informsPeerNewBlock)
                 toPeer["blocksCount"] = len(m_Blocks)
                 toPeer["cumulativeDifficulty"] = 55 # TODO this still need to be counted
                 toPeer["nodeUrl"] = m_info['nodeUrl']
-                c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer,"")
+                c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer, "")
+                return setOK("Block accepted, reward paid: "+str(known['expectedReward'])+" microcoins")
 
-                response = {
-                    "message": "Block accepted, reward paid: "+str(known['expectedReward'])+" microcoins"
-                }
-                return jsonify(response), 200
-
-        {
-            "errorMsg": "Block not found or already mined"
-        }
         #TODO call errMsg
         #TODO confirm
         #After a new block is mined in the network (by someone)
         #All pending mining jobs are deleted (because are no longer valid)
         #When a miner submits a mined block later  404 "Not Found"
 
-        return jsonify(response), 404
+        return errMsg("Block not found or already mined", 404)
 
 

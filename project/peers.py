@@ -16,12 +16,12 @@ from time import sleep
 #Extra: implement functionality to delete lost peers
 #If a peer is contacted and it does not respond, delete it from the connected peers
 #If /info does not return the correct peerId
-#It is invalid or does not respond  delete it
+#It is invalid or does not respond -> delete it
 #You may run this check once per minute or when you send a notification about a new block
 
 
 class peers:
-    def asynchPOST(self,url,json,skipPeer):
+    def asynchPOST(self, url, json, skipPeer):
         cnt=0
         if (url[0] != "/"):
             url = "/"+url
@@ -33,7 +33,8 @@ class peers:
                 try:
                     print("sending asynch " + peer + url + str(json))
                     requests.post(url=peer + url, json=json)
-                    cnt=cnt+1
+                    cnt = cnt + 1
+                    m_cfg['peers'][peer]['active'] = True
                     if (cnt> m_cfg['minPeers']): #TODO stop sending when min reached, do more?
                         break
                 except Exception:
@@ -41,61 +42,72 @@ class peers:
 
 
     def sendAsynchPOSTToPeers(self,url,json,skipPeer):
-        thread = Thread(target = self.asynchPOST, args = (url,json,skipPeer))
+        thread = Thread(target=self.asynchPOST, args=(url, json, skipPeer))
         #TODO after some time, clear this buffer, maybe as part of checking peers availability?
         #TODO or alternatively by the size/len of it???
         #TODO cut the buffer short if POST is too long???
         m_peerSkip.append({"url":url,"json":json})
         thread.start()
 
-
-    def sendPOSTToPeers(self,url,json):
-        m_peerSkip.append({"url": url, "json": json})
-        response = []
-        cnt=0
-        if (url[0] != "/"):
-            url = "/"+url
+    def hasActivePeers(self):
         for peer in m_cfg['peers']:
             if (m_cfg['peers'][peer]['active']):
+                return True
+        return False
+
+    def sendPOSTToPeers(self, url, json):
+        m_peerSkip.append({"url": url, "json": json})
+        response = []
+        cnt = 0
+        if (url[0] != "/"):
+            url = "/"+url
+        forceSend = not self.hasActivePeers()
+        for peer in m_cfg['peers']:
+            if (m_cfg['peers'][peer]['active']) or forceSend:
                 try:
-                    print("Share new info with "+url)
+                    print("Peer: Share new info with "+url + ", force: "+str(forceSend))
                     ret = requests.post(url=peer+url, json=json)
                     response.append(ret)
-                    cnt=cnt+1
+                    cnt = cnt+1
+                    m_cfg['peers'][peer]['active'] = True
                     if (cnt> m_cfg['minPeers']): #TODO stop sending when min reached, do more?
                         break
                 except Exception:
-                    m_cfg['peers'][peer]['numberFail'] = m_cfg['peers'][peer]['numberFail'] + 1
+                    if (not forceSend):
+                        m_cfg['peers'][peer]['numberFail'] = m_cfg['peers'][peer]['numberFail'] + 1
         return response
 
-    def sendGETToPeer(self,url):
-        #TODO if htis is new peer and replies add to list???
-        rep= requests.get(url=url)
-        dat =json.loads(rep.text)
+    def sendGETToPeer(self, url):
+        #This routine must not have try/except as except is signal to caller
+        rep = requests.get(url=url)
+        dat = json.loads(rep.text)
         x = rep.status_code
-        return dat,x
+        self.addPeer(url, False)
+        return dat, x
 
-    def sendGETToPeers(self,url):
+    def sendGETToPeers(self, url):
         #TODO check if we still need and if it works
         response = []
-        cnt=0
+        cnt = 0
         if (url[0] != "/"):
-            url = "/"+url
+            url = "/" + url
+        forceSend = not self.hasActivePeers()
         for peer in m_cfg['peers']:
-            if (m_cfg['peers'][peer]['active']):
+            if (m_cfg['peers'][peer]['active'] or forceSend):
                 try:
                     response.append(self.sendGETToPeer(url=peer+url))
-                    cnt=cnt+1
-                    if (cnt>= m_cfg['minPeers']):
+                    cnt = cnt + 1
+                    if (cnt >= m_cfg['minPeers']):
                         break
                 except Exception:
-                    m_cfg['peers'][peer]['numberFail'] = m_cfg['peers'][peer]['numberFail'] + 1
+                    if (not forceSend):
+                        m_cfg['peers'][peer]['numberFail'] = m_cfg['peers'][peer]['numberFail'] + 1
         return response
 
-    def deActivate(self,peer):
+    def deActivate(self, peer):
         if (m_cfg['peers'][peer]['numberFail'] > m_cfg['peerDrop']):
-            print("Peer "+ peer + " not responding " +str(m_cfg['peers'][peer]['numberFail'])+" times, soon to be removed...")
-            m_cfg['peers'][peer]['active']= False
+            print("Peer " + peer + " not responding " + str(m_cfg['peers'][peer]['numberFail']) + " times, de-activated...")
+            m_cfg['peers'][peer]['active'] = False
             return True
         return False
 
@@ -106,7 +118,7 @@ class peers:
                 try:
                     s1 = requests.get(peer + "/peers")
                 except Exception:
-                    m_cfg['peers'][peer]['active'] == False
+                    m_cfg['peers'][peer]['active'] = False
                     continue
                 reply = json.loads(s1.text)
                 for nodeId in reply:
@@ -117,26 +129,26 @@ class peers:
                             break
                     if (not found):
                         findPeer.append(reply[nodeId])
-                        needed = needed -1
+                        needed = needed - 1
                         break
 
-                if (needed <=0):
+                if (needed <= 0):
                     break   # do not just take all peers from one peer
-                                # to avoid peer aggregation, rather try another peer
-                                # to see if that one connects to another, even if it
-                                # means the lower boundary is off for a few more rounds
+                    # to avoid peer aggregation, rather try another peer
+                    # to see if that one connects to another, even if it
+                    # means the lower boundary is off for a few more rounds
         for peer in findPeer:
-            self.addPeer(peer)
+            self.addPeer(peer, True)
 
 
-    def checkPeerAlive(self,peer):
+    def checkPeerAliveAndValid(self, peer):
         try:
-            s1 = requests.get( peer+"/info")
+            s1 = requests.get(peer+"/info")
             reply = json.loads(s1.text)
             m, l, f = checkRequiredFields(reply, m_info, ["chainId", "about"],False)
             if (len(f) > 0) or (len(m) > 0): #we skip to check any additoinal fields, is that OK
                 print("Peer " + peer + " reply not accepted, considered not alive")
-                m_cfg['peers'][peer]['numberFail'] = m_cfg['peerDrop'] +1
+                m_cfg['peers'][peer]['numberFail'] = m_cfg['peerDrop'] + 1
                 return False
             if peer in m_cfg['peers']:
                 if m_cfg['peers'][peer]['nodeId'] != "Pending...":
@@ -151,17 +163,17 @@ class peers:
             return False
         return True
 
-    def addPeer(self, url):
+    def addPeer(self, url, addCheck):
         if url not in m_cfg['peers']:
-            # this may need to be made more sophisticated, same url without http is still a loop
+            # TODO this may need to be made more sophisticated, same url without http is still a loop
             if url != m_info['nodeUrl']:
                 m_cfg['peers'][url] = deepcopy(m_peerInfo)
                 m_info['peers'] = len(m_cfg['peers'])
-                return self.checkPeerAlive(url)
+                return ((not addCheck) or self.checkPeerAliveAndValid(url))
         return False
 
 
-    def setPeersAs(self,nodes, port):
+    def setPeersAs(self, nodes, port):
         for x in nodes.split(','):
             if len(x) > 0:
                 if (len(x) < 4):
@@ -169,28 +181,28 @@ class peers:
                         xint = int(x.strip())
                         if (xint > 0) and (xint < 256):
                             newNode = "http://127.0.0."+str(xint)+":"+str(port)
-                            self.addPeer(newNode)
+                            self.addPeer(newNode, True)
                         else:
                             print("WAR: IP extension not recognised: '" + x + "'")
                     except Exception:
                         print("ERR: Invalid connection parameter: '" + x + "'")
                 else:
-                    self.addPeer(x)
+                    self.addPeer(x, True)
 
 
     #this is a thread running every x seconds to check peers are still there
-    def checkEveryXSecs(self,sleepSecs):
+    def checkEveryXSecs(self, sleepSecs):
         while True:
             if(not "statusChain" in m_cfg):
                 m_cfg['statusChain'] = False       # backward compatibility
-            while(m_cfg['statusChain']== True):
+            while(m_cfg['statusChain'] == True):
                 sleep(1)
             m_cfg['statusPeer'] = True
             cntActive= 0
             for peer in m_cfg['peers']:
                 if (cntActive > m_cfg['minPeers']):
                     break
-                if (self.checkPeerAlive(peer) == False):
+                if (self.checkPeerAliveAndValid(peer) == False):
                     m_cfg['peers'][peer]['numberFail'] = m_cfg['peers'][peer]['numberFail'] + 1
                     self.deActivate(peer)
                 else:
@@ -214,30 +226,31 @@ class peers:
             for peer in rem:
                 del m_cfg['peers'][peer]
             m_cfg['statusPeer'] = False
-            sleep(sleepSecs) ## adjust to 60 after testing
+            sleep(sleepSecs) #TODO adjust to 60 after testing
 
+    # TODO several vars not used??
     def peersConnect(self, path, linkInfo, values, request):
         try:
             values = request.get_json()
         except Exception:
             return errMsg("JSON not decodeable", 400)
         #check = json.loads(values)
-        m, l, f = checkRequiredFields(['peerUrl'], values, [],False)
-        if (len(m)>0):
+        m, l, f = checkRequiredFields(['peerUrl'], values, [], False)
+        if (len(m) > 0):
             return errMsg("Missing field 'peerUrl': " + newNode, 400)
         newNode = values['peerUrl']
         peers = m_cfg['peers']
         for k in peers:
             if newNode == k:
-                return errMsg("Already connected to peer: " + newNode,409)
-        if self.addPeer(newNode):
-            if self.checkPeerAlive(newNode) == False:
+                return errMsg("Already connected to peer: " + newNode, 409)
+        if self.addPeer(newNode, False):
+            if self.checkPeerAliveAndValid(newNode) == False:
                 del m_cfg['peers'][newNode]
                 return errMsg("Invalid or not connected peer/chain: " + newNode, 400)
             return setOK({'message': 'Connected to peer: '+newNode})
         return errMsg("Invalid peer/chain/recursion: " + newNode, 400)
 
-    def listPeers(peers):
+    def listPeers(self):
         response = {}
         for peer in m_cfg['peers']:
             response.update({m_cfg['peers'][peer]['nodeId']: peer})
