@@ -11,6 +11,7 @@ defGenesisDate = "2018-06-06T00:00:00.000Z"
 
 
 m_peerSkip = []
+m_Delay = []
 
 m_peerInfo = {
     "numberFail": 0,
@@ -36,7 +37,8 @@ m_cfg = {
     # 1 means we are reloading the entire blocks at startup, so until this is finished, no reply
     # 2 means we are checking for peers again... default for starting up
     "statusChain": False,
-    "statusPeer": True
+    "statusPeer": True,
+    "useDelay": False
 }
 
 m_info = {

@@ -32,12 +32,13 @@ rem ######################## Wallet hard coded parameters
 set typeDir=Wallet
 set col=1F
 set port=5555
+set delay=True
 echo %typeDir% start...
 rem #### make the port to reflect the peer it connects to, so 5x = 5 wallet and x connected node 
 set nodeIPnum=52
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runWallet.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --port %port%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runWallet.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --port %port% --useDelay %delay%"
 set nodeIPnum=54
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runWallet.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runWallet.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --useDelay %delay%"
 
 rem ######################## BlockChain node template, can launch many nodes by simply changing the IP-ending
 set typeDir=Blockchain
@@ -45,23 +46,25 @@ set nodeIPnum=2
 set minPeers=2
 set maxPeers=3
 set col=2B
-echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --minPeers %minPeers% --maxPeers %maxPeers%"
+rem echo %typeDir% start at IP 127.0.0.%nodeIPnum%
+rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"
 
 set nodeIPnum=4
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2,5 --port %port% --minPeers %minPeers% --maxPeers %maxPeers%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2,5 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"
 
 
 rem ###################### Miner hard coded parameters 
 set typeDir=Miner
 rem we keep the sam address as blockchain above!
-set con=2
 set col=5B
 set mode=y
-start cmd.exe /K "color %col% & title=Miner_to_%con% & %myPyPath% runMiner.py --connect http://127.0.0.%con% --port %port% -a ae1f%con% -mod %mode%"
-set con=4
-start cmd.exe /K "color %col% & title=Miner_to_%con% & %myPyPath% runMiner.py --connect http://127.0.0.%con% --port %port% -a ae2f%con% -mod %mode%"
+set minPeers=1
+set maxPeers=1
+set nodeIPnum=32
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%" -mod %mode%"
+set nodeIPnum=34
+rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%" -mod %mode%"
 
 pause
 set typeDir=Blockchain
@@ -70,4 +73,4 @@ set minPeers=2
 set maxPeers=3
 set col=2B
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-start cmd.exe /K "color %col% &title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --port %port% --minPeers %minPeers% --maxPeers %maxPeers%"
+start cmd.exe /K "color %col% &title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"

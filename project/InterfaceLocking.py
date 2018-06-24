@@ -12,7 +12,7 @@ class mainInterface:
 
     def delay(self,url,type):
         #sleep a seconds or a loop etc
-        print("Delay needed for: "+url + " type: "+str(type)+ " stackGET: "+str(len(m_simpleLock))+ " stackPOST: "+str(len(m_isPOST)))
+        print("Delay needed for: "+url + " type: "+str(type) + " stackGET: " + str(len(m_simpleLock)) + " stackPOST: " + str(len(m_isPOST)))
         sleep(1)
         return True
 

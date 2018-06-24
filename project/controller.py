@@ -12,6 +12,18 @@ from copy import deepcopy
 
 c_MainIntf = mainInterface()
 
+@app.route('/visual')
+def visual():
+    dat = []
+    if (len(m_Delay)>0):
+        dat = m_Delay.pop(0)
+    return jsonify(dat), 200
+
+
+@app.route('/cfg')
+def get_cfg():
+    return jsonify(m_cfg), 200
+
 ### TODO remove after debugging
 @app.route('/load/<file>')
 def loadSys(file):
@@ -26,13 +38,6 @@ def saveSys(file):
 #GET /info
 @app.route('/info')
 def get_info():
-    # for peer in m_cfg['peers']:
-    #     if (m_cfg['peers'][peer]['active']):
-    #         txList, ret = c_peer.sendGETToPeer(peer + "/transactions/pending")
-    #         if (ret == 200):  # TODO try other peers or just go ahead?
-    #             for tx in txList:
-    #                 c_MainIntf.c_blockInterface.c_blockchainNode.c_tx.receivedNewTransaction(tx, peer, False)
-    #             break
     return info()
 
 #GET /debug
@@ -180,7 +185,7 @@ def index():
     if (isWallet()):
         if request.method == 'POST':
             return c_walletInterface.form_post(request)
-        return render_template("wallet.html")
+        return render_template("TabWallet.html")
 
     response = {
         'NodeType': m_cfg['type'],

@@ -1,7 +1,7 @@
 from project.models import *
 from project.utils import *
 from threading import Thread
-from project.models import m_cfg, m_peerSkip
+from project.models import m_cfg, m_peerSkip, m_Delay
 from project.utils import checkRequiredFields
 from flask import jsonify
 from copy import deepcopy
@@ -19,8 +19,33 @@ from time import sleep
 #It is invalid or does not respond -> delete it
 #You may run this check once per minute or when you send a notification about a new block
 
-
+cntDelay = [0]
 class peers:
+    def doPOST(self, url, json):
+        if (m_cfg['useDelay'] == True):
+            myDelay = cntDelay[0]
+            m_Delay.append({"delay": myDelay, "url": url, "json": json})
+            cntDelay[0] = cntDelay[0] + 1
+            try:
+                while (m_Delay[0]['delay'] == myDelay):
+                    sleep(1)
+            except Exception: #means no ,m_Delay
+                myDelay=-1
+        return requests.post(url=url, json=json)
+
+    def doGET(self, url):
+        if (m_cfg['useDelay'] == True):
+            myDelay = cntDelay[0]
+            m_Delay.append({"delay": myDelay, "url": url})
+            cntDelay[0] = cntDelay[0] + 1
+            try:
+                while (m_Delay[0]['delay'] == myDelay):
+                    sleep(1)
+            except Exception: #means no ,m_Delay
+                myDelay=-1
+        #return requests.get(url=url)
+        return requests.get(url=url, headers={'content-type': 'application/json', 'accept': 'application/json'})
+
     def asynchPOST(self, url, json, skipPeer):
         cnt=0
         if (url[0] != "/"):
@@ -32,7 +57,7 @@ class peers:
             if (m_cfg['peers'][peer]['active']):
                 try:
                     print("sending asynch " + peer + url + str(json))
-                    requests.post(url=peer + url, json=json)
+                    self.doPOST(url=peer + url, json=json)
                     cnt = cnt + 1
                     m_cfg['peers'][peer]['active'] = True
                     if (cnt> m_cfg['minPeers']): #TODO stop sending when min reached, do more?
@@ -66,7 +91,7 @@ class peers:
             if (m_cfg['peers'][peer]['active']) or forceSend:
                 try:
                     print("Peer: Share new info with "+url + ", force: "+str(forceSend))
-                    ret = requests.post(url=peer+url, json=json)
+                    ret = self.doPOST(url=peer+url, json=json)
                     response.append(ret)
                     cnt = cnt+1
                     m_cfg['peers'][peer]['active'] = True
@@ -79,7 +104,7 @@ class peers:
 
     def sendGETToPeer(self, url):
         #This routine must not have try/except as except is signal to caller
-        rep = requests.get(url=url)
+        rep = self.doGET(url=url)
         dat = json.loads(rep.text)
         x = rep.status_code
         self.addPeer(url, False)
@@ -116,7 +141,7 @@ class peers:
         for peer in m_cfg['peers']:
             if (m_cfg['peers'][peer]['active'] == True):
                 try:
-                    s1 = requests.get(peer + "/peers")
+                    s1 = self.doGET(peer + "/peers")
                 except Exception:
                     m_cfg['peers'][peer]['active'] = False
                     continue
@@ -143,7 +168,7 @@ class peers:
 
     def checkPeerAliveAndValid(self, peer):
         try:
-            s1 = requests.get(peer+"/info")
+            s1 = self.doGET(peer+"/info")
             reply = json.loads(s1.text)
             m, l, f = checkRequiredFields(reply, m_info, ["chainId", "about"],False)
             if (len(f) > 0) or (len(m) > 0): #we skip to check any additoinal fields, is that OK
@@ -164,6 +189,9 @@ class peers:
         return True
 
     def addPeer(self, url, addCheck):
+        for x in m_cfg['peers']:
+            if (url.startswith(x)):
+                return False
         if url not in m_cfg['peers']:
             # TODO this may need to be made more sophisticated, same url without http is still a loop
             if url != m_info['nodeUrl']:
@@ -228,7 +256,7 @@ class peers:
             m_cfg['statusPeer'] = False
             sleep(sleepSecs) #TODO adjust to 60 after testing
 
-    # TODO several vars not used??
+    # TODO newNode set too late and several vars not used??
     def peersConnect(self, path, linkInfo, values, request):
         try:
             values = request.get_json()

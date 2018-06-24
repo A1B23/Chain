@@ -7,11 +7,14 @@ from project.pclass import c_peer
 
 # put your distribution according to url
 class walletInterface:
-    def nodeSpecificGETNow(self,url,linkInfo,request):
+    def nodeSpecificGETNow(self,url,linkInfo):
         urlID = url[1:5]
         if (urlID == 'send'):
             return send()
 
+        if (urlID == 'addr'):
+            return setOK(linkInfo)
+            #return send()
         # identify your url and then proceed
         #linkInfo is a json object containing the information from the URL
         response = {
