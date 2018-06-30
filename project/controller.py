@@ -203,10 +203,17 @@ def wallet_create():
         return errMsg("JSON not decodeable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-@app.route('/wallet/list')
-def allWallets():
+@app.route('/wallet/list/wallet')
+def getWallets():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
+
+@app.route('/wallet/list/keys/<param>/<wallet>', methods=['GET'])
+def getKeyInfo(param,wallet):
+    linkInfo = {"sel": param, "wallet": wallet}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
 
 ################## the following two are only for testing while developing peer module
 @app.route("/listNodes")

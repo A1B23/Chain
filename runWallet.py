@@ -21,7 +21,8 @@ if __name__ == "__main__":
         "/peers",
         "/listNodes",  # TODO test only
         "/address/[0-9a-zA-Z]+/balance$",
-        "/wallet/list$"
+        "/wallet/list/wallet$",
+        "/wallet/list/keys/s([pna]y)*/[0-9a-zA-Z]+$"
     ])
 
     m_permittedPOST.clear()

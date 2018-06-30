@@ -13,8 +13,10 @@ class walletInterface:
             return send()
 
         if (urlID == 'wall'):
-            if (url == "/wallet/list"):
+            if (url == "/wallet/list/wallet"):
                 return c_walletInterface.getAllWallets()
+            if (url.startswith("/wallet/list/keys/s")):
+                return c_walletInterface.getAllKeys(linkInfo)
 
         if (urlID == 'addr'):
             return setOK(linkInfo)

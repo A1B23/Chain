@@ -10,6 +10,7 @@ from project.utils import setOK,errMsg
 import sqlite3
 from project.nspec.wallet.modelW import m_db
 from contextlib import closing
+import re
 
 
 class wallet:
@@ -56,22 +57,15 @@ class wallet:
         print("response is: ", req[0])
         return jsonify(txn_data), 200
 
-    def getAllKeys(self, wallet,con):
-        con.row_factory = sqlite3.Row
-
-        cur = con.cursor()
-        cur.execute("select privKey,pubKey,address,KName from Wallet WHERE WName='"+wallet+"'")
-
-        rows = cur.fetchall()
-        return rows
-
     def createWallet(self, json):
         try:
             with closing(sqlite3.connect(m_db['DATABASE'])) as con:
                 #TODO sanitise wallet name
                 wal = json['name']
-                rows = self.getAllKeys(wal,con)
-                for row in rows:
+                pattern = re.compile("^[A-Z0-9a-z_]+$")
+                if (not pattern.match(wal)):
+                    return errMsg("Invalid wallet name.", 400)
+                if (wal in self.listAllWallets()):
                     return errMsg("Creating Wallet " + wal + " failed.", 400)
                 cur = con.cursor()
                 cur.execute("INSERT INTO Wallet (WName,privKey,pubKey,address,KName,ChkSum) VALUES(?, ?, ?, ?,?,?)",(wal,"prK","pK","@","*","000"))
@@ -80,8 +74,7 @@ class wallet:
         except Exception:
             return errMsg("Creating Wallet "+ wal + " failed.", 400)
 
-
-    def getAllWallets(self):
+    def listAllWallets(self):
         try:
             with closing(sqlite3.connect(m_db['DATABASE'])) as con:
                 con.row_factory = sqlite3.Row
@@ -92,10 +85,54 @@ class wallet:
                 rows = cur.fetchall()
                 wal = []
                 for row in rows:
-                    wal.extend(row);
-                return setOK({"walletList":wal})
+                    wal.extend(row)
+                return wal
         except Exception:
             return errMsg("Creating Wallet "+wal+ " failed.", 400)
+        return []
+
+    def getAllWallets(self):
+        return setOK({"walletList": self.listAllWallets()})
 
 
+    def getAllKeys(self,params):
+        wal = params['wallet']
+        try:
+            pattern = re.compile("^[A-Z0-9a-z_]+$")
+            if (not pattern.match(wal)):
+                return errMsg("Invalid wallet name.", 400)
+
+            with closing(sqlite3.connect(m_db['DATABASE'])) as con:
+                con.row_factory = sqlite3.Row
+
+                cur = con.cursor()
+                cmd = "SELECT"
+                sel = False
+                if ("py" in params['sel']):
+                    cmd = cmd + " pubKey,"
+                    sel = True
+
+                if ("ay" in params['sel']):
+                    cmd = cmd + " address,"
+                    sel = True
+
+                if ("ny" in params['sel']):
+                    cmd = cmd + " KName"
+                    sel = True
+
+                if (sel == False):
+                    cmd = cmd + " pubKey, address, KName"
+                else:
+                    if (cmd.endswith(",")):
+                        cmd = cmd[0:-1]
+
+                cmd = cmd + " FROM Wallet WHERE WName='" + wal + "'"
+                cur.execute(cmd)
+
+                keys = []
+                for row in cur.fetchall():
+                    keys.extend(row)
+                return setOK({"keyList": keys})
+        except Exception:
+            return errMsg("Collecting keys for wallet " + wal + " failed.", 400)
 
