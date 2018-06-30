@@ -24,198 +24,193 @@
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     Welcome to PDPC_Coin <b>Visualiser:</b><br />
     <button type="button" class="options" id="test">test</button>
-    <table width="100%" border="1">
-        <tr>
-            <td>
-                <table id="sets">
-                    <tr>
-                        <td class="options">
-                            Scan: <input type="checkbox" id="scan">
-                            <button type="button" class="options" onClick="JavaScript:scan(0)">start</button>
-                            <button type="button" class="options" onClick="JavaScript:scan(-1)">stop</button>
-                            <button type="button" class="options" onClick="JavaScript:step()">step</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="opt" class="options alt1">
-                            IPMinMax 127.0.0.x:
-                            <input type="text" value="1" class="options" size="5" id="IPMin">
-                            <input type="text" value="10" class="options" size="5" id="IPMax">
-                            <br />
-                            Circle
-                            <select id="circle" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
-                            Max. nodes
-                            <select id="maxnodes" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                            <select id="type" class="options">
-                                <option value="BCNode">BCNode</option>
-                                <option value="Wallet">Wallet</option>
-                                <option value="Miner">Miner</option>
-                            </select>
-                            <br />
-                            Offset:
-                            <input type="range" min="1" max="360" value="50" class="options" id="off1" oninput="drawCanvas();">
-                            <br />
-                            Size:
-                            <input type="range" min="1" max="100" value="50" class="options" id="siz1" oninput="drawCanvas();">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="opt" class="options alt1">
-                            IPMinMax 127.0.0.x:
-                            <input type="text" value="1" class="options" size="5" id="IPMin">
-                            <input type="text" value="1" class="options" size="5" id="IPMax">
-                            <br />
-                            Circle
-                            <select id="circle" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
-                            Max. nodes
-                            <select id="maxnodes" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                            <select id="type" class="options">
-                                <option value="BCNode">BCNode</option>
-                                <option value="Wallet">Wallet</option>
-                                <option value="Miner">Miner</option>
-                            </select>
-                            <br />
-                            Offset:
-                            <input type="range" min="1" max="360" value="50" class="options" id="off2" oninput="drawCanvas();">
-                            <br />
-                            Size:
-                            <input type="range" min="1" max="100" value="50" class="options" id="siz2" oninput="drawCanvas();">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="opt" class="options alt1">
-                            IPMinMax 127.0.0.x:
-                            <input type="text" value="1" class="options" size="5" id="IPMin">
-                            <input type="text" value="1" class="options" size="5" id="IPMax">
-                            <br />
-                            Circle
-                            <select id="circle" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
-                            Max. nodes
-                            <select id="maxnodes" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                            <select id="type" class="options">
-                                <option value="BCNode">BCNode</option>
-                                <option value="Wallet">Wallet</option>
-                                <option value="Miner">Miner</option>
-                            </select>
-                            <br />
-                            Offset:
-                            <input type="range" min="1" max="360" value="50" class="options" id="off3" oninput="drawCanvas();">
-                            <br />
-                            Size:
-                            <input type="range" min="1" max="100" value="50" class="options" id="siz3" oninput="drawCanvas();">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="opt" class="options alt2">
-                            IPMinMax 127.0.0.x:
-                            <input type="text" value="1" class="options" size="5" id="IPMin">
-                            <input type="text" value="1" class="options" size="5" id="IPMax">
-                            <br />
-                            Circle
-                            <select id="circle" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
-                            Max. nodes
-                            <select id="maxnodes" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                            <select id="type" class="options">
-                                <option value="BCNode">BCNode</option>
-                                <option value="Wallet">Wallet</option>
-                                <option value="Miner">Miner</option>
-                            </select>
-                            <br />
-                            Offset:
-                            <input type="range" min="1" max="360" value="50" class="options" id="off4" oninput="drawCanvas();">
-                            <br />
-                            Size:
-                            <input type="range" min="1" max="100" value="50" class="options" id="siz4" oninput="drawCanvas();">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td id="opt" class="options alt1">
-                            IPMinMax 127.0.0.x:
-                            <input type="text" value="1" class="options" size="5" id="IPMin">
-                            <input type="text" value="1" class="options" size="5" id="IPMax">
-                            <br />
-                            Circle
-                            <select id="circle" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                                <option value="6">6</option>
-                            </select>
-                            Max. nodes
-                            <select id="maxnodes" class="options">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                            </select>
-                            <select id="type" class="options">
-                                <option value="BCNode">BCNode</option>
-                                <option value="Wallet">Wallet</option>
-                                <option value="Miner">Miner</option>
-                            </select>
-                            <br />
-                            Offset:
-                            <input type="range" min="1" max="360" value="50" class="options" id="off5" oninput="drawCanvas();">
-                            <br />
-                            Size:
-                            <input type="range" min="1" max="100" value="50" class="options" id="siz5" oninput="drawCanvas();">
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td align="center">
-                Time Delay <input type="range" min="1" max="5000" value="200" class="slider" id="delay">
-                Canvas Width <input type="range" min="100" max="900" value="500" class="slider" id="twidth" oninput="setCanvas();">
-                <br />
-                <canvas id="canvas" class="border" >Oops, no canvas supported by your browser?</canvas>
-            </td>
-        </tr>
-    </table>
+    <select id="viewsizes" class="options">
+        <option value="0">close</option>
+        <option value="1">small</option>
+        <option value="3">medium</option>
+        <option value="5">large</option>
+
+    </select>
+    <div id="control"></div>
+    <div class="iframes" id="views">
+        <table id="sets">
+            <tr>
+                <td class="options">
+                    Scan: <input type="checkbox" id="scan"><br />
+                    <button type="button" class="options" onClick="JavaScript:scan(0)">start</button><br />
+                    <button type="button" class="options" onClick="JavaScript:scan(-1)">stop</button><br />
+                    <button type="button" class="options" onClick="JavaScript:step()">step</button>
+                </td>
+                <td id="opt" class="options alt1">
+                    IPMinMax 127.0.0.x:
+                    <input type="text" value="1" class="options" size="5" id="IPMin">
+                    <input type="text" value="5" class="options" size="5" id="IPMax">
+                    <br />
+                    Circle
+                    <select id="circle" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                    Max. nodes
+                    <select id="maxnodes" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <select id="type" class="options">
+                        <option value="BCNode" selected>BCNode</option>
+                        <option value="Wallet">Wallet</option>
+                        <option value="Miner">Miner</option>
+                    </select>
+                    <br />
+                    Offset:
+                    <input type="range" min="1" max="360" value="50" class="options" id="off1" oninput="drawCanvas();">
+                    <br />
+                    Size:
+                    <input type="range" min="1" max="100" value="50" class="options" id="siz1" oninput="drawCanvas();">
+                </td>
+                <td id="opt" class="options alt2">
+                    IPMinMax 127.0.0.x:
+                    <input type="text" value="30" class="options" size="5" id="IPMin">
+                    <input type="text" value="34" class="options" size="5" id="IPMax">
+                    <br />
+                    Circle
+                    <select id="circle" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                    Max. nodes
+                    <select id="maxnodes" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <select id="type" class="options">
+                        <option value="BCNode">BCNode</option>
+                        <option value="Wallet">Wallet</option>
+                        <option value="Miner" selected>Miner</option>
+                    </select>
+                    <br />
+                    Offset:
+                    <input type="range" min="1" max="360" value="50" class="options" id="off2" oninput="drawCanvas();">
+                    <br />
+                    Size:
+                    <input type="range" min="1" max="100" value="50" class="options" id="siz2" oninput="drawCanvas();">
+                </td>
+                <td id="opt" class="options alt1">
+                    IPMinMax 127.0.0.x:
+                    <input type="text" value="50" class="options" size="5" id="IPMin">
+                    <input type="text" value="54" class="options" size="5" id="IPMax">
+                    <br />
+                    Circle
+                    <select id="circle" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                    Max. nodes
+                    <select id="maxnodes" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <select id="type" class="options">
+                        <option value="BCNode">BCNode</option>
+                        <option value="Wallet" selected>Wallet</option>
+                        <option value="Miner">Miner</option>
+                    </select>
+                    <br />
+                    Offset:
+                    <input type="range" min="1" max="360" value="50" class="options" id="off3" oninput="drawCanvas();">
+                    <br />
+                    Size:
+                    <input type="range" min="1" max="100" value="50" class="options" id="siz3" oninput="drawCanvas();">
+                </td>
+                <td id="opt" class="options alt2">
+                    IPMinMax 127.0.0.x:
+                    <input type="text" value="0" class="options" size="5" id="IPMin">
+                    <input type="text" value="0" class="options" size="5" id="IPMax">
+                    <br />
+                    Circle
+                    <select id="circle" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                    Max. nodes
+                    <select id="maxnodes" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <select id="type" class="options">
+                        <option value="BCNode">BCNode</option>
+                        <option value="Wallet">Wallet</option>
+                        <option value="Miner">Miner</option>
+                    </select>
+                    <br />
+                    Offset:
+                    <input type="range" min="1" max="360" value="50" class="options" id="off4" oninput="drawCanvas();">
+                    <br />
+                    Size:
+                    <input type="range" min="1" max="100" value="50" class="options" id="siz4" oninput="drawCanvas();">
+                </td>
+                <td id="opt" class="options alt1">
+                    IPMinMax 127.0.0.x:
+                    <input type="text" value="0" class="options" size="5" id="IPMin">
+                    <input type="text" value="0" class="options" size="5" id="IPMax">
+                    <br />
+                    Circle
+                    <select id="circle" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                    Max. nodes
+                    <select id="maxnodes" class="options">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                    <select id="type" class="options">
+                        <option value="BCNode">BCNode</option>
+                        <option value="Wallet">Wallet</option>
+                        <option value="Miner">Miner</option>
+                    </select>
+                    <br />
+                    Offset:
+                    <input type="range" min="1" max="360" value="50" class="options" id="off5" oninput="drawCanvas();">
+                    <br />
+                    Size:
+                    <input type="range" min="1" max="100" value="50" class="options" id="siz5" oninput="drawCanvas();">
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id='radar' align="center">
+        Time Delay <input type="range" min="50" max="2000" value="200" class="slider" id="delay">
+        Canvas Width <input type="range" min="100" max="900" value="500" class="slider" id="twidth" oninput="resizeCanvas();">
+        Canvas Height <input type="range" min="100" max="900" value="500" class="slider" id="theight" oninput="resizeCanvas();">
+        <br />
+        <canvas onmousemove="draw(event)" id="canvas" class="border">Oops, no canvas supported by your browser?</canvas>
+    </div>
     REST-API log:
     <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
     <div>
@@ -224,58 +219,166 @@
     </div>
 
     <script>
-        nodes = {
-            "B": {},
-            "W": {},
-            "M": {}
-        }
-
-        rings = [[],[],[],[],[]]
-
         ctx = null
 
+        function clearDom(dom) {
+            return dom.replace(/\./g, "").replace(/:/g, "").replace(/\//g, "");
+        }
         $(document).ready(function () {
             ctx = $("#canvas")[0].getContext('2d');
             $("#scan").prop("checked", false);
-            setCanvas();
+            init();
+            drawGrid();
         });
+
+        function init() {
+            nodes = {
+                "B": {},
+                "W": {},
+                "M": {}
+            }
+
+            rings = [[], [], [], [], []]
+
+            col = {
+                "B": ['rgb(255,0,0)', 'rgb(0,255,255)', 'rgb(255,255,0)'],
+                "M": ['rgb(0,255,0)', 'rgb(0,0,255)', 'rgb(255,255,255)'],
+                "W": ['rgb(255,0,255)', 'rgb(0,0,255)', 'rgb(0,255,0)'],
+            }
+
+            ctx.canvas.width = getWidth();
+            ctx.canvas.height = getHeight();
+        }
 
         function getWidth() {
             return $("#twidth")[0].value
         }
 
-        function setCanvas() {
+        function getHeight() {
+            return $("#theight")[0].value
+        }
+        function draw(evt) {
+            globMousePos = getMousePos(ctx.canvas, evt);
+
+            //ctx.fillStyle = "#000000";
+            //ctx.fillRect(pos.x, pos.y, 4, 4);
+        }
+
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        function resizeCanvas() {
             ctx.canvas.width = getWidth();
-            ctx.canvas.height = getWidth();
+            ctx.canvas.height = getHeight();
             drawCanvas();
         }
 
-        $("#test").on("click", function () {
+        function hideFrames() {
+            $(".iframes").each(function () {
+                $(this).hide();
+            });
+
+        }
+
+        function setFramesHeight() {
+            $(".iframes").each(function () {
+                var h = $("#viewsizes").val() * 100;
+                if (h == 0) {
+                    $(this).hide();
+                } else {
+                    $(this).attr('height', h);
+                }
+            });
+        }
+
+        $("#viewsizes").change(function () {
+            setFramesHeight();
+        });
+
+        $("canvas").dblclick(function () {
+            hideFrames();
+            for (var typ in nodes) {
+                if (nodes.hasOwnProperty(typ)) {
+                    for (var dom in nodes[typ]) {
+                        var dx = getXYType(typ, dom);
+                        if ((dx[0] - dx[2] < globMousePos.x) && (dx[0] + dx[2] > globMousePos.x) &&
+                            (dx[1] - dx[2] < globMousePos.y) && (dx[1] + dx[2] > globMousePos.y)) {
+                            $("#" + clearDom(dom)).show();
+                            return;
+                        }
+                    }
+                }
+            }
+            $("#views").show();
 
         });
+
+        function drawCom(fromType,fromDom,toType,toDom, iter) {
+            iter = iter + 1
+            drawCanvas();
+            if (iter < 10) {
+                var from = getXYType(fromType, fromDom);
+                var to = getXYType(toType, toDom);
+                var deltax = (to.x - from.x) / 10 * iter;
+                var delta = { 'x': from.x + deltax, 'y': deltax * from.slope + from.y, 'size': from.size };
+                drawNode("B", "http://127.0.0.2:5555", delta, col['M']);
+                setTimeout(function () { drawCom(fromType, fromDom, toType, toDom, iter) }, +$("#delay")[0].value);
+            } 
+
+        }
+
+        $("#test").on("click", function () {
+            ctx.save();
+            setTimeout(function () { drawCom("W", "http://127.0.0.52:5555", "B", "http://127.0.0.2:5555", 0); }, 100);
+        });
+
         $("#scan").on("change", function () {
             if (this.checked) {
-                rings = [[], [], [], [], []]
-                setTimeout(doScan(),100);
+                setTimeout(function () { doScan(); }, 100);
             }
         });
- 
+
+
+        function setShadow(on) {
+            ctx.shadowColor = 'black';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetX = 5;
+            ctx.shadowOffsetY = 5;
+        }
+
         stopit = false;
         // TODO make the scanning button inactive, else scan runs multiple times
         function doScan() {
+            init();
             var ring = 0
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            collectSizes();
+            drawGrid();
+            scans = []
             $("td[id*='opt']").each(function () {
                 var min = parseInt($(this).find("#IPMin")[0].value);
                 var max = parseInt($(this).find("#IPMax")[0].value);
                 var typ = $(this).find("#type")[0];
                 // TODO alert ignore double
-                if ((min * max > 0) && (min >0) && (min<128) && (max<128)) {
+                if ((min * max > 0) && (min > 0) && (min < 128) && (max < 128)) {
                     for (var ipx = min; ipx <= max; ipx++) {
-                        scanFor(ipx, typ.value, ring);
+                        //TODO get the scan directly here and only update the relevant ring!!!
+                        scans.push([ipx, typ.value, ring]);
                     }
                 }
                 ring++;
             });
+            totalScan = scans.length
+            for (var i = 0; i < scans.length; i++) {
+                scanFor(scans[i][0], scans[i][1], scans[i][2]);
+            }
+            scans = [];
+            $("#scan").prop("checked", false);
         }
 
         function scanFor(ipIn, typIn, ringIn) {
@@ -315,7 +418,7 @@
                             if (avail.hasOwnProperty(dom)) {
                                 nodes[typ][dom]['ping'] = true;
                             } else {
-                                nodes[typ][dom] = { "ping": true, "ring": ring };
+                                nodes[typ][dom] = { "ping": true, "ring": ring, "cfg": jstext, "peers": jstext['peers'] };
                             }
 
                             if (!text.startsWith("[]")) {
@@ -323,6 +426,9 @@
                             } else {
                                 addLog(" ===> []", false);
                             }
+                            $('<iframe src="' + dom + '" frameborder="1" class="iframes" scrolling="yes" id="' + clearDom(dom) + '" title="' + dom + '" width="100%"></iframe>')
+                                .appendTo('#control').hide();
+                            setFramesHeight();
                         } else {
                             addLog("Wrong node detected in range: " + jstext['type'] + "for ring " + ring + " expected " + typ);
                         }
@@ -338,68 +444,14 @@
                     if (!stopit) {
                         //setTimeout(scan(ip + 1), 200);
                     }
-                    drawCanvas();
-                }
-            };
-            xhttp.open("GET", url, true);
-            xhttp.send();
-        }
-
-        function scan(ipIn,typIn,ringIn) {
-            var ip = ipIn;
-            var typ = typIn.substring(0, 1);
-            var ring = ringIn;
-            if (ip < 0) {
-                stopit = true;
-            } else {
-                stopit = false;
-            }
-            if (stopit) {
-                return;
-            }
-            port = 5555
-            var dom = "http://127.0.0." + ip + ":" + port
-            var url = dom + "/visual";
-            var xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4) {
-                    addLog("\n(" + typ + ") Reply:" + url, false);
-                    var avail = nodes[typ]
-                    var found = false
-                    for (var i = 0; i < rings[ring].length; i++) {
-                        if (rings[ring][i] == dom) {
-                            found = true;
-                            break;
-                        }
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    drawGrid();
+                    calcCoords();
+                    drawAllNodes();
+                    totalScan--;
+                    if (totalScan <= 0) {
+                        drawCanvas();
                     }
-                    if (found == false) {
-                        rings[ring].push(dom);
-                    }
-                    if (this.status == 200) {
-                        if (avail.hasOwnProperty(dom)) {
-                            nodes[typ][dom]['ping'] = true;
-                        } else {
-                            nodes[typ][dom] = { "ping": true, "ring":ring };
-                        }
-                        text = this.responseText;
-                        if (!text.startsWith("[]")) {
-                            addLog("\n" + text, false);
-                        } else {
-                            addLog(" ===> []", false);
-                        }
-                    } else {
-                        text = " ==> Error: " + this.status + " with '" + this.responseText + "'";
-                        addLog(text, false);
-                        if (avail.hasOwnProperty(dom)) {
-                            nodes[typ][dom]['ping'] = false;
-                        } else {
-                            
-                        }
-                    }
-                    if (!stopit) {
-                        //setTimeout(scan(ip + 1), 200);
-                    }
-                    drawCanvas();
                 }
             };
             xhttp.open("GET", url, true);
@@ -419,23 +471,23 @@
             return ntext
         }
 
-        function drawNode(typ,dom,x,y,size,col1,col2,col3) {
+        function drawNode(typ, dom, node, cols) {
             var n = nodes[typ];
             if (n.hasOwnProperty(dom)) {
                 var item = n[dom]
                 if (item['ping'] === true) {
-                    var gr = ctx.createRadialGradient(x, y, size/4, x, y, size);
-                    gr.addColorStop(0, col1);
-                    gr.addColorStop(0.5, col2);
-                    gr.addColorStop(1, col3);
+                    var gr = ctx.createRadialGradient(node.x, node.y, node.size / 4, node.x, node.y, node.size);
+                    gr.addColorStop(0, cols[0]);
+                    gr.addColorStop(0.5, cols[1]);
+                    gr.addColorStop(1, cols[2]);
                     ctx.fillStyle = gr;
                     ctx.beginPath();
-                    ctx.arc(x, y, size, 0, Math.PI * 2, false);
+                    ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2, false);
                     ctx.closePath();
                     ctx.fill();
                 } else {
                     ctx.fillStyle = "orange";
-                    ctx.fillRect(x, y, size,size);
+                    ctx.fillRect(node.x, node.y, node.size, node.size);
                 }
                 ctx.fillStyle = "black";
                 ctx.font = "10px _sans";
@@ -446,49 +498,208 @@
                     ipa = dom.substring(0, pos);
                     pos = ipa.lastIndexOf(".");
                     if (pos > 0) {
-                        ipa = typ+"/"+ipa.substring(pos+1);
+                        ipa = typ + "/" + ipa.substring(pos + 1);
                     }
                 }
-                ctx.fillText(ipa, x-size/2, y);
+                ctx.fillText(ipa, node.x - node.size / 2, node.y);
                 return true;
             }
             return false;
         }
 
-         function drawCanvas() {
+        function collectSizes() {
+            setSizes = [];
+            rot = [];
+            for (var i = 1; i < rings.length + 1; i++) {
+                setSizes.push(+$("#siz" + i)[0].value);
+                rot.push(+$("#off" + i)[0].value);
+            }
+        }
+
+        function drawCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            var setSizes = [];
-            var rot = [];
-            for (var i = 1; i < rings.length+1; i++) {
-                setSizes.push(parseInt($("#siz" + i)[0].value));
-                rot.push(parseInt($("#off" + i)[0].value));
+            collectSizes();
+            calcCoords();
+            drawGrid();
+            drawLines();
+            ctx.save();
+            setShadow(true);
+            drawAllNodes();
+            ctx.restore();
+        }
+
+        function drawGrid() {
+            ctx.setLineDash([5,5])
+            var sradx = Math.trunc((getWidth() * .45) / (rings.length * 1));
+            var srady = Math.trunc((getHeight() * .45) / (rings.length * 1));
+            var center_x = getWidth() / 2;
+            var center_y = getHeight() / 2; 
+            ctx.strokeStyle = "lightgrey";
+            ctx.fillStyle = "lightgrey";
+            ctx.lineWidth = 1;
+            ctx.strokeWidth = 1;
+
+            for (var ring = 1; ring <= rings.length; ring++) {
+                ctx.beginPath();
+                ctx.ellipse(center_x, center_y, sradx * ring, srady*ring,0, 2 * Math.PI, false);
+                ctx.stroke();
+            }
+            ctx.setLineDash([])
+        }
+
+        function setXY(typ, dom, x, y, size) {
+            if (nodes.hasOwnProperty(typ) && nodes[typ].hasOwnProperty(dom)) {
+                nodes[typ][dom]['draw'] = { 'x': x, 'y': y, 'size': size };
+            }
+        }
+
+        function getXYType(typ, dom) {
+            if (nodes.hasOwnProperty(typ)) {
+                if (nodes[typ].hasOwnProperty(dom)) {
+                    return nodes[typ][dom]['draw'];
+                }
+            }
+            return {}
+        }
+
+        function getXY(dom) {
+            for (var typ in nodes) {
+                if (nodes.hasOwnProperty(typ)) {
+                    if (nodes[typ].hasOwnProperty(dom)) {
+                        return nodes[typ][dom]['draw'];
+                    }
+                }
+            }
+            return {}
+        }
+
+        function calcCoords() {
+            var sradx = Math.trunc((getWidth() * .45) / (rings.length * 1));
+            var srady = Math.trunc((getHeight() * .45) / (rings.length * 1));
+
+            var center_x = getWidth() / 2;
+            var center_y = getHeight() / 2;   
+
+            for (var ring = 0; ring < rings.length; ring++) {
+                r = rings[ring];
+                var radiusx = sradx * (ring + 1);
+                var radiusy = srady * (ring + 1);
+                var size = (sradx * 2 / 3) * (setSizes[ring] / 100);
+                size = Math.min(size, (srady * 2 / 3) * (setSizes[ring] / 100));
+                for (var rr = 0; rr < r.length; rr++) {
+                    var angle = ((360 / r.length) * rr + rot[ring]) * Math.PI / 180;
+                    var x = center_x + radiusx * Math.cos(angle);
+                    var y = center_y + radiusy * Math.sin(angle);
+                    if (!setXY("B", r[rr], x, y, size)) {
+                        if (!setXY("W", r[rr], x, y, size)) {
+                            if (!setXY("M", r[rr], x, y, size)) {
+                                //???
+                            }
+                        }
+                    }
+                }
             }
 
-            var srad = Math.trunc((getWidth() *.45) / (rings.length * 1));
-            var center_x = getWidth() / 2;
-            var center_y = center_x;
-            
-            for(var ring = 0; ring < rings.length; ring++) {
-                r = rings[ring];
-                var radius = srad * (ring + 1);
-                ctx.beginPath();
-                ctx.arc(center_x,center_y, radius, 0, 2 * Math.PI,false);
-                ctx.stroke();
-                var size = (srad*2/3) * (setSizes[ring] / 100);
-                for(var rr = 0; rr < r.length; rr++) {
-                    //var x = (rr+1) * 100;
-                    //var y = (ring + 1) * 100;
-                    var angle = (360 / r.length) * rr + rot[ring];
-                    var x = center_x + radius * Math.cos(-angle * Math.PI / 180);
-                    var y = center_y + radius * Math.sin(-angle * Math.PI / 180);
-                    if (!drawNode("B", r[rr], x, y, size, 'rgb(0,255,0)', 'rgb(0,0,255)', 'rgb(255,0,0)')) {
-                        if (!drawNode("W", r[rr], x, y, size, 'rgb(255,255,0)', 'rgb(0,255,255)', 'rgb(255,0,255)')) {
-                            if (!drawNode("M", r[rr], x, y, size, 'rgb(255,255,255)', 'rgb(0,255,0)', 'rgb(0,255,255)')) {
-                                ctx.fillStyle = "red";
-                                ctx.beginPath();
-                                ctx.arc(x, y, size, 0, Math.PI * 2, true);
-                                ctx.closePath();
-                                ctx.fill();
+            for (var typ in nodes) {
+                if (nodes.hasOwnProperty(typ)) {
+                    for (var dom in nodes[typ]) {
+                        if (nodes[typ].hasOwnProperty(dom)) {
+                            var drawFrom = getXY(dom);
+                            for (var peer in nodes[typ][dom]['peers']) {
+                                if (nodes[typ][dom]['peers'].hasOwnProperty(peer)) {
+                                    var drawTo = getXY(peer);
+                                    if (Object.keys(drawTo).length > 0) {
+                                        var slope = (drawTo.y - drawFrom.y) / (drawTo.x - drawFrom.x);
+                                        nodes[typ][dom]['draw'].slope = slope;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawAllNodes() {
+            for (var typ in nodes) {
+                if (nodes.hasOwnProperty(typ)) {
+                    for (var dom in nodes[typ]) {
+                        var dx = getXYType(typ, dom);
+                        if (Object.keys(dx).length > 2) {
+                            drawNode(typ, dom, dx, col[typ]);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        function drawArrow(fromx, fromy, tox, toy, size) {
+            //variables to be used when creating the arrow
+            var headlen = size;
+
+            var angle = Math.atan2(toy - fromy, tox - fromx);
+
+            //starting a new path from the head of the arrow to one of the sides of the point
+            ctx.beginPath();
+            ctx.moveTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 7), toy - headlen * Math.sin(angle - Math.PI / 7));
+
+            //path from the side point of the arrow, to the other side point
+            ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 7), toy - headlen * Math.sin(angle + Math.PI / 7));
+
+            //path from the side point back to the tip of the arrow, and then again to the opposite side point
+            ctx.lineTo(tox, toy);
+            ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 7), toy - headlen * Math.sin(angle - Math.PI / 7));
+
+            //draws the paths created above
+            ctx.lineWidth = 5;
+            ctx.stroke();
+            ctx.fill();
+        }
+
+        function arrow(from, to) {
+            var mx = (from.x + to.x) / 2;
+            var my = (from.y + to.y) / 2;
+            var mx2 = (from.x + mx) / 2;
+            var my2 = (from.y + my) / 2;
+            mx = (mx2 + mx) / 2;
+            my = (my2 + my) / 2;
+            drawArrow(from.x, from.y, mx, my, 1);
+        }
+
+        function drawLines() {
+            //nodes[typ][dom] = { "ping": true, "ring": ring, "cfg": jstext };
+            for (var typ in nodes) {
+                if (nodes.hasOwnProperty(typ)) {
+                    for (var dom in nodes[typ]) {
+                        if (nodes[typ].hasOwnProperty(dom)) {
+                            var drawFrom = getXY(dom);
+                            for (var peer in nodes[typ][dom]['peers']) {
+                                if (nodes[typ][dom]['peers'].hasOwnProperty(peer)) {
+                                    var drawTo = getXY(peer);
+                                    if (Object.keys(drawTo).length > 0) {
+                                        ctx.strokeStyle = 'green';
+                                        ctx.lineWidth = 2;
+                                        ctx.beginPath();
+                                        ctx.moveTo(drawFrom.x, drawFrom.y);
+                                        ctx.lineTo(drawTo.x, drawTo.y);
+                                        ctx.stroke();
+                                        ctx.closePath();
+                                        arrow(drawFrom, drawTo);
+                                    }
+                                    else {
+                                        ctx.strokeStyle = 'red';
+                                        ctx.lineWidth = 2;
+                                        ctx.beginPath();
+                                        ctx.moveTo(drawFrom[0], drawFrom[1]);
+                                        ctx.lineTo(0, 0);
+                                        ctx.stroke();
+                                        ctx.closePath();
+                                    }
+
+                                }
                             }
                         }
                     }

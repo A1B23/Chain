@@ -1,5 +1,6 @@
 from project.initArgs import main
-from project.models import m_permittedGET
+from project.models import m_permittedGET, m_permittedPOST
+
 
 if __name__ == "__main__":
     m_permittedGET.clear()
@@ -19,8 +20,18 @@ if __name__ == "__main__":
         #"/address/[0-9a-fA-F]+/balance",
         "/peers",
         "/listNodes",  # TODO test only
-        "/mining/get-mining-job/[0-9a-fA-F]+$",
-        "/address/[0-9a-zA-Z]+/balance$"
+        "/address/[0-9a-zA-Z]+/balance$",
+        "/wallet/list$"
     ])
+
+    m_permittedPOST.clear()
+    m_permittedPOST.extend([
+        "/transactions/send",  # TODO POST
+        "/peers/connect",  # TODO POST
+        "/peers/notify-new-block",  # TODO POST
+        "/wallet/create$"
+    ])
+
+
     main("Wallet")
 

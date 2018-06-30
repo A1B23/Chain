@@ -193,6 +193,20 @@ def index():
      }
     return jsonify(response), 400
 
+################## Wallet specific routes
+@app.route('/wallet/create', methods=['POST'])
+def wallet_create():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/wallet/list')
+def allWallets():
+    linkInfo = {}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 ################## the following two are only for testing while developing peer module
 @app.route("/listNodes")

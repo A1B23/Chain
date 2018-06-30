@@ -6,6 +6,10 @@ import hashlib, os, json, binascii, datetime, requests
 from project.nspec.wallet.transactions import *
 from project.pclass import c_peer
 from project.models import m_info
+from project.utils import setOK,errMsg
+import sqlite3
+from project.nspec.wallet.modelW import m_db
+from contextlib import closing
 
 
 class wallet:
@@ -52,6 +56,46 @@ class wallet:
         print("response is: ", req[0])
         return jsonify(txn_data), 200
 
+    def getAllKeys(self, wallet,con):
+        con.row_factory = sqlite3.Row
+
+        cur = con.cursor()
+        cur.execute("select privKey,pubKey,address,KName from Wallet WHERE WName='"+wallet+"'")
+
+        rows = cur.fetchall()
+        return rows
+
+    def createWallet(self, json):
+        try:
+            with closing(sqlite3.connect(m_db['DATABASE'])) as con:
+                #TODO sanitise wallet name
+                wal = json['name']
+                rows = self.getAllKeys(wal,con)
+                for row in rows:
+                    return errMsg("Creating Wallet " + wal + " failed.", 400)
+                cur = con.cursor()
+                cur.execute("INSERT INTO Wallet (WName,privKey,pubKey,address,KName,ChkSum) VALUES(?, ?, ?, ?,?,?)",(wal,"prK","pK","@","*","000"))
+                con.commit()
+                return setOK(wal)
+        except Exception:
+            return errMsg("Creating Wallet "+ wal + " failed.", 400)
+
+
+    def getAllWallets(self):
+        try:
+            with closing(sqlite3.connect(m_db['DATABASE'])) as con:
+                con.row_factory = sqlite3.Row
+
+                cur = con.cursor()
+                cur.execute("SELECT DISTINCT WName from Wallet")
+
+                rows = cur.fetchall()
+                wal = []
+                for row in rows:
+                    wal.extend(row);
+                return setOK({"walletList":wal})
+        except Exception:
+            return errMsg("Creating Wallet "+wal+ " failed.", 400)
 
 
 

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
@@ -14,27 +14,36 @@
             background-color: #f1f1f1;
         }
 
-            /* Style the buttons inside the tab */
-            .tab button {
-                background-color: inherit;
-                float: left;
-                border: none;
-                outline: none;
-                cursor: pointer;
-                padding: 14px 16px;
-                transition: 0.3s;
-                font-size: 17px;
-            }
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
 
-                /* Change background color of buttons on hover */
-                .tab button:hover {
-                    background-color: #ddd;
-                }
+        .subtab button {
+            background-color: #ddd;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
 
-                /* Create an active/current tablink class */
-                .tab button.active {
-                    background-color: #ccc;
-                }
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .subtab button.active {
+            background-color: #808080;
+        }
 
         /* Style the tab content */
         .tabcontent {
@@ -64,61 +73,127 @@
                 opacity: 1;
             }
         }
+
+        .alert {
+            padding: 20px;
+            background-color: #f1f1f1;
+            color: white;
+        }
+
+        .closebtn {
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+            float: left;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .closebtn:hover {
+            color: black;
+        }
     </style>
 </head>
 <body>
     <script type="text/javascript" src="{{ url_for('static', filename='js/GET_POST.js') }}"></script>
-    <div class="tab">
-        <button class="tablinks" onclick="openTab(event, 'Keys')">Keys</button>
-        <button class="tablinks" onclick="openTab(event, 'Nodes')">Nodes</button>
-        <button class="tablinks" onclick="openTab(event, 'Payment')">Payment</button>
-        <button class="tablinks" onclick="openTab(event, 'Balance')">Balance</button>
-        <button class="tablinks" onclick="openTab(event, 'TxView')">TxView</button>
-        <button class="tablinks" onclick="openTab(event, 'PDPC_Coin Wallet')">PDPC_Coin Wallet</button>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/js/GET_POST.js"></script>
+
+
+    Current State: <span id="state">No wallet selected</span>
+
+    <div class="tab maintab">
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'KeysWallets')">Keys/Wallets</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
+        <br />
+        <br />
+        <div class="alert">
+            <span class="closebtn" onclick="closeAlert();">&times;</span>
+            <span id='alertText'></span>
+        </div>
     </div>
 
-    <div id="Keys" class="tabcontent">
-        <h3>Keys</h3>
-        <p>Keys is the capital city of England.</p>
+    <div id="KeysWallets" class="tabcontent maintab">
+        <div class="tab subtab keytab">
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab', 'createWallet')">Create Wallet</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','selectWallet')">Select Wallet</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Import Wallet</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Export Wallet</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Import Key</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Export Key</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','infok')">Info</button>
+        </div>
+        <div id="createWallet" class="tabcontent keytab">
+            Provide new wallet name <br />
+            <input type="text" id="walletName" value="" size="20"><br />
+            <input type="checkbox" id="quickSelWallet"> Auto-Select wallet for use
+            <br /><br />
+            <button class="keys" onclick="createWallet()">Submit</button>
+        </div>
+        <div id="selectWallet" class="tabcontent keytab">
+            <button class="keys" onclick="closeWallet()">Close current wallet</button><br />
+            Choose name of Wallet to be used:<br />
+            <select id="selWallet" class="options">
+                <option value="__clr"></option>
+                <option value="0">offline0</option>
+                <option value="1">offline1</option>
+            </select>
+            <br />
+            <button class="keys" onclick="selectWallet()">Submit</button>
+        </div>
+        <div id="infok" class="tabcontent keytab">
+            Keys are managed within so-called 'wallets'. Wallets only hold keys, they don't contain 'monetary' value.
+            Before payments can be made or balances be queried, a specific wallte needs to be activated.
+            Keys can be grouped in different wallets, as wallets are distinguished by names.
+        </div>
+        <div id="TBD" class="tabcontent keytab">
+            This function/feature is not yet implemented...
+        </div>
+
     </div>
 
-    <div id="Nodes" class="tabcontent">
-        <h3>Nodes</h3>
-        <p>
+    <div id="Peers" class="tabcontent maintab">
+        <div class="tab subtab peertab">
+            <button class="tablinks peertab" onclick="openTab(event, 'peertab', 'checkPeer')">Check Peer connection</button>
+            <button class="tablinks peertab" onclick="openTab(event, 'peertab','managePeer')">Manage Peers</button>
+            <button class="tablinks peertab" onclick="openTab(event, 'peertab','infop')">Info</button>
+        </div>
+        <div id="checkPeer" class="tabcontent peertab">
+            <button type="button" onClick="JavaScript:doGET('peers','responseN')" style="background-color:#b6ff00"> /peers</button>
+            <button type="button" onClick="document.getElementById('responseN').value=''">Reset Log</button>
+            <br /><button type="button" onClick="JavaScript:doGET('listNodes','responseN')" style="background-color:#5e5858"> /listNodes [additional API]</button>
+            <br /><textarea id="responseN" cols="50" rows="12"></textarea>
+        </div>
+        <div id="managePeer" class="tabcontent peertab">
+            Add a new
+            <button type="button" onClick="JavaScript:doPOST('peers/connect','replyDataN','POSTDataN')" style="background-color:#b6ff00">/peers/connect</button>
+            <button type="button" onClick="document.getElementById('replyDataN').value=''">Reset Log</button>
+            <br />
+            Place data for commands in here:
+            <br />
+            <textarea id="POSTDataN" cols="50" rows="5">{"peerUrl":"http://127.0.0.1:5555"}</textarea>
+            <textarea id="replyDataN" cols="50" rows="5"></textarea>
+        </div>
+        <div id="infop" class="tabcontent peertab">
             Set and check the peer(s) with which you want to connect. <br />
             All communication will be attempted with all peers. If they reply <u>differently</u>, then
-            the majority data will be shown, with an indication that some nodes disagree.
-        </p>
-        <table>
-            <tr>
-                <td>
-                    Check your
-                    <button type="button" onClick="JavaScript:doGET('peers','responseN')" style="background-color:#b6ff00"> /peers</button>
-                    <button type="button" onClick="document.getElementById('responseN').value=''">Reset Log</button>
-                    <br /><button type="button" onClick="JavaScript:doGET('listNodes','responseN')" style="background-color:#5e5858"> /listNodes [additional API]</button>
-                    <br /><textarea id="responseN" cols="50" rows="12"></textarea>
-                </td>
-                <td>
-                    Add a new
-                    <button type="button" onClick="JavaScript:doPOST('peers/connect','replyDataN','POSTDataN')" style="background-color:#b6ff00">/peers/connect</button>
-                    <button type="button" onClick="document.getElementById('replyDataN').value=''">Reset Log</button>
-                    <br />
-                    Place data for commands in here:
-                    <br />
-                    <textarea id="POSTDataN" cols="50" rows="5">{"peerUrl":"http://127.0.0.1:5555"}</textarea>
-                    <textarea id="replyDataN" cols="50" rows="5"></textarea>
-                </td>
-            </tr>
-        </table>
-
+            the majority data will be shown, with an indication that some nodes disagree..
+        </div>
     </div>
 
-    <div id="Payment" class="tabcontent">
+    <div id="Payment" class="tabcontent maintab">
         <h3>Payment</h3>
         <p>Payment is the capital of France.</p>
     </div>
 
-    <div id="Balance" class="tabcontent">
+    <div id="Balance" class="tabcontent maintab">
         <h3>Balance</h3>
         <p>
             Check the balances belonging to one of your addresses
@@ -127,7 +202,7 @@
             <tr>
                 <td>
                     Check your
-                    <br /><button type="button" onClick="JavaScript:doGET('address/{addressb}/balance','responseB')" style="background-color:#ff0000"> /balance/{address}</button> 
+                    <br /><button type="button" onClick="JavaScript:doGET('address/{addressb}/balance','responseB')" style="background-color:#ff0000"> /balance/{address}</button>
                     <select id="paddressb">
                         <option value="Volvo">Volvo</option>
                         <option value="Saab">Saab</option>
@@ -138,24 +213,17 @@
                     <br /><textarea id="responseB" cols="50" rows="12"></textarea>
                 </td>
                 <td>
-                    Add a new
-                    <button type="button" onClick="JavaScript:doPOST('peers/connect')" style="background-color:#b6ff00">/peers/connect</button>
-                    <button type="button" onClick="document.getElementById('replyData').value=''">Reset Log</button>
-                    <br />
-                    Place data for commands in here:
-                    <br />
-                    <textarea id="POSTDataB" cols="50" rows="5">{"peerUrl":"http://127.0.0.1:5555"}</textarea>
-                    <textarea id="replyData" cols="50" rows="5"></textarea>
+
                 </td>
             </tr>
         </table>
     </div>
-    <div id="TxView" class="tabcontent">
+    <div id="TxView" class="tabcontent maintab">
         <h3>TxView</h3>
         <p>TxView is the capital of Japan.</p>
     </div>
 
-    <div id="PDPC_Coin Wallet" class="tabcontent">
+    <div id="Info" class="tabcontent maintab">
         <h3>PDPC_Coin Wallet</h3>
         <p>
             PDPC_Coin Wallet is is a simple, low level Wallet function which supports the following features:
@@ -170,20 +238,134 @@
 
 
     <script>
-        function openTab(evt, tabName) {
+        /*
+        * State Management
+        */
+        $(".alert").css("display", "none");
+        initState();
+
+        function doAlert(message, level) {
+            if (level == 0) {
+                $(".alert").css("background-color", "red");
+            } else if (level == 1) {
+                $(".alert").css("background-color", "orange");
+            } else if (level == 9) {
+                $(".alert").css("background-color", "green");
+            }
+            $("#alertText").html("  " + message);
+            $(".alert").css("display", "block");
+            setTimeout(function () {
+                closeAlert();
+            }, 5000);
+        }
+
+        function closeAlert() {
+            $(".alert").css("display", "none");
+            $(".alert").css("background-color", "white");
+        }
+
+        function initState() {
+            state = { "wallet": "", "key": "" };
+            $("#wallets").val("");
+            $('#selWallet').val("__clr");
+            $('#walletName').val("");
+            $("#quickSelWallet").removeAttr("checked");
+            $("#quickSelWallet").prop("checked", false);
+            $("#quickSelWallet").attr("checked", false);
+            updateStateInfo();
+        }
+
+        function updateStateInfo() {
+            $("#state").text("Wallet: " + state.wallet);
+        }
+
+
+        /*
+            * Manage the keys and wallets
+            */
+
+        function createWallet() {
+            var name = $("#walletName").val();
+            var xxsel = document.getElementById("quickSelWallet").checked;
+            closeWallet();
+            if (name.length > 0) {
+                json = doPOSTSynch("wallet/create", null, '{"name": "' + name + '"}');
+                if (json.message === name) {
+                    if (xxsel === true) {
+                        // careful json changes here!!
+                        prepareSelectWallet();
+                        useWallet(name);
+                    }
+                    doAlert("Creation of wallet <u>" + name + "</u> succeded.", 9)
+                }
+                else {
+                    doAlert("Creation not successful, Node said: <u>"+json.message+"</u>",0)
+                }
+
+            } else {
+                doAlert("Missing <u>Wallet name</u>, required for Create Key", 0);
+            }
+        }
+
+        function closeWallet() {
+            initState();
+        }
+
+
+        function prepareSelectWallet() {
+            var sel = $('#selWallet').find(":selected").text();
+            var val = $('#selWallet').find(":selected").val();
+            json = doGETSynch("wallet/list");
+            $('#selWallet').empty(); //remove all child nodes
+            for (var i = 0; i < json.walletList.length;i++) {
+                var newOption = $('<option value="' + json.walletList[i] + '">' + json.walletList[i] +'</option>');
+                $('#selWallet').append(newOption);
+            }
+            useWallet(sel);
+            $('#selWallet').val(val);       
+        }
+
+        function selectWallet() {
+            var sel = $('#selWallet').find(":selected").text();
+            var val = $('#selWallet').find(":selected").val();
+            useWallet(sel);
+            $('#selWallet').val(val);
+        }
+
+        function useWallet(name) {
+            closeWallet();
+            if (name.length > 0) {
+                state.wallet = name;
+                $('#selWallet').val(name);
+            }
+            updateStateInfo();
+        }
+
+        /*
+            * Tab Manager
+            */
+        function openTab(evt, tabs, tabName) {
+            if (state.wallet.length == 0) {
+                if ((tabs === "maintab") && ((tabName === "Balance") || (tabName === "Payment"))) {
+                    doAlert("No Wallet selected, required for " + tabName, 1);
+                    return;
+                }
+            }
             var i, tabcontent, tablinks;
-            tabcontent = document.getElementsByClassName("tabcontent");
+            tabcontent = document.getElementsByClassName("tabcontent " + tabs);
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "none";
             }
-            tablinks = document.getElementsByClassName("tablinks");
+            tablinks = document.getElementsByClassName("tablinks " + tabs);
             for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
             if (tabName === "Balance") {
-                document.getElementById('paddressb').value = document.getElementById('paddressb').value + "x" 
+                document.getElementById('paddressb').value = document.getElementById('paddressb').value + "x"
+            } else if (tabName === "selectWallet") {
+                prepareSelectWallet();
             }
         }
     </script>

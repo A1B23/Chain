@@ -2,8 +2,8 @@ from project import app, render_template
 from flask import Flask, jsonify, request
 from project.utils import *
 import json
-from project.nspec.wallet import *
 from project.pclass import c_peer
+from project.classes import c_walletInterface
 
 # put your distribution according to url
 class walletInterface:
@@ -12,8 +12,13 @@ class walletInterface:
         if (urlID == 'send'):
             return send()
 
+        if (urlID == 'wall'):
+            if (url == "/wallet/list"):
+                return c_walletInterface.getAllWallets()
+
         if (urlID == 'addr'):
             return setOK(linkInfo)
+
             #return send()
         # identify your url and then proceed
         #linkInfo is a json object containing the information from the URL
@@ -29,10 +34,12 @@ class walletInterface:
     # this is the dummy function only, your functoin comes from the import!
     def nodeSpecificPOSTNow(self,url,linkInfo,json,request):
         # linkInfo is a json object containing the information from the URL
-
+        urlID = url[1:7]
         if (url == "/"):
             return form_post(request)
 
+        if (urlID == 'wallet'):
+            return c_walletInterface.createWallet(json)
 
         #json contains the json object submitted during the POST
         response = {

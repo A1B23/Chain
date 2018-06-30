@@ -15,6 +15,8 @@ from project.pclass import c_peer
 from threading import Thread
 import sys
 from project.nspec.miner.miner import initMiner
+import sqlite3
+from project.nspec.wallet.modelW import m_db
 
 
 def finalise(peer, port, type):
@@ -32,7 +34,9 @@ def finalise(peer, port, type):
         initPendingTX()
     if (type == "Miner"):
         initMiner()
-
+    if (type == "Wallet"):
+        #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
+        m_db['db'] = sqlite3.connect(m_db['DATABASE'])
 
 
 @app.after_request
