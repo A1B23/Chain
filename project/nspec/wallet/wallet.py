@@ -130,18 +130,21 @@ class wallet:
                 keys.extend(row)
             return keys
 
+    def collectKeyBalance(self, addr):
+        resps = c_peer.sendGETToPeers("address/" + addr + "/balance")
+        # TODO should we compare all replies??? Not really??? Just take first one?
+        return resps[0]
+
     def getKeyBalance(self, params):
-        keys = self.getDataFor([params['sel'], params['key']], params['wallet'], "",params['user'])
+        keys = self.getDataFor([params['sel'], params['key']], params['wallet'], "", params['user'])
         if (len(keys)>4):
-            addr = keys[4]
-            resps = c_peer.sendGETToPeers("address/" + addr + "/balance")
-            # TODO should we compare all replies??? Not really??? Just take first one?
-            respText, respCode = resps[0]
+            respText, respCode = self.collectKeyBalance(keys[4])
             if (respCode == 200):
                 return setOK(respText)
             else:
                 return errMsg(respText['errorMsg'], respCode)
         return errMsg("Invalid parameters provided", 400)
+
 
     def getAllKeys(self, params):
         wal = 'unidentified'
@@ -192,7 +195,7 @@ class wallet:
             cmd = cmd + "pubKey='"+keyRef[1]
         elif (keyRef[0] == "name"):
             cmd = cmd + "KName='" + keyRef[1]
-        cmd = cmd + "' AND User='" + user +"'"
+        cmd = cmd + "' AND User='" + user + "'"
         return self.doSelect(cmd)
 
 
@@ -225,9 +228,9 @@ class wallet:
                     return errMsg("Invalid destination wallet name", 400)
                 if (not self.hasWallet(toWallet)):
                     return errMsg("Invalid destination wallet name", 400)
-                keys = self.getDataFor(finalAddress, toWallet, "address",user)
+                keys = self.getDataFor(finalAddress, toWallet, "address", user)
                 recAddress = keys[0]
-            keys = self.getDataFor(keyref, fromWallet, "")
+            keys = self.getDataFor(keyref, fromWallet, "", user)
             #TODO get address based on wallet info and database verification even for address
             #get final address based on SQL query with final address and walref
             if (len(keys)>0):
@@ -259,3 +262,40 @@ class wallet:
         # Signed txn has appended signature; hash is not appended, but may be verified when receiving reply
         transaction["senderSignature"] = tran_signature_str
         return transaction, hex(tran_hash)[2:]
+
+    def getAllBalance(self, params):
+        user = params['user']
+        bal = {'confirmedBalance': 0, 'pendingBalance': 0, 'safeBalance': 0}
+        for key in self.doSelect("SELECT address FROM Wallet WHERE User='" + user + "'"):
+            val, respCode = self.collectKeyBalance(key)
+            if (respCode == 200):
+                bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
+                bal['pendingBalance'] = bal['pendingBalance'] + val['pendingBalance']
+                bal['safeBalance'] = bal['safeBalance'] + val['safeBalance']
+        return setOK(bal)
+
+    def getWalletBalance(self, params):
+        wal = params['wallet']
+        user = params['user']
+        bal = {'confirmedBalance': 0, 'pendingBalance': 0, 'safeBalance': 0}
+        for key in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
+            val, respCode = self.collectKeyBalance(key)
+            if (respCode == 200):
+                bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
+                bal['pendingBalance'] = bal['pendingBalance'] + val['pendingBalance']
+                bal['safeBalance'] = bal['safeBalance'] + val['safeBalance']
+        return setOK(bal)
+
+    def getWalletKeyBalance(self, params):
+        wal = params['wallet']
+        user = params['user']
+        bal = {}
+        for addr in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
+            val, respCode = self.collectKeyBalance(addr)
+            if (respCode == 200):
+                bal2 = {'confirmedBalance': 0, 'pendingBalance': 0, 'safeBalance': 0}
+                bal2['confirmedBalance'] = val['confirmedBalance']
+                bal2['pendingBalance'] = val['pendingBalance']
+                bal2['safeBalance'] = + val['safeBalance']
+                bal[addr] = bal2
+        return setOK(bal)

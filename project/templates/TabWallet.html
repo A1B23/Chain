@@ -243,7 +243,7 @@
                 </td>
             </tr>
         </table>
-        <button class="keys" onclick="JavaScript:chkBal('')">Check key balance</button>
+        <button class="keys" onclick="JavaScript:chkBalForKey('')">Check key balance</button>
         <br />
         <br /><br />
         Most recent transaction hash: <span id="TxHash"></span>
@@ -306,7 +306,7 @@
                                 </td>
                             </tr>
                         </table>
-                        <button class="keys" onclick="JavaScript:chkBal('2')">Check key balance</button><br />
+                        <button class="keys" onclick="JavaScript:chkBalForKey('2')">Check key balance</button><br />
                     </td>
                     <td width="*" valign="center">
                         <button class="keys" onclick="JavaScript:payOwn()" style="background-color: #b6ff00">Proceed to transfer to own wallet</button>
@@ -335,11 +335,13 @@
                 <option value="1">offline1</option>
             </select>
             <br />
-            <button class="keys" onclick="JavaScript:getBalance($('#balWallet').val())">Show summed up balance</button><br />
-            <button class="keys" onclick="JavaScript:doAlert('Not yet...',10)">Show balances by keys</button><br />
+            <button class="keys" onclick="JavaScript:getBalanceWallet($('#balWallet').val())">Show summed up balance</button><br />
+            <button class="keys" onclick="JavaScript:getBalanceWalletKeys($('#balWallet').val())">Show balances by keys</button><br />
+            <span id="balResult"></span>
         </div>
         <div id="totalBal" class="tabcontent baltab">
-            Show balance for all wallets (copy form walletsel)
+            <button class="keys" onclick="JavaScript:getBalanceWallets()">Show balance for all my Wallets</button><br />
+            <span id="balAllResult"></span>
         </div>
         <div id="infob" class="tabcontent baltab">
             With this feature you can check the balance for an entire Wallet<br />
@@ -679,11 +681,67 @@
          * Balance section
          */
 
-        function getBalance(wallet) {
-            doAlert("Check Balance for Wallet", 1);
+        function getBalanceWallets() {
+            var json = doGETSynch("wallet/list/allbalances/" + user);
+            var bal = json.confirmedBalance;
+            if (!isNaN(bal)) {
+                var res = "<table border='1'>";
+                for (var txt in json) {
+                    if (json.hasOwnProperty(txt)) {
+                        res = res + "<tr><td>" + txt + "</td><td> " + json[txt] + "</td></tr>";
+                    }
+                }
+                res = res + "</table>"
+                $("#balAllResult").html(res);
+            } else {
+                doAlert(JSON.stringify(json), 0);
+            }
         }
 
-        function chkBal(use) {
+        function getBalanceWallet(wallet) {
+            var json = doGETSynch("wallet/list/allbalance/" + wallet + "/" + user);
+            var bal = json.confirmedBalance;
+            if (!isNaN(bal)) {
+                var res = "<table border='1'>";
+                for (var txt in json) {
+                    if (json.hasOwnProperty(txt)) {
+                        res = res + "<tr><td>"+ txt + "</td><td> "+ json[txt] + "</td></tr>";
+                    }
+                } 
+                res = res+"</table>"
+                $("#balResult").html(res);
+            } else {
+                doAlert(JSON.stringify(json), 0);
+            }
+        }
+
+        function getBalanceWalletKeys(wallet) {
+            var json = doGETSynch("wallet/list/allkeybalance/" + wallet + "/" + user);
+            //var bal = json.confirmedBalance;
+            //if (!isNaN(bal)) {
+            var order = ["confirmedBalance", "pendingBalance", "safeBalance"];
+            var res = "<table border='1'> <th>address</th>";
+            for (var i = 0; i < order.length; i++) {
+                res = res + "<th>" + order[i] + "</th>";
+            }
+            for (var addr in json) {
+                if (json.hasOwnProperty(addr)) {
+                    res = res + "<tr><td>" + addr + "</td>";
+                    var i=0
+                    for (var i = 0; i < order.length; i++) {
+                        res = res + "<td align='center'>" + json[addr][order[i]] + "</td>";
+                    }
+                    res = res + "</tr>";
+                }
+            }
+            res = res + "</table>"
+            $("#balResult").html(res);
+            //} else {
+            //    doAlert(JSON.stringify(json), 0);
+            //}
+        }
+
+        function chkBalForKey(use) {
             var sel = getSingleSel(use);
             if (sel.length == 0) {
                 doAlert("Key selection must be unique, use exactly one option", 1);

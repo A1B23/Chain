@@ -7,7 +7,7 @@ from project.classes import c_walletInterface
 
 # put your distribution according to url
 class walletInterface:
-    def nodeSpecificGETNow(self,url,linkInfo):
+    def nodeSpecificGETNow(self, url, linkInfo):
         urlID = url[1:5]
         if (urlID == 'send'):
             return send()
@@ -19,6 +19,12 @@ class walletInterface:
                 return c_walletInterface.getAllKeys(linkInfo)
             if (url.startswith("/wallet/list/balance")):
                 return c_walletInterface.getKeyBalance(linkInfo)
+            if (url.startswith("/wallet/list/allbalances")):
+                return c_walletInterface.getAllBalance(linkInfo)
+            if (url.startswith("/wallet/list/allbalance")):
+                return c_walletInterface.getWalletBalance(linkInfo)
+            if (url.startswith("/wallet/list/allkeybalance")):
+                return c_walletInterface.getWalletKeyBalance(linkInfo)
 
         if (urlID == 'addr'):
             return setOK(linkInfo)

@@ -23,7 +23,10 @@ if __name__ == "__main__":
         "/address/[0-9a-zA-Z]+/balance$",
         "/wallet/list/wallet/[0-9a-zA-Z]+$",
         "/wallet/list/keys/s([pna]y)*/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
-        "/wallet/list/balance/[0-9a-zA-Z]+/[0-9a-zA-Z]+/[0-9a-zA-Z]+$/[0-9a-zA-Z]+$"
+        "/wallet/list/balance/[0-9a-zA-Z]+/[0-9a-zA-Z]+/[0-9a-zA-Z]+$/[0-9a-zA-Z]+$",
+        "/wallet/list/allbalance/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
+        "/wallet/list/allkeybalance/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
+        "/wallet/list/allbalances/[0-9a-zA-Z]+$"
     ])
 
     m_permittedPOST.clear()
