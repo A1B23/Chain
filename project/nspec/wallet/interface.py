@@ -13,10 +13,12 @@ class walletInterface:
             return send()
 
         if (urlID == 'wall'):
-            if (url == "/wallet/list/wallet"):
-                return c_walletInterface.getAllWallets()
+            if (url.startswith("/wallet/list/wallet")):
+                return c_walletInterface.getAllWallets(linkInfo['user'])
             if (url.startswith("/wallet/list/keys/s")):
                 return c_walletInterface.getAllKeys(linkInfo)
+            if (url.startswith("/wallet/list/balance")):
+                return c_walletInterface.getKeyBalance(linkInfo)
 
         if (urlID == 'addr'):
             return setOK(linkInfo)
@@ -34,19 +36,22 @@ class walletInterface:
         return jsonify(response), 400
 
     # this is the dummy function only, your functoin comes from the import!
-    def nodeSpecificPOSTNow(self,url,linkInfo,json,request):
+    def nodeSpecificPOSTNow(self, url, linkInfo, json, request):
         # linkInfo is a json object containing the information from the URL
         urlID = url[1:7]
         if (url == "/"):
             return form_post(request)
 
         if (urlID == 'wallet'):
-            return c_walletInterface.createWallet(json)
+            if (url.startswith("/wallet/transfer")):
+                return c_walletInterface.payment(json)
+            if (url.startswith("/wallet/create")):
+                return c_walletInterface.createWallet(json)
 
         #json contains the json object submitted during the POST
         response = {
             'NodeType': m_cfg['type'],
-            'info': "This API is not yet implemented...."
+            'info': "This API is not (yet) implemented...."
         }
         ## put your logic here and create the reply as next line
         return jsonify(response), 400

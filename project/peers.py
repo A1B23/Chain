@@ -44,7 +44,7 @@ class peers:
             except Exception: #means no ,m_Delay
                 myDelay=-1
         #return requests.get(url=url)
-        return requests.get(url=url, headers={'content-type': 'application/json', 'accept': 'application/json'})
+        return requests.get(url=url, headers={'accept': 'application/json'})
 
     def asynchPOST(self, url, json, skipPeer):
         cnt=0

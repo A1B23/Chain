@@ -47,7 +47,7 @@ set minPeers=2
 set maxPeers=3
 set col=2B
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"
+rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"
 
 set nodeIPnum=4
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
@@ -62,7 +62,7 @@ set mode=y
 set minPeers=1
 set maxPeers=1
 set nodeIPnum=32
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%" -mod %mode%"
+rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%" -mod %mode%"
 set nodeIPnum=34
 start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%" -mod %mode%"
 

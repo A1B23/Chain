@@ -104,6 +104,7 @@
 
 
     Current State: <span id="state">No wallet selected</span>
+    <button class="keys" id="login" onclick="JavaScript: openTab(event, 'maintab', 'Info'); user = ''; initState(); $('#login').text('Logged Out');" style="background-color:#ef12b4">Logout</button>
 
     <div class="tab maintab">
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'KeysWallets')">Keys/Wallets</button>
@@ -123,7 +124,7 @@
     <div id="KeysWallets" class="tabcontent maintab">
         <div class="tab subtab keytab">
             <button class="tablinks keytab" onclick="openTab(event, 'keytab', 'createWallet')">Create Wallet</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','selectWallet')">Select Wallet</button>
+            <button class="tablinks keytab" onclick="openTab(event, 'keytab','selectWallet')">Select Wallet/New Key</button>
             <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Import Wallet</button>
             <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Export Wallet</button>
             <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Import Key</button>
@@ -134,7 +135,17 @@
             Provide new wallet name <br />
             <input type="text" id="walletName" value="" size="20"><br />
             <input type="checkbox" id="quickSelWallet"> Auto-Select wallet for use
-            <br /><br />
+            <br />
+            How many keys to be created immediately (min 1):<br />
+            <select id="numKeys" class="options">
+                <option value=1 selected>1</option>
+                <option value=2>2</option>
+                <option value=3>3</option>
+            </select><br />
+            Optional: Provide your own names for the keys (else they will be named with address)<br />
+            <input type="text" id="key1Name" value="" size="20"><br />
+            <input type="text" id="key2Name" value="" size="20"><br />
+            <input type="text" id="key3Name" value="" size="20"><br />
             <button class="keys" onclick="createWallet()">Submit</button>
         </div>
         <div id="selectWallet" class="tabcontent keytab">
@@ -149,7 +160,7 @@
             <input type="checkbox" id="usePubKey"> Use public key for payment<br />
             <input type="checkbox" id="useAddress"> Use address for payment<br />
             <input type="checkbox" id="useName"> Use name for payment<br />
-            <button class="keys" onclick="selectWallet()">Submit</button>
+            <button class="keys" onclick="JavaScript:selectWallet()">Select</button><br />
         </div>
         <div id="infok" class="tabcontent keytab">
             Keys are managed within so-called 'wallets'. Wallets only hold keys, they don't contain 'monetary' value.
@@ -166,7 +177,7 @@
         <div class="tab subtab peertab">
             <button class="tablinks peertab" onclick="openTab(event, 'peertab', 'checkPeer')">Check Peer connection</button>
             <button class="tablinks peertab" onclick="openTab(event, 'peertab','managePeer')">Manage Peers</button>
-            <button class="tablinks peertab" onclick="openTab(event, 'peertab','infop')">Info</button>
+            <button class="tablinks peertab" onclick="openTab(event, 'peertab','infon')">Info</button>
         </div>
         <div id="checkPeer" class="tabcontent peertab">
             <button type="button" onClick="JavaScript:doGET('peers','responseN')" style="background-color:#b6ff00"> /peers</button>
@@ -184,7 +195,7 @@
             <textarea id="POSTDataN" cols="50" rows="5">{"peerUrl":"http://127.0.0.1:5555"}</textarea>
             <textarea id="replyDataN" cols="50" rows="5"></textarea>
         </div>
-        <div id="infop" class="tabcontent peertab">
+        <div id="infon" class="tabcontent peertab">
             Set and check the peer(s) with which you want to connect. <br />
             All communication will be attempted with all peers. If they reply <u>differently</u>, then
             the majority data will be shown, with an indication that some nodes disagree..
@@ -192,67 +203,149 @@
     </div>
 
     <div id="Payment" class="tabcontent maintab">
-        <input type="number" id="payAmount" value="-1" size="20" onkeypress="JavaScript:updateProgress()"> Payment amount<br />
-        <input type="number" id="payFees" value="20" size="20" onkeypress="JavaScript:updateProgress()"> Payment fees<br />
-        <br />  
-        Based on the wallet selection and configuration, select your own key to make payment:<br />
-        <select id="selPayKey" class="options">
-            <option value="__clr"></option>
-            <option value="0">offline0</option>
-            <option value="1">offline1</option>
-        </select>
-        <button class="keys" onclick="???">Check key balance</button>
+        <input type="number" id="payAmount" value="0" min="0" size="20"> Payment amount<br />
+        <input type="number" id="payFees" value="20" size="20" min="20"> Payment fees<br />
+        <input type="text" id="payMes" value="" size="20"> (Optional) Provide any messsage to recipient<br />
         <br />
+        Based on the wallet selection and configuration, select your own key to make payment:
         <br />
-        <table border="1">
+        <table>
             <tr>
-                <td width="60%" >
-                    Provide recipient's<br />
-                    <input type="text" id="otherAddress" value="" size="60" onkeypress="JavaScript:updateProgress()">address, or<br />
-                    <input type="text" id="otherPubKey" value="" size="60" onkeypress="JavaScript:updateProgress()">public key<br />
-                    <button class="keys" onclick="???">Payment to other account</button>
-                </td>
-                <td valign="top">
-                    For payment to your own wallet, select destination key:<br />
-                    <select id="selOwnKey" class="options">
+                <td>Public key</td>
+                <td>
+                    <select id="selPayKeyP" class="options">
                         <option value="__clr"></option>
                         <option value="0">offline0</option>
                         <option value="1">offline1</option>
                     </select>
-                    <button class="keys" onclick="???">Check key balance</button><br />
-                    <br />
-                    <button class="keys" onclick="???">Payment to same wallet</button>
+                    <button onclick="JavaScript:toClipBoard('selPayKeyP')" style="color: white; background-color: #808080">Copy</button>
+                </td>
+            <tr>
+                <td> Address</td>
+                <td>
+                    <select id="selPayKeyA" class="options">
+                        <option value="__clr"></option>
+                        <option value="0">offline0</option>
+                        <option value="1">offline1</option>
+                    </select>
+                    <button onclick="JavaScript:toClipBoard('selPayKeyA')" style="color: white; background-color: #808080">Copy</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Key name</td>
+                <td>
+                    <select id="selPayKeyN" class="options">
+                        <option value="__clr"></option>
+                        <option value="0">offline0</option>
+                        <option value="1">offline1</option>
+                    </select>
+                    <button onclick="JavaScript:toClipBoard('selPayKeyN')" style="color: white; background-color: #808080">Copy</button>
                 </td>
             </tr>
         </table>
+        <button class="keys" onclick="JavaScript:chkBal('')">Check key balance</button>
         <br />
-        <span id="payProgress">...</span>
+        <br /><br />
+        Most recent transaction hash: <span id="TxHash"></span>
+        <div class="tab subtab paytab">
+            <button class="tablinks paytab" onclick="openTab(event, 'paytab','otherPay')">Payment to any account</button>
+            <button class="tablinks paytab" onclick="openTab(event, 'paytab','selfPay')">Transfer to own selected Wallet</button>
+            <button class="tablinks paytab" onclick="openTab(event, 'paytab','infop')">Info</button>
+        </div>
+        <div id="otherPay" class="tabcontent paytab">
+            <table border="1" width="100%" style="background-color: #fc4f17">
+                <tr>
+                    <td width="70%">
+                        Provide recipient's<br />
+                        address <input type="text" id="otherAddress" value="" size="60">, or<br />
+                        public key <input type="text" id="otherPubKey" value="" size="60"><br />
+                    </td>
+                    <td width="*" valign="center">
+                        <button class="keys" onclick="JavaScript:payAccount()" style="color: white; background-color: #c11515">Proceed for payment to provided account</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="selfPay" class="tabcontent paytab">
+            <table border="1" width="100%" style="background-color: #7ef78a">
+                <tr>
+                    <td width="70%">
+                        For payment to a key of your own selected wallet, choose destination key:<br />
+                        <table>
+                            <tr>
+                                <td>Public key</td>
+                                <td>
+                                    <select id="selPayKeyP2" class="options">
+                                        <option value="__clr"></option>
+                                        <option value="0">offline0</option>
+                                        <option value="1">offline1</option>
+                                    </select>
+                                    <button onclick="JavaScript:toClipBoard('selPayKeyP2')" style="color: white; background-color: #808080">Copy</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td> Address</td>
+                                <td>
+                                    <select id="selPayKeyA2" class="options">
+                                        <option value="__clr"></option>
+                                        <option value="0">offline0</option>
+                                        <option value="1">offline1</option>
+                                    </select>
+                                    <button onclick="JavaScript:toClipBoard('selPayKeyA2')" style="color: white; background-color: #808080">Copy</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Key name</td>
+                                <td>
+                                    <select id="selPayKeyN2" class="options">
+                                        <option value="__clr"></option>
+                                        <option value="0">offline0</option>
+                                        <option value="1">offline1</option>
+                                    </select>
+                                    <button onclick="JavaScript:toClipBoard('selPayKeyN2')" style="color: white; background-color: #808080">Copy</button>
+                                </td>
+                            </tr>
+                        </table>
+                        <button class="keys" onclick="JavaScript:chkBal('2')">Check key balance</button><br />
+                    </td>
+                    <td width="*" valign="center">
+                        <button class="keys" onclick="JavaScript:payOwn()" style="background-color: #b6ff00">Proceed to transfer to own wallet</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="infop" class="tabcontent paytab">
+            This section allows you to choose the destination of your payment. <br />
+            You can make payment to any account identified by the public key or address, which you need to provide. <br />
+            You can also use a shortcut to transfer to your own currently selected wallet by quick selection.
+        </div>
     </div>
 
     <div id="Balance" class="tabcontent maintab">
-        <h3>Balance</h3>
-        <p>
-            Check the balances belonging to one of your addresses
-        </p>
-        <table>
-            <tr>
-                <td>
-                    Check your
-                    <br /><button type="button" onClick="JavaScript:doGET('address/{addressb}/balance','responseB')" style="background-color:#ff0000"> /balance/{address}</button>
-                    <select id="paddressb">
-                        <option value="Volvo">Volvo</option>
-                        <option value="Saab">Saab</option>
-                        <option value="Mercedes">Mercedes</option>
-                        <option value="Audi">Audi</option>
-                    </select>
-                    <button type="button" onClick="document.getElementById('responseB').value=''">Reset Log</button>
-                    <br /><textarea id="responseB" cols="50" rows="12"></textarea>
-                </td>
-                <td>
-
-                </td>
-            </tr>
-        </table>
+        <div class="tab subtab baltab">
+            <button class="tablinks baltab" onclick="openTab(event, 'baltab', 'walletBal')">Wallet Balance</button>
+            <button class="tablinks baltab" onclick="openTab(event, 'baltab','totalBal')">Total Balance</button>
+            <button class="tablinks baltab" onclick="openTab(event, 'baltab','infob')">Info</button>
+        </div>
+        <div id="walletBal" class="tabcontent baltab">
+            Choose name of Wallet to be used:<br />
+            <select id="balWallet" class="options">
+                <option value="__clr"></option>
+                <option value="0">offline0</option>
+                <option value="1">offline1</option>
+            </select>
+            <br />
+            <button class="keys" onclick="JavaScript:getBalance($('#balWallet').val())">Show summed up balance</button><br />
+            <button class="keys" onclick="JavaScript:doAlert('Not yet...',10)">Show balances by keys</button><br />
+        </div>
+        <div id="totalBal" class="tabcontent baltab">
+            Show balance for all wallets (copy form walletsel)
+        </div>
+        <div id="infob" class="tabcontent baltab">
+            With this feature you can check the balance for an entire Wallet<br />
+            You can check for a single wallet, or check for all wallets at the same time<br />
+            For can also check the balanmce for individual keys (same as during payment)
+        </div>
     </div>
     <div id="TxView" class="tabcontent maintab">
         <h3>TxView</h3>
@@ -279,9 +372,25 @@
         */
         $(".alert").css("display", "none");
         initState();
+        user = prompt("Please enter your username", "User");
 
         function h(message) {
             return "<u>" + message + "</u>";
+        }
+
+        function toClipBoard(id) {
+            var text = $("#" + id).val()
+            if (text != null) {
+                var dummy = document.createElement("input");
+                document.body.appendChild(dummy);
+                dummy.setAttribute('value', text);
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+                doAlert("Copied text to clipboard: '" + text + "' len=" + text.length, 10);
+            } else {
+                doAlert("No selection for copying...", 0);
+            }
         }
 
         function doAlert(message, level) {
@@ -291,8 +400,14 @@
             } else if (level == 1) {
                 $(".alert").css("background-color", "orange");
                 tim = 3000;
+            } else if (level == 8) {
+                $(".alert").css("background-color", "green");
+                tim = 4000;
             } else if (level == 9) {
                 $(".alert").css("background-color", "green");
+                tim = 2000;
+            } else {
+                $(".alert").css("background-color", "grey");
                 tim = 2000;
             }
             $("#alertText").html("  " + message);
@@ -332,21 +447,41 @@
             var xxsel = document.getElementById("quickSelWallet").checked;
             closeWallet();
             if (name.length > 0) {
-                json = doPOSTSynch("wallet/create", null, '{"name": "' + name + '"}');
+                var keys = +$("#numKeys").val();
+                dat = { "name": name, "numKeys": keys, "keyNames": [] };
+                var names = 0;
+                for (var i = 1; i <= keys; i++) {
+                    var nam = $("#key" + i + "Name").val().trim();
+                    if (nam === "") {
+                        continue;
+                    }
+                    if ((dat['keyNames'].length > 0) && dat['keyNames'].includes(nam)) {
+                        doAlert("Duplicate key names not allowed: " + h(nam), 9);
+                        return;
+                    }
+                    dat.keyNames.push(nam);
+                    names++;
+                }
+                if (names > keys) {
+                    doAlert("More names given than keys requested, please adjust setting.", 9);
+                    return;
+                }
+                dat['user'] = user;
+                json = doPOSTSynch("wallet/create", null, dat);
                 if (json.message === name) {
                     if (xxsel === true) {
                         // careful json changes here!!
                         prepareSelectWallet();
-                        useWallet(name,true);
+                        useWallet(name, true);
                     }
                     doAlert("Creation of wallet " + h(name) + " succeded.", 9)
                 }
                 else {
-                    doAlert("Creation not successful, Node said: "+h(json.message),0)
+                    doAlert("Creation not successful, Node said: " + h(json.message), 0)
                 }
 
             } else {
-                doAlert("Missing " + h("Wallet name") +", one is required for Create Key", 0);
+                doAlert("Missing " + h("Wallet name") + ", one is required for Create Key", 0);
             }
         }
 
@@ -361,20 +496,24 @@
         function populateSelOptions(id, items) {
             id = "#" + id;
             $(id).empty(); //remove all child nodes
+            var newOption = $('<option value="" selected>  </option>');
+            $(id).append(newOption);
             for (var i = 0; i < items.length; i++) {
-                var newOption = $('<option value="' + items[i] + '">' + items[i] + '</option>');
+                newOption = $('<option value="' + items[i] + '">' + items[i] + '</option>');
                 $(id).append(newOption);
             }
         }
 
-        function prepareSelectWallet() {
-            var sel = $('#selWallet').find(":selected").text();
-            var val = $('#selWallet').find(":selected").val();
-            json = doGETSynch("wallet/list/wallet");
-            populateSelOptions('selWallet', json.walletList);
-            if (sel != "") { 
-                useWallet(sel,false);
-                $('#selWallet').val(val);
+        function prepareSelectWallet(id, use) {
+            var sel = $('#' + id).find(":selected").text();
+            var val = $('#' + id).find(":selected").val();
+            json = doGETSynch("wallet/list/wallet/"+user);
+            populateSelOptions(id, json.walletList);
+            if (sel != "") {
+                if (use) {
+                    useWallet(sel, false);
+                }
+                $('#' + id).val(val);
             }
         }
 
@@ -383,7 +522,7 @@
             var val = $('#selWallet').find(":selected").val();
             var chk = document.getElementById("usePubKey").checked || document.getElementById("useAddress").checked
                 || document.getElementById("useName").checked;
-            useWallet(sel,false);
+            useWallet(sel, false);
             $('#selWallet').val(val);
             if (!chk) {
                 doAlert("Remember to choose the mode for you to select keys in other steps!", 1)
@@ -396,12 +535,12 @@
             }
         }
 
-        function useWallet(name,alertEmpty,alertName) {
+        function useWallet(name, alertEmpty, alertName) {
             closeWallet();
             if (name.length > 0) {
                 state.wallet = name;
                 $('#selWallet').val(name);
-                doAlert("Wallet selected: "+h(name), 9);
+                doAlert("Wallet selected: " + h(name), 9);
             } else {
                 if (alertEmpty) {
                     doAlert("Wallet selection cleared", 9);
@@ -411,53 +550,163 @@
         }
 
 
-        /* 
+        /*
          * Payment section
          */
 
-        function updateProgress() {
-            setTimeout(function () {
-                var info = "Make payment of " + h($("#payAmount").val()) + " with fees " + h($("#payFees").val()) + " using key: " + h($("#selPayKey").val());
-                var hasOther = false;
-                if ($("#otherAddress").val().length > 0 && $("#otherPubKey").val().length > 0) {
+        function payAccount() {
+            var dat = [];
+            var params = {};
+            var ref = $("#otherAddress").val().trim();
+            if (ref.length > 0) {
+                dat.push("address");
+                dat.push(ref);
+            }
+            ref = $("#otherPubKey").val().trim();
+            if (ref.length > 0) {
+                if (dat.length > 0) {
                     doAlert("Only one recipient information to be provided!", 0);
                     return;
                 }
-                if ($("#otherAddress").val().length + $("#otherPubKey").val().length > 0) {
-                    hasOther = true;
-                    info = info + " to a specific ";
-                    if ($("#otherAddress").val().length > 0) {
-                        info = info + h(" address " + $("#otherAddress").val());
-                    } else {
-                        info = info + h(" public key " + $("#otherPubKey").val());
-                    }
-                }
-                var own = $("#selOwnKey").val();
-                if (own.length > 0) {
-                    info = info + " to a key inside same wallet " + h(own);
-                }
-                $("#payProgress").html(info);
-            }, 100);
+                dat.push("publicKey");
+                dat.push(ref);
+            }
+            params['walletDest'] = "";
+            params['receiver'] = dat;
+            submitPay(params);
         }
+
+        function payOwn() {
+            var params = {};
+            params['receiver'] = getSingleSel("2");
+            params['walletDest'] = state.wallet;
+            if (params['receiver'].length == 0) {
+                doAlert("Only one wallet reference to be provided!", 0);
+                return;
+            }
+            submitPay(params);
+        }
+
+        function submitPay(params) {
+            params['fee'] = +$("#payFees").val().trim();
+            params['amount'] = +$("#payAmount").val().trim();
+            params['source'] = getSingleSel("");
+            params['walletSrc'] = state.wallet;
+            params['walletPW'] = prompt("Please enter your password to use keys in wallet", "KeyPassword");
+            params['msg'] = $("#payMes").val().trim(); // TODO cleanse??
+            if (params['source'].length == 0) {
+                doAlert("Only one wallet reference to be provided!", 0);
+                return;
+            }
+            params['user'] = user;
+            json = doPOSTSynch("wallet/transfer", null, params);
+            var hash = json.transactionDataHash;
+            if (hash.length > 0) {
+                doAlert("Tx succeeded " + hash, 8);
+                $("#TxHash").text(hash);
+            } else {
+                doAlert(JSON.parse(json), 0);
+            }
+        }
+
         function prepareSelection() {
-            var sel = $('#selPayKey').find(":selected").text();
-            var val = $('#selPayKey').find(":selected").val();
-            json = doGETSynch("wallet/list/keys/s" + (state.sel.pub ? "py" : "") + (state.sel.add ? "ay" : "")
-                + (state.sel.nam ? "ny" : "")+"/"+state.wallet);
-            populateSelOptions('selPayKey', json.keyList);
-            $('#selPayKey').val(val);                
+            //var sel = $('#selPayKey').find(":selected").text();
+            var valp = $('#selPayKeyP').find(":selected").val();
+            var vala = $('#selPayKeyA').find(":selected").val();
+            var valn = $('#selPayKeyN').find(":selected").val();
+            var json = doGETSynch("wallet/list/keys/s" + (state.sel.pub ? "py" : "") + (state.sel.add ? "ay" : "")
+                + (state.sel.nam ? "ny" : "") + "/" + state.wallet + "/" + user);
+            var pk = []
+            var ad = []
+            var na = []
+            for (var kk = 0; kk < json.keyList.length; kk++) {
+                var kx = json.keyList[kk]
+                var kxx = kx.split(":")
+                if (kxx[0] === "pubkey") {
+                    pk.push(kxx[1])
+                }
+                if (kxx[0] === "addr") {
+                    ad.push(kxx[1])
+                }
+                if (kxx[0] === "name") {
+                    na.push(kxx[1])
+                }
+            }
+            populateSelOptions('selPayKeyP', pk);
+            $('#selPayKeyP').val(valp);
+            populateSelOptions('selPayKeyA', ad);
+            $('#selPayKeyA').val(vala);
+            populateSelOptions('selPayKeyN', na);
+            $('#selPayKeyN').val(valn);
+            populateSelOptions('selPayKeyP2', pk);
+            $('#selPayKeyP2').val(valp);
+            populateSelOptions('selPayKeyA2', ad);
+            $('#selPayKeyA2').val(vala);
+            populateSelOptions('selPayKeyN2', na);
+            $('#selPayKeyN2').val(valn);
         }
 
         function preparePayment() {
             prepareSelection();
         }
 
+        function getSingleSel(use) {
+            var valp = $('#selPayKeyP' + use).find(":selected").val();
+            var vala = $('#selPayKeyA' + use).find(":selected").val();
+            var valn = $('#selPayKeyN' + use).find(":selected").val();
+            var ret = []
+
+            if (valp) {
+                ret.push("publicKey");
+                ret.push(valp);
+                if ((vala) || (valn)) {
+                    return [];
+                }
+            } else if (vala) {
+                ret.push("address");
+                ret.push(vala);
+                if (valn) {
+                    return [];
+                }
+            } else if (valn) {
+                ret.push("name");
+                ret.push(valn);
+            }
+            return ret
+
+        }
+        /*
+         * Balance section
+         */
+
+        function getBalance(wallet) {
+            doAlert("Check Balance for Wallet", 1);
+        }
+
+        function chkBal(use) {
+            var sel = getSingleSel(use);
+            if (sel.length == 0) {
+                doAlert("Key selection must be unique, use exactly one option", 1);
+                return;
+            }
+            var json = doGETSynch("wallet/list/balance/" + sel[0] + "/" + state.wallet + "/" + sel[1]+"/"+user);
+            var bal = json.confirmedBalance;
+            if (!isNaN(bal)) {
+                doAlert("Tx succeeded " + JSON.stringify(json), 8);
+            } else {
+                doAlert(JSON.stringify(json), 0);
+            }
+        }
         /*
             * Tab Manager
             */
         function openTab(evt, tabs, tabName) {
+            if (user === "") {
+                doAlert("No user logged in, please refresh page", 0);
+                return;
+            }
             if (state.wallet.length == 0) {
-                if ((tabs === "maintab") && ((tabName === "Balance") || (tabName === "Payment"))) {
+                if ((tabs === "maintab") && (tabName === "Payment")) {
                     doAlert("No Wallet selected, required for " + tabName, 1);
                     return;
                 }
@@ -474,9 +723,11 @@
             document.getElementById(tabName).style.display = "block";
             evt.currentTarget.className += " active";
             if (tabName === "Balance") {
-                document.getElementById('paddressb').value = document.getElementById('paddressb').value + "x"
+                //document.getElementById('paddressb').value = document.getElementById('paddressb').value + "x"
             } else if (tabName === "selectWallet") {
-                prepareSelectWallet();
+                prepareSelectWallet("selWallet", true);
+            } else if (tabName === "walletBal") {
+                prepareSelectWallet("balWallet", false);
             } if (tabName === "Payment") {
                 preparePayment();
             }

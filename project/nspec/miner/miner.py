@@ -12,7 +12,7 @@ from project.utils import checkRequiredFields, makeMinerHash
 from project.models import defHash, m_info, m_cfg
 from project.nspec.miner.modelM import *
 from project.pclass import c_peer
-
+from project.nspec.wallet.transactions import get_public_address, generate_private_key
 
 def miner_get(url):
     response, code = c_peer.sendGETToPeer(url)
@@ -21,7 +21,7 @@ def miner_get(url):
 
 def getCandidate():
     for peer in m_cfg['peers']:
-        resp = miner_get(peer + "/mining/get-mining-job/" + m_info['nodeId'])
+        resp = miner_get(peer + "/mining/get-mining-job/" + cfg['address'])
         print("==== First Stage : Response Received from Node: ", str(resp))
         #return json.loads(resp.text)
         return resp
@@ -47,7 +47,7 @@ def isDataValid(resp_text):
         print("Err1")
         return False
 
-    if ((resp_text['rewardAddress'] != m_info['nodeId']) or (resp_text['index'] <= 0)):
+    if ((resp_text['rewardAddress'] != cfg['address']) or (resp_text['index'] <= 0)):
         print("Err2")
         return False
 
@@ -193,11 +193,12 @@ def doMine():
 def initMiner():
     random.seed(a=getFutureTimeStamp(0))
     cfg['pulling'] = True
+    cfg['privKey'] = generate_private_key()
+    cfg['address'] = get_public_address(cfg['privKey'])
     thread = Thread(target=pullCandidate)
     thread.start()
     thread2 = Thread(target=doMine)
     thread2.start()
-
 
     #test = "df8f114897188bcc68b97ebe2b673d3c92de986024abe565df0a4f8702c1742b|2018-02-11T20:31:32.397Z|1453826"
     #res = hashlib.sha256(test.encode("utf8")).hexdigest()

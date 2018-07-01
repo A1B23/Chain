@@ -11,7 +11,7 @@ peerURL = "https://stormy-everglades-34766.herokuapp.com" #Albert
 
 def generate_private_key() -> str:
   private_key = hex(random.getrandbits(256))
-  print("Private key (hex):", private_key)
+  #print("Private key (hex):", private_key)
   return private_key[2:]
   
 def ripemd160(msg: str) -> str:

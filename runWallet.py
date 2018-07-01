@@ -21,8 +21,9 @@ if __name__ == "__main__":
         "/peers",
         "/listNodes",  # TODO test only
         "/address/[0-9a-zA-Z]+/balance$",
-        "/wallet/list/wallet$",
-        "/wallet/list/keys/s([pna]y)*/[0-9a-zA-Z]+$"
+        "/wallet/list/wallet/[0-9a-zA-Z]+$",
+        "/wallet/list/keys/s([pna]y)*/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
+        "/wallet/list/balance/[0-9a-zA-Z]+/[0-9a-zA-Z]+/[0-9a-zA-Z]+$/[0-9a-zA-Z]+$"
     ])
 
     m_permittedPOST.clear()
@@ -30,7 +31,8 @@ if __name__ == "__main__":
         "/transactions/send",  # TODO POST
         "/peers/connect",  # TODO POST
         "/peers/notify-new-block",  # TODO POST
-        "/wallet/create$"
+        "/wallet/create/[0-9a-zA-Z]+$",
+        "/wallet/transfer$"
     ])
 
 

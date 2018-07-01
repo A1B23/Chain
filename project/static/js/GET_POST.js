@@ -3,7 +3,7 @@
         return 5555;
     }
 
-function doPOSTSynch(url, updateField, datax) {
+function doPOSTSynch(url, updateField, data) {
     port = getPort();
     if (port < 1024) {
         newContent = "Error: No Port";
@@ -11,7 +11,7 @@ function doPOSTSynch(url, updateField, datax) {
         url = fillURL(url);
         //var url = getDomain() + ":" + port + "/" + url;
         //datax = document.getElementById(getField).value.replace(/\\n/g, "");
-        var data = JSON.parse(datax);
+        //var data = JSON.parse(datax);
         //keep = "==> POST / " + url + " with: " + datax;
 
 
@@ -52,11 +52,11 @@ function doGETSynch(url) {
         var xhttp = new XMLHttpRequest();
         xhttp.open("GET", url, false);
         xhttp.send();
-        if (xhttp.status == 200) {
+        //if (xhttp.status == 200) {
             json = JSON.parse(xhttp.responseText)
-        } else {
-            json = { "message": xhttp.responseText };
-        }
+        //} else {
+        //    json = { "message": xhttp.responseText };
+        //}
     }
     return json;
 }

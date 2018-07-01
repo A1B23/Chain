@@ -4,7 +4,9 @@ cfg = {
     'zero_string': '00000000000000000000000000000',
     'maxNonce': 2147483647,  #typical Java max, so stick to it to avoid endless search
     'scanning': 10,
-    'lastHash': ""
+    'lastHash': "",
+    'privKey': "",
+    'address': ""
 }
 
 data = {
