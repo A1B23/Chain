@@ -15,16 +15,20 @@ class walletInterface:
         if (urlID == 'wall'):
             if (url.startswith("/wallet/list/wallet")):
                 return c_walletInterface.getAllWallets(linkInfo['user'])
-            if (url.startswith("/wallet/list/keys/s")):
+            elif (url.startswith("/wallet/list/keys/s")):
                 return c_walletInterface.getAllKeys(linkInfo)
-            if (url.startswith("/wallet/list/balance")):
+            elif (url.startswith("/wallet/list/balance")):
                 return c_walletInterface.getKeyBalance(linkInfo)
-            if (url.startswith("/wallet/list/allbalances")):
+            elif (url.startswith("/wallet/list/allbalances")):
                 return c_walletInterface.getAllBalance(linkInfo)
-            if (url.startswith("/wallet/list/allbalance")):
+            elif (url.startswith("/wallet/list/allbalance")):
                 return c_walletInterface.getWalletBalance(linkInfo)
-            if (url.startswith("/wallet/list/allkeybalance")):
+            elif (url.startswith("/wallet/list/allkeybalance")):
                 return c_walletInterface.getWalletKeyBalance(linkInfo)
+            elif (url.startswith("/wallet/list/allTXs/")):
+                return c_walletInterface.getAllTX(linkInfo)
+            elif (url.startswith("/wallet/list/allTX/")):
+                return c_walletInterface.getWalletTX(linkInfo)
 
         if (urlID == 'addr'):
             return setOK(linkInfo)

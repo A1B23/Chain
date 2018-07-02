@@ -244,6 +244,19 @@ def getWalletBalance(wallet, user):
 def getWalletKeyBalance(wallet, user):
     linkInfo = {"wallet": wallet, "user": user}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
+
+@app.route('/wallet/list/allTXs/<type>/<user>', methods=['GET'])
+def getAllTX(type, user):
+    linkInfo = {"user": user, "type": type}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
+@app.route('/wallet/list/allTX/<type>/<wallet>/<user>', methods=['GET'])
+def getWalletTx(type, wallet, user):
+    linkInfo = {"wallet": wallet, "user": user, "type": type}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
+
 ################## the following two are only for testing while developing peer module
 @app.route("/listNodes")
 def listNodes():

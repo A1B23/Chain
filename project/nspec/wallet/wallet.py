@@ -299,3 +299,44 @@ class wallet:
                 bal2['safeBalance'] = + val['safeBalance']
                 bal[addr] = bal2
         return setOK(bal)
+
+    def getAllTX(self, params):
+        user = params['user']
+        type = int(params['type'])
+        return self.filterTX(type, self.doSelect("SELECT address, KName, pubKey FROM Wallet WHERE User='" + user + "'"))
+
+
+    def getWalletTX(self, params):
+        wal = params['wallet']
+        user = params['user']
+        type = int(params['type'])
+        return self.filterTX(type, self.doSelect("SELECT address, KName, pubKey FROM Wallet WHERE User='" + user + "' AND WName='"+wal+"'"))
+
+    def filterTX(self, type, l):
+        tx = []
+        if (len(l) < 3):
+            return setOK(tx)
+        query = [l[i:i + 3] for i in range(0, len(l), 3)]
+        for addrx in query:
+            resps = c_peer.sendGETToPeers("address/" + addrx[0] + "/transactions")
+            # TODO should we compare all replies??? Not really??? Just take first one?
+            (text, code) = resps[0]
+            if (code == 200):
+                if (type<2):
+                    trxn = {'address':addrx[0]}
+                elif (type<4):
+                    trxn = {'keyName': addrx[1]+"/"+addrx[0]}
+                elif (type < 6):
+                    trxn = {'publicKey': addrx[2]+"/"+addrx[0]}
+
+                trxn['transactions'] = []
+                for trx in text['transactions']:
+                    if ("minedInBlockIndex" in trx):
+                        if (type == 0) or (type == 2) or (type == 4):
+                            trxn['transactions'].append(trx)
+                    else:
+                        if (type == 1) or (type == 3) or (type == 5):
+                            trxn['transactions'].append(trx)
+                if (len(trxn['transactions'])>0):
+                    tx.append(trxn)
+        return setOK(tx)

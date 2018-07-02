@@ -58,7 +58,7 @@ function doGETSynch(url) {
         //    json = { "message": xhttp.responseText };
         //}
     }
-    return json;
+    return [json, xhttp.status];
 }
 
 function doPOST(url, updateField, getField) {
