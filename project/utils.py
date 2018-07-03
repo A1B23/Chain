@@ -13,10 +13,6 @@ def d(mes):
     print(mes)
 
 
-def info():
-    return jsonify(m_info), 200
-
-
 def jsonToStr(jsonDict):
     json_encoder = json.JSONEncoder(separators=(',', ':'))
     tran_json = json_encoder.encode(jsonDict)

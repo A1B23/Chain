@@ -7,6 +7,7 @@ if __name__ == "__main__":
     m_permittedGET.extend([
         #TODO remove the ones not valid anymore
         "/cfg$",
+        "/info$",
         #"/info",  # TODO need to bring up???
         "/debug$",
         "/transactions/pending",

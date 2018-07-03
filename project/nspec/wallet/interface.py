@@ -4,6 +4,8 @@ from project.utils import *
 import json
 from project.pclass import c_peer
 from project.classes import c_walletInterface
+from project.models import m_info, m_peerInfo
+from project.nspec.wallet.modelW import m_db
 
 # put your distribution according to url
 class walletInterface:
@@ -11,6 +13,15 @@ class walletInterface:
         urlID = url[1:5]
         if (urlID == 'send'):
             return send()
+        if (urlID == 'info'):
+            infow = {
+                'about': m_info['about'],
+                'database': m_db['DATABASE'],
+                'chainID': m_info['chainId'],
+                'nodeUrl': m_info['nodeUrl'],
+                'nodeId': m_info['nodeId']
+            }
+            return setOK(infow)
 
         if (urlID == 'wall'):
             if (url.startswith("/wallet/list/wallet")):

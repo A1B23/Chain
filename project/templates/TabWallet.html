@@ -107,12 +107,14 @@
     <button class="keys" id="login" onclick="JavaScript: openTab(event, 'maintab', 'Info'); user = ''; initState(); $('#login').text('Logged Out');" style="background-color:#ef12b4">Logout</button>
 
     <div class="tab maintab">
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'KeysWallets')">Keys/Wallets</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Wallets</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Keys')">Keys</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
+
         <br />
         <br />
         <div class="alert">
@@ -121,17 +123,15 @@
         </div>
     </div>
 
-    <div id="KeysWallets" class="tabcontent maintab">
-        <div class="tab subtab keytab">
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab', 'createWallet')">Create Wallet</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','selectWallet')">Select Wallet/New Key</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Import Wallet</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Export Wallet</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Import Key</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','TBD')">Export Key</button>
-            <button class="tablinks keytab" onclick="openTab(event, 'keytab','infok')">Info</button>
+    <div id="Wallets" class="tabcontent maintab">
+        <div class="tab subtab walletTab">
+            <button class="tablinks walletTab" onclick="openTab(event, 'walletTab', 'createWallet')">Create Wallet</button>
+            <button class="tablinks walletTab" onclick="openTab(event, 'walletTab','selectWallet')">Select Wallet</button>
+            <button class="tablinks walletTab" onclick="openTab(event, 'walletTab','TBDw')">Import Wallet</button>
+            <button class="tablinks walletTab" onclick="openTab(event, 'walletTab','TBDw')">Export Wallet</button>
+            <button class="tablinks walletTab" onclick="openTab(event, 'walletTab','infow')">Info</button>
         </div>
-        <div id="createWallet" class="tabcontent keytab">
+        <div id="createWallet" class="tabcontent walletTab">
             Provide new wallet name <br />
             <input type="text" id="walletName" value="" size="20"><br />
             <input type="checkbox" id="quickSelWallet"> Auto-Select wallet for use
@@ -148,7 +148,7 @@
             <input type="text" id="key3Name" value="" size="20"><br />
             <button class="keys" onclick="createWallet()">Submit</button>
         </div>
-        <div id="selectWallet" class="tabcontent keytab">
+        <div id="selectWallet" class="tabcontent walletTab">
             <button class="keys" onclick="clrWallet()">Close current wallet</button><br />
             Choose name of Wallet to be used:<br />
             <select id="selWallet" class="options">
@@ -161,16 +161,49 @@
             <input type="checkbox" id="useAddress"> Use address for payment<br />
             <input type="checkbox" id="useName"> Use name for payment<br />
             <button class="keys" onclick="JavaScript:selectWallet()">Select</button><br />
+
         </div>
-        <div id="infok" class="tabcontent keytab">
+        <div id="infow" class="tabcontent walletTab">
             Keys are managed within so-called 'wallets'. Wallets only hold keys, they don't contain 'monetary' value.
             Before payments can be made or balances be queried, a specific wallte needs to be activated.
-            Keys can be grouped in different wallets, as wallets are distinguished by names.
+            Keys can be grouped in different wallets, as wallets are distinguished by names.<br />
+            A wallet <b>must</b> be selected in order to make payment/transfer or to create additional keys.  
         </div>
-        <div id="TBD" class="tabcontent keytab">
+        <div id="TBDw" class="tabcontent walletTab">
             This function/feature is not yet implemented...
         </div>
 
+    </div>
+
+    <div id="Keys" class="tabcontent maintab">
+        <div class="tab subtab keyTab">
+            <button class="tablinks keyTab" onclick="openTab(event, 'keyTab', 'createKeys')">Create Keys</button>
+            <button class="tablinks walletTab" onclick="openTab(event, 'keyTab','importKey')">Import Key</button>
+            <button class="tablinks walletTab" onclick="openTab(event, 'keyTab','exportKey')">Export Key</button>
+            <button class="tablinks keyTab" onclick="openTab(event, 'keyTab','infokey')">Info</button>
+        </div>
+        <div id="createKeys" class="tabcontent keyTab">
+            How many keys to be created (min 1):<br />
+            <select id="numKeysk" class="options">
+                <option value=1 selected>1</option>
+                <option value=2>2</option>
+                <option value=3>3</option>
+            </select><br />
+            Optional: Provide your own names for the keys (else they will be named with address)<br />
+            <input type="text" id="key1Namek" value="" size="20"><br />
+            <input type="text" id="key2Namek" value="" size="20"><br />
+            <input type="text" id="key3Namek" value="" size="20"><br />
+            <button class="keys" onclick="createKeys()">Submit</button>
+        </div>
+        <div id="infokey" class="tabcontent keyTab">
+            A wallet <b>must</b> be selected in order to make payment/transfer or to create/import/export keys.
+        </div>
+        <div id="exportKey" class="tabcontent keyTab">
+            This function/feature is not yet implemented...
+        </div>
+        <div id="importKey" class="tabcontent keyTab">
+            This function/feature is not yet implemented...
+        </div>
     </div>
 
     <div id="Peers" class="tabcontent maintab">
@@ -197,8 +230,9 @@
         </div>
         <div id="infon" class="tabcontent peertab">
             Set and check the peer(s) with which you want to connect. <br />
-            All communication will be attempted with all peers. If they reply <u>differently</u>, then
-            the majority data will be shown, with an indication that some nodes disagree..
+            All communication will be attempted with all peers. Currently only the first reply is taken as corrcet data,
+            but in future may consider if they reply <u>differently</u> then
+            the majority data to be shown, with an indication that some nodes disagree..
         </div>
     </div>
 
@@ -408,6 +442,8 @@
                 <li>Check pending transactions </li>
             </ul>
         </p>
+        <button class="keys" onclick="JavaScript:getInfo()">Refresh Wallet Node info</button><br />
+        <span id="infoResult"></span>
     </div>
 
 
@@ -421,6 +457,44 @@
 
         function h(message) {
             return "<u>" + message + "</u>";
+        }
+
+        function getInfo() {
+            var repl = doGETSynch("info");
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
+                $("#infoResult").html(tablify([json], []));
+            }
+            else {
+                doAlert("Wallet node not replying or not configured " + JSON.stringify(json));
+            }
+        }
+
+        function tablify(jsonList, order) {
+            var res = "";
+            var th = "";
+            if (order.length == 0) {
+                for (var key in jsonList[0]) {
+                    if (jsonList[0].hasOwnProperty(key)) {
+                        order.push(key);
+                    }
+                }
+            }
+            for (var i = 0; i < order.length; i++) {
+                th = th + "<th>" + order[i] + "</th>";
+            }
+            for (var cnt = 0; cnt < jsonList.length; cnt++) {
+                res = res + "<tr><td>" + (cnt + 1) + "</td>";
+                for (var det = 0; det < order.length; det++) {
+                    if (jsonList[cnt].hasOwnProperty(order[det])) {
+                        res = res + "<td>" + jsonList[cnt][order[det]] + "</td>";
+                    }
+                }
+                res = res + "</tr>";
+            }
+            res = "<table border='1'><th>#</th>" + th + res + "</table>"
+            return res;
         }
 
         function toClipBoard(id) {
@@ -487,31 +561,43 @@
             * Manage the keys and wallets
             */
 
+        function getKeyInput(wallet, ext) {
+            var keys = +$("#numKeys" + ext).val();
+            if (keys <= 0) {
+                doAlert("No keys to be created", 9);
+                return {}
+            }
+            dat = { "name": name, "numKeys": keys, "keyNames": [] };
+            var names = 0;
+            for (var i = 1; i <= keys; i++) {
+                var nam = $("#key" + i + "Name"+ext).val().trim();
+                if (nam === "") {
+                    continue;
+                }
+                if ((dat['keyNames'].length > 0) && dat['keyNames'].includes(nam)) {
+                    doAlert("Duplicate key names not allowed: " + h(nam), 9);
+                    return {};
+                }
+                dat.keyNames.push(nam);
+                names++;
+            }
+            if (names > keys) {
+                doAlert("More names given than keys requested, please adjust setting.", 9);
+                return {};
+            }
+            dat['user'] = user;
+            return dat;
+        }
+
         function createWallet() {
             var name = $("#walletName").val();
             var xxsel = document.getElementById("quickSelWallet").checked;
             closeWallet();
             if (name.length > 0) {
-                var keys = +$("#numKeys").val();
-                dat = { "name": name, "numKeys": keys, "keyNames": [] };
-                var names = 0;
-                for (var i = 1; i <= keys; i++) {
-                    var nam = $("#key" + i + "Name").val().trim();
-                    if (nam === "") {
-                        continue;
-                    }
-                    if ((dat['keyNames'].length > 0) && dat['keyNames'].includes(nam)) {
-                        doAlert("Duplicate key names not allowed: " + h(nam), 9);
-                        return;
-                    }
-                    dat.keyNames.push(nam);
-                    names++;
+                var dat = getKeyInput(name,"")
+                if (dat.length == 0) {
+                    return
                 }
-                if (names > keys) {
-                    doAlert("More names given than keys requested, please adjust setting.", 9);
-                    return;
-                }
-                dat['user'] = user;
                 json = doPOSTSynch("wallet/create", null, dat);
                 if (json.message === name) {
                     if (xxsel === true) {
@@ -527,6 +613,25 @@
 
             } else {
                 doAlert("Missing " + h("Wallet name") + ", one is required for Create Key", 0);
+            }
+        }
+
+        function createKeys() {
+            var dat = getKeyInput(name, "k")
+            if (dat.length == 0) {
+                return
+            }
+            json = doPOSTSynch("wallet/createKey", null, dat);
+            if (json.message === name) {
+                if (xxsel === true) {
+                    // careful json changes here!!
+                    prepareSelectWallet();
+                    useWallet(name, true);
+                }
+                doAlert("Creation of keys for wallet " + h(name) + " succeded.", 9)
+            }
+            else {
+                doAlert("Creation not successful, Node said: " + h(json.message), 0)
             }
         }
 
@@ -602,8 +707,8 @@
 
 
         /*
-         * Payment section
-         */
+            * Payment section
+            */
 
         function payAccount() {
             var dat = [];
@@ -735,8 +840,8 @@
 
 
         /*
-         * Balance section
-         */
+            * Balance section
+            */
 
         function getBalanceWallets() {
             var repl = doGETSynch("wallet/list/allbalances/" + user);
@@ -819,10 +924,10 @@
 
 
         /*
-         * TX section
-         */
+            * TX section
+            */
 
-        function showTX(type,repl,ext) {
+        function showTX(type, repl, ext) {
             var json = repl[0];
             var code = repl[1];
             if (code == 200) {
@@ -833,7 +938,7 @@
                     th = th + "<th>" + order[i] + "</th>";
                 }
                 var address = ""
-                var typeN=""
+                var typeN = ""
                 var cnt = 1;
                 for (var ad = 0; ad < json.length; ad++) {
                     for (var txt in json[ad]) {
@@ -854,7 +959,7 @@
                         }
                     }
                 }
-                res = "<table border='1'><th>#</th><th>"+typeN+"</th>" + th + res + "</table>"
+                res = "<table border='1'><th>#</th><th>" + typeN + "</th>" + th + res + "</table>"
                 $("#tx" + (type == 1 ? "p" : "") + ext + "Result").html(res);
                 doAlert("Update completed", 9);
             } else {
@@ -863,8 +968,11 @@
         }
 
         function getTXWallets(type) {
-            var repl = +$('input[name=type]:checked').val()+type
-            showTX(type, doGETSynch("wallet/list/allTXs/" + repl + "/" + user),"All")
+            var repl = +$('input[name=type]:checked').val() + type
+            if (isNaN(repl)) {
+                repl = 0;
+            }
+            showTX(type, doGETSynch("wallet/list/allTXs/" + repl + "/" + user), "All")
         }
 
         function getTXWallet(wallet, type) {
@@ -873,7 +981,10 @@
                 return;
             }
             var repl = +$('input[name=type]:checked').val() + type
-            showTX(type,doGETSynch("wallet/list/allTX/" + repl + "/" + wallet + "/" + user),"");
+            if (isNaN(repl)) {
+                repl = 1;
+            }
+            showTX(type, doGETSynch("wallet/list/allTX/" + repl + "/" + wallet + "/" + user), "");
         }
 
         function chkTXForKey(use) {
@@ -906,6 +1017,10 @@
                     doAlert("No Wallet selected, required for " + tabName, 1);
                     return;
                 }
+                if ((tabs === "keyTab") && (tabName !== "infokey")) {
+                    doAlert("No Wallet selected, required for " + tabName, 1);
+                    return;
+                }
             }
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent " + tabs);
@@ -928,7 +1043,7 @@
                 prepareSelectWallet("txWallet", false);
             } else if (tabName === "walletpTX") {
                 prepareSelectWallet("txpWallet", false);
-            }if (tabName === "Payment") {
+            } if (tabName === "Payment") {
                 preparePayment();
             }
         }

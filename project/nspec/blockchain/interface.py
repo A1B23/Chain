@@ -63,6 +63,9 @@ class chainInterface:
                 'date': datetime.datetime.now().isoformat(),
             }
             return jsonify(response), 200
+        elif (urlID == 'info/'):
+            # TODO better info please
+            return setOK(m_info)
 
         # identify your url and then proceed
         #linkInfo is a json object containing the information from the URL

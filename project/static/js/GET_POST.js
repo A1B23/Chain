@@ -52,11 +52,11 @@ function doGETSynch(url) {
         var xhttp = new XMLHttpRequest();
         xhttp.open("GET", url, false);
         xhttp.send();
-        //if (xhttp.status == 200) {
+        if (xhttp.status == 200) {
             json = JSON.parse(xhttp.responseText)
-        //} else {
-        //    json = { "message": xhttp.responseText };
-        //}
+        } else {
+            json = { "message": xhttp.responseText };
+        }
     }
     return [json, xhttp.status];
 }

@@ -38,7 +38,8 @@ def saveSys(file):
 #GET /info
 @app.route('/info')
 def get_info():
-    return info()
+    linkInfo = {}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /debug
 @app.route('/debug')
