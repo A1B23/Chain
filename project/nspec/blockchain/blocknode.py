@@ -117,7 +117,7 @@ class blockChainNode:
         #{"blockDataHash": "15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
         # "dateCreated": "2018-05-20T04:36:36Z", "nonce": "735530",
         # "blockHash": "0000020135f1c30b68733e9805f52fdc758fff4b07149929edbd995d30167ae1"}
-        colErr = checkSameFields(minerSolution,m_minerFoundNonce,True)
+        colErr = checkSameFields(minerSolution, m_minerFoundNonce, True)
         if (colErr != ""):
             return errMsg(colErr, 400)
         for minerAddress in m_BufferMinerCandidates:
@@ -144,6 +144,7 @@ class blockChainNode:
                 m_candidateBlock['blockHash'] = minerSolution['blockHash']
                 m_candidateBlock['nonce'] = minerSolution['nonce']
                 m_candidateBlock['dateCreated'] = minerSolution['dateCreated']
+                m_candidateBlock['blockDataHash'] = minerSolution['blockDataHash']
                 err = self.c_blockchainHandler.verifyThenAddBlock(m_candidateBlock)
                 if (len(err) > 0):
                     return errMsg("Internal error on setting up block",400)

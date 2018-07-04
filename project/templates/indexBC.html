@@ -112,8 +112,8 @@
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Query')">NodeInfo</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
     </div>
-    Provide <span id="inputText1">blocknumber</span><input type="text" id="inputVal1" value="" size="20"><br />
-    Output as JSON or <input type="checkbox" id="useTable">Table<br />
+
+    Output as JSON or <input type="checkbox" id="useTable">Table <input type="checkbox" id="useHorizontal">HorizontalViewTable<br />
     <div id="Block" class="tabcontent maintab">
         <div class="tab subtab blockTab">
             <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'allBlocks'); doDirect('blocks','AB')">All blocks</button>
@@ -125,7 +125,8 @@
             <span id="resultAB">Command results....</span>
         </div>
         <div id="blockNum" class="tabcontent blockTab">
-            <span id="optionsBN">Command results....</span>
+            Provide blocknumber<input type="text" id="paramBN" value="" size="20"><button class="tablinks txTab" onclick="JavaScript: doParameter('blocks/?', 'BN');">Submit</button><br />
+            <div id="optionsBN"></div>
             <span id="resultBN">Command results....</span>
         </div>
     </div>
@@ -137,13 +138,22 @@
             <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">by TXHash</button>
             <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">by address</button>
         </div>
-       
+
     </div>
 
     <div id="Balance" class="tabcontent maintab">
         <div class="tab subtab balTab">
-            <button class="tablinks balTab" onclick="openTab(event, 'blockTab', 'blockAll')">All non-zero balances</button>
-            <button class="tablinks balTab" onclick="openTab(event, 'blockTab', 'blockAll')">by address</button>
+            <button class="tablinks balTab" onclick="openTab(event, 'balTab', 'balAll'); doDirect('balances', 'BX');">All non-zero balances</button>
+            <button class="tablinks balTab" onclick="openTab(event, 'balTab', 'balAddr')">by address</button>
+        </div>
+        <div id="balAll" class="tabcontent balTab">
+            <div id="optionsBX"></div>
+            <span id="resultBX">Command results....</span>
+        </div>
+        <div id="balAddr" class="tabcontent balTab">
+            Provide address<input type="text" id="paramBA" value="" size="40"><button class="tablinks balTab" onclick="JavaScript:doParameter('address/?/balance', 'BA');">Submit</button><br />
+            <div id="optionsBA"></div>
+            <span id="resultBA">Command results....</span>
         </div>
     </div>
 
@@ -156,11 +166,15 @@
     <div id="Query" class="tabcontent maintab">
         <div class="tab subtab qTab">
             <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
-            <button class="tablinks qTab" onclick="openTab(event, 'qTab', 'peerDat')">Peers</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerDat');doDirect('peers','PE')">Peers</button>
         </div>
         <div id="nInfo" class="tabcontent qTab">
             <div id="optionsNI"></div>
             <span id="resultNI">Command results....</span>
+        </div>
+        <div id="peerDat" class="tabcontent qTab">
+            <div id="optionsPE"></div>
+            <span id="resultPE">Command results....</span>
         </div>
     </div>
 
@@ -173,7 +187,8 @@
 
 
     <script>
-        function tablify(jsonList, order,level,pref) {
+        function tablify(jsonList, order, level, pref, horizontal) {
+
             var res = "";
             var th = "";
             var useorder = [];
@@ -219,35 +234,53 @@
                 case 2:
                     col = "style='background-color:#B0E0E6'";
                     break;
-                    
+
             }
-            for (var i = 0; i < useorder.length; i++) {
-                th = th + "<th "+col+">" + useorder[i] + "</th>";
+            if (horizontal) {
+                for (var i = 0; i < useorder.length; i++) {
+                    th = th + "<th " + col + ">" + useorder[i] + "</th>";
+                }
             }
             for (var cnt = 0; cnt < jsonList.length; cnt++) {
-                res = res + "<tr><td>" + (cnt + 1) + "</td>";
+                if (horizontal) {
+                    res = res + "<tr><td>" + (cnt + 1) + "</td>";
+                }
                 for (var det = 0; det < useorder.length; det++) {
                     if (jsonList[cnt].hasOwnProperty(useorder[det])) {
+                        if (!horizontal) {
+                            res = res + "<tr><td " + col + ">" + useorder[det] + "</td>";
+                        }
                         if (jsonList[cnt][useorder[det]] instanceof Array) {
                             res = res + "<td>";
                             var wasEmpty = (suborder.length == 0);
-                            res = res + tablify(jsonList[cnt][useorder[det]], suborder, level + 1, pref + useorder[det] + ":") + "</td>";
+                            res = res + tablify(jsonList[cnt][useorder[det]], suborder, level + 1, pref + useorder[det] + ":", horizontal) + "</td>";
                             if (wasEmpty) {
-                                order.push.apply(order,suborder);
+                                order.push.apply(order, suborder);
+                                suborder = [];
                             }
                         } else {
                             res = res + "<td>" + jsonList[cnt][useorder[det]] + "</td>";
                         }
                     }
+                    if (!horizontal) {
+                        res = res + "</tr>";
+                    }
                 }
-                res = res + "</tr>";
+                if (horizontal) {
+                    res = res + "</tr>";
+                }
+
             }
-            res = "<table border='1'><th>#</th>" + th + res + "</table>"
+            if (horizontal) {
+                res = "<table border='1'><th>#</th>" + th + res + "</table>";
+            } else {
+                res = "<table border='1'>" + res + "</table>";
+            }
             return res;
         }
 
         function breakup(json) {
-            return "<pre>"+JSON.stringify(json, null, 2)+"</pre>";
+            return "<pre>" + JSON.stringify(json, null, 2) + "</pre>";
         }
 
 
@@ -255,15 +288,20 @@
             options.sort();
             var parentElement = document.getElementById(id);
 
-            for (var count = 0; count < options.length;count++) {
+            for (var count = 0; count < options.length; count++) {
                 var newCheckBox = document.createElement('input');
                 newCheckBox.type = 'checkbox';
-                newCheckBox.id = id + 'opt'+count;
+                newCheckBox.id = id + 'opt' + count;
                 newCheckBox.classList.add(id + 'opt');
                 newCheckBox.value = options[count]
                 parentElement.appendChild(newCheckBox);
-                parentElement.appendChild(document.createTextNode(options[count]+" "));
+                parentElement.appendChild(document.createTextNode(options[count] + " "));
             }
+        }
+
+        function doParameter(url, ext) {
+            var par = $("#param" + ext).val();
+            doDirect(url.replace("?", par), ext);
         }
 
         function doDirect(url, ext) {
@@ -274,17 +312,18 @@
             if (code == 200) {
                 var opts = []
                 var addOptions = true;
-                $(".options" + ext+"opt").each(function () {
+                $(".options" + ext + "opt").each(function () {
                     addOptions = false;
                     if ($(this).is(':checked')) {
                         opts.push($(this).val());
                     }
                 });
                 if (document.getElementById("useTable").checked) {
+                    var horizontal = document.getElementById("useHorizontal").checked
                     if (json instanceof Array) {
-                        $(id).html(tablify(json, opts, 0, ""));
+                        $(id).html(tablify(json, opts, 0, "", horizontal));
                     } else {
-                        $(id).html(tablify([json], opts, 0, ""));
+                        $(id).html(tablify([json], opts, 0, "", horizontal));
                     }
                     if (addOptions) {//first time
                         //repl[1] = Array.from(new Set(repl[1]));
