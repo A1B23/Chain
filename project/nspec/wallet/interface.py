@@ -23,7 +23,7 @@ class walletInterface:
             }
             return setOK(infow)
 
-        if (urlID == 'wall'):
+        if urlID == 'wall':
             if (url.startswith("/wallet/list/wallet")):
                 return c_walletInterface.getAllWallets(linkInfo['user'])
             elif (url.startswith("/wallet/list/keys/s")):
@@ -66,7 +66,9 @@ class walletInterface:
         if (urlID == 'wallet'):
             if (url.startswith("/wallet/transfer")):
                 return c_walletInterface.payment(json)
-            if (url.startswith("/wallet/create")):
+            elif (url.startswith("/wallet/createKey")):
+                return c_walletInterface.createKeys(json)
+            elif (url.startswith("/wallet/create")):
                 return c_walletInterface.createWallet(json)
 
         #json contains the json object submitted during the POST

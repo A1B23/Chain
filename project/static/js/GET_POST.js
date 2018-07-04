@@ -36,7 +36,7 @@ function doPOSTSynch(url, updateField, data) {
         if (updateField != null) {
             document.getElementById(updateField).value = document.getElementById(updateField).value + text;
         }
-        return json;
+        return [json,xhr.status];
     }
 }
 

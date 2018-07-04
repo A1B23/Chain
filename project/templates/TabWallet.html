@@ -249,8 +249,7 @@
                 <td>
                     <select id="selPayKeyP" class="options">
                         <option value="__clr"></option>
-                        <option value="0">offline0</option>
-                        <option value="1">offline1</option>
+                        <option value="0">missing keytype during Wallet selection</option>
                     </select>
                     <button onclick="JavaScript:toClipBoard('selPayKeyP')" style="color: white; background-color: #808080">Copy</button>
                 </td>
@@ -567,7 +566,7 @@
                 doAlert("No keys to be created", 9);
                 return {}
             }
-            dat = { "name": name, "numKeys": keys, "keyNames": [] };
+            var dat = { "name": wallet, "numKeys": keys, "keyNames": [] };
             var names = 0;
             for (var i = 1; i <= keys; i++) {
                 var nam = $("#key" + i + "Name"+ext).val().trim();
@@ -598,8 +597,10 @@
                 if (dat.length == 0) {
                     return
                 }
-                json = doPOSTSynch("wallet/create", null, dat);
-                if (json.message === name) {
+                var repl = doPOSTSynch("wallet/create", null, dat);
+                var json = repl[0];
+                var code = repl[1];
+                if (code == 200) {
                     if (xxsel === true) {
                         // careful json changes here!!
                         prepareSelectWallet();
@@ -610,28 +611,8 @@
                 else {
                     doAlert("Creation not successful, Node said: " + h(json.message), 0)
                 }
-
             } else {
                 doAlert("Missing " + h("Wallet name") + ", one is required for Create Key", 0);
-            }
-        }
-
-        function createKeys() {
-            var dat = getKeyInput(name, "k")
-            if (dat.length == 0) {
-                return
-            }
-            json = doPOSTSynch("wallet/createKey", null, dat);
-            if (json.message === name) {
-                if (xxsel === true) {
-                    // careful json changes here!!
-                    prepareSelectWallet();
-                    useWallet(name, true);
-                }
-                doAlert("Creation of keys for wallet " + h(name) + " succeded.", 9)
-            }
-            else {
-                doAlert("Creation not successful, Node said: " + h(json.message), 0)
             }
         }
 
@@ -705,6 +686,26 @@
             updateStateInfo();
         }
 
+        /*
+         * Keys section 
+         */
+
+        function createKeys() {
+            var dat = getKeyInput(state.wallet, "k")
+            if (dat.length == 0) {
+                return
+            }
+            
+            var repl = doPOSTSynch("wallet/createKey", null, dat);
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
+                doAlert(json.message, 9)
+            }
+            else {
+                doAlert("Creation not successful, Node said: " + h(json.message), 0)
+            }
+        }
 
         /*
             * Payment section
@@ -755,9 +756,10 @@
                 return;
             }
             params['user'] = user;
-            json = doPOSTSynch("wallet/transfer", null, params);
-            var hash = json.transactionDataHash;
-            if (hash.length > 0) {
+            var repl = doPOSTSynch("wallet/transfer", null, params);
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
                 doAlert("Tx succeeded " + hash, 8);
                 $("#TxHash").text(hash);
             } else {

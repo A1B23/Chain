@@ -63,7 +63,7 @@ class chainInterface:
                 'date': datetime.datetime.now().isoformat(),
             }
             return jsonify(response), 200
-        elif (urlID == 'info/'):
+        elif (urlID.startswith('info')):
             # TODO better info please
             return setOK(m_info)
 

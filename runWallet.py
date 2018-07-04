@@ -34,7 +34,8 @@ if __name__ == "__main__":
         "/transactions/send",  # TODO POST
         "/peers/connect",  # TODO POST
         "/peers/notify-new-block",  # TODO POST
-        "/wallet/create/[0-9a-zA-Z]+$",
+        "/wallet/create$",
+        "/wallet/createKey$",
         "/wallet/transfer$"
     ])
 

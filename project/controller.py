@@ -177,15 +177,24 @@ def debug_mining(minerAddress, difficulty):
 #float 	Like int but for floating point values.
 #path 	Like string but accepts slashes.
 
+@app.route("/debug/GUI", methods=['GET'])
+def indexDebug():
+    if (isBCNode()):
+        return render_template("indexBC _debug.html")
+    if (isWallet()):
+        return render_template("TabWallet_debug.html")
 
+    response = {
+        'NodeType': m_cfg['type'],
+        'info': "This URL/API is not available"
+     }
+    return jsonify(response), 400
 
-@app.route("/",methods=['POST', 'GET'])
+@app.route("/",methods=['GET'])
 def index():
     if (isBCNode()):
         return render_template("indexBC.html")
     if (isWallet()):
-        if request.method == 'POST':
-            return c_walletInterface.form_post(request)
         return render_template("TabWallet.html")
 
     response = {
@@ -197,6 +206,15 @@ def index():
 ################## Wallet specific routes
 @app.route('/wallet/create', methods=['POST'])
 def wallet_create():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/wallet/createKey', methods=['POST'])
+def wallet_createKey():
     linkInfo = {}
     try:
         values = request.get_json()

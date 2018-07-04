@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <b>Welcome to School of Academy Python-based Blockchain project:</b>
+    <p>
+        Open another tab for 127.0.0.x:
+        <button type="button" onClick="window.open('http://127.0.0.1:5555')">1</button>
+        <button type="button" onClick="window.open('http://127.0.0.2:5555')">2</button>
+        <button type="button" onClick="window.open('http://127.0.0.3:5555')">3</button>
+        <button type="button" onClick="window.open('http://127.0.0.4:5555')">4</button>
+        <button type="button" onClick="window.open('http://127.0.0.5:5555')">5</button>
+        <button type="button" onClick="window.open('http://127.0.0.6:5555')">6</button>
+        <button type="button" onClick="window.open('http://127.0.0.7:5555')">7</button>
+        <button type="button" onClick="window.open('http://127.0.0.8:5555')">8</button>
+        <button type="button" onClick="window.open('http://127.0.0.9:5555')">9</button>
+        <button type="button" onClick="window.open('http://127.0.0.10:5555')">10</button>
+        <button type="button" onClick="window.open('http://127.0.0.11:5555')">11</button>
+        <button type="button" onClick="window.open('http://127.0.0.12:5555')">12</button>
+        <button type="button" onClick="JavaScript:doGET('save/{dumpfile}')" style="background-color:#fced0d">Save as sys.pydat</button><input type="text" size="18" value="sysDumpNapCoin.dat" id="pdumpfile" />
+        <button type="button" onClick="JavaScript:doGET('load/{dumpfile}')" style="background-color:#fced0d">Load from sys.pydat</button>
+
+    </p>
+           <table width="100%" border="1">
+               <tr>
+                   <td>
+                       <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('info')" style="background-color:#4CAF50"> /info</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('debug')" style="background-color:#0eb14d"> /debug</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('debug/reset-chain')" style="background-color:#0eb14d"> /debug/reset-chain</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('debug/mine/{minerAddressd}/{difficulty}')" style="background-color:#0eb14d"> /debug/mine/{minerAddress}/{difficulty}</button><input type="text" size="12" value="0" id="pminerAddressd" /><input type="text" size="5" value="0" id="pdifficulty" />
+                       <br /><button type="button" onClick="JavaScript:doGET('blocks')" style="background-color:#e912e1"> /blocks</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('blocks/{number}')" style="background-color:#e912e1" )> /blocks/{number}</button><input type="text" size="5" value="0" id="pnumber" />
+                       <br /><button type="button" onClick="JavaScript:doGET('transactions/pending')" style="background-color:#ffd800"> /transactions/pending</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('transactions/confirmed')" style="background-color:#ffd800"> /transactions/confirmed</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('transactions/{TXHash}')" style="background-color:#ffd800"> /transactions/{TXHash}</button><input type="text" size="32" value="0" id="pTXHash" />
+                       <br /><button type="button" onClick="JavaScript:doPOST('transactions/send')" style="background-color:#ffd800"><b>POST </b>/transactions/send</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('balances')" style="background-color:#ff0000"> /balances</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('address/{addresst}/transactions')" style="background-color:#ff0000"> /address/{address}/transactions</button><input type="text" size="24" value="0" id="paddresst" />
+                       <br /><button type="button" onClick="JavaScript:doGET('address/{addressb}/balance')" style="background-color:#ff0000"> /address/{address}/balance</button><input type="text" size="24" value="0" id="paddressb" />
+                       <br /><button type="button" onClick="JavaScript:doGET('peers')" style="background-color:#b6ff00"> /peers</button>
+                       <br /><button type="button" onClick="JavaScript:doPOST('peers/connect')" style="background-color:#b6ff00"><b>POST </b>/peers/connect</button>
+                       <br /><button type="button" onClick="JavaScript:doPOST('peers/notify-new-block')" style="background-color:#b6ff00"><b>POST </b>/peers/notify-new-block</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('listNodes')" style="background-color:#5e5858"> /listNodes [test API only!]</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('mining/get-mining-job/{minerAddress}')" style="background-color:#0c10f4"> /mining/get-mining-job/{minerAddress}</button><input type="text" size="18" value="0" id="pminerAddress" />
+                       <br /><button type="button" onClick="JavaScript:doPOST('mining/submit-mined-block')" style="background-color:#0c10f4"><b>POST </b>/mining/submit-mined-block</button>
+                   </td>
+                   <td>
+                       Place data for any <b>POST</b> commands in here:<br />
+                       <textarea id="POSTData" cols="100" rows="5">
+{
+  "peerUrl":"http://127.0.0.1:5555"
+}
+                        </textarea><br /><br />
+                       REST-API log: <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
+                       <div>
+                           <textarea id="response" cols="100" rows="15">
+                            </textarea>
+                       </div>
+                   </td>
+               </tr>
+           </table>
+    <script>
+        var cnt = 1;
+        // helper function, but currently port fixex
+        function getPort() {
+            return 5555
+        }
+
+        function fillURL(inDat) {
+            var items = inDat.split("{");
+            //var test = inDat.match("/{.+}/g");
+            for (var i = 1; i < items.length; i = i + 1) {
+                var test = items[i].indexOf("}");
+                toReplace = items[i].substr(0,test);
+                repl = document.getElementById("p" + toReplace).value;
+                inDat = inDat.replace("{"+toReplace + "}", repl);
+            }
+            return inDat;
+        }
+
+        // helper function to show results as 
+        function addLog(text, start) {
+            if (start == true) {
+                ntext = "\n---- [Command count:" + cnt + "]" + text
+                cnt++
+            } else {
+                //ntext = "\n\r==> Reply:\n\r"+text
+                ntext= text
+            }
+            document.getElementById("response").value = document.getElementById("response").value + ntext;
+            return ntext
+        }
+
+        // generic function to post data from the input text area field
+        function doPOST(url) {
+            port = getPort()
+            if (port < 1024) {
+                newContent = "Error: No Port";
+            } else {
+                url = fillURL(url);
+                //var url = getDomain() + ":" + port + "/" + url;
+                datax = document.getElementById("POSTData").value.replace(/\\n/g, "");
+                var data = JSON.parse(datax);
+                keep = "==> POST / " + url + " with: " + datax;
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (this.readyState == 4) {
+                        if (this.status == 200) {
+                            text = xhr.responseText.replace(/\n/g, "");
+                            var json = JSON.parse(xhr.responseText);
+                            var input = document.createElement("textarea");
+                            input.value = text.replace(/",/g, "\",\r\n").replace(/],/g, "],\r\n");
+                            input.setAttribute('cols', 40);
+                            input.setAttribute('rows', 5);
+                            document.getElementById("response").appendChild(input);
+                        } else {
+                            text = "Error: " + this.status + " ==> " + xhr.responseText;
+                        }
+                        addLog("\n!!!!Completed: " + keep + "\nReply:\n" + text, false);
+                    }
+                };
+                xhr.open("POST", url, true);
+                xhr.setRequestHeader("Content-Type", "application/json");
+                xhr.send(JSON.stringify(data));
+            }
+            keep = addLog(keep, true);
+            addLog("\n   ... waiting for reply ....", false)
+        }
+
+        // helper function for debugging the standard API calls to test, configure etc.
+        function doGET(url) {
+            keep=""
+            port = getPort();
+            if (port < 1024) {
+                newContent = "No Port";
+            } else {
+                url = fillURL(url);
+                //url = getDomain() + ":" + port + "/" + url;
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4) {
+                        if (this.status == 200) {
+                            text = this.responseText;
+                        } else {
+                            text = "Error: " + this.status + " ==> " + this.responseText;
+                        }
+                        addLog("\n!!!! Completed: "+keep+"\nReply:\n"+text,false);
+                    }
+                };
+                xhttp.open("GET", url, true);
+                xhttp.send();
+                keep = "==> GET / " + url;
+            }
+            keep = addLog(keep, true);
+            addLog("\n    ... waiting for reply ....",false)
+        }
+    </script>
+</body>
+</html>

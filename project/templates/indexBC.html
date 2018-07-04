@@ -1,158 +1,318 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+            /* Style the buttons inside the tab */
+            .tab button {
+                background-color: inherit;
+                float: left;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 14px 16px;
+                transition: 0.3s;
+                font-size: 17px;
+            }
+
+        .subtab button {
+            background-color: #ddd;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+
+        .subtab button.active {
+            background-color: #808080;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            -webkit-animation: fadeEffect 1s;
+            animation: fadeEffect 1s;
+        }
+
+        /* Fade in tabs */
+        @-webkit-keyframes fadeEffect {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeEffect {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .alert {
+            padding: 20px;
+            background-color: #f1f1f1;
+            color: white;
+        }
+
+        .closebtn {
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+            float: left;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .closebtn:hover {
+                color: black;
+            }
+    </style>
+</head>
 <body>
-    <b>Welcome to School of Academy Python-based Blockchain project:</b>
-    <p>
-        Open another tab for 127.0.0.x:
-        <button type="button" onClick="window.open('http://127.0.0.1:5555')">1</button>
-        <button type="button" onClick="window.open('http://127.0.0.2:5555')">2</button>
-        <button type="button" onClick="window.open('http://127.0.0.3:5555')">3</button>
-        <button type="button" onClick="window.open('http://127.0.0.4:5555')">4</button>
-        <button type="button" onClick="window.open('http://127.0.0.5:5555')">5</button>
-        <button type="button" onClick="window.open('http://127.0.0.6:5555')">6</button>
-        <button type="button" onClick="window.open('http://127.0.0.7:5555')">7</button>
-        <button type="button" onClick="window.open('http://127.0.0.8:5555')">8</button>
-        <button type="button" onClick="window.open('http://127.0.0.9:5555')">9</button>
-        <button type="button" onClick="window.open('http://127.0.0.10:5555')">10</button>
-        <button type="button" onClick="window.open('http://127.0.0.11:5555')">11</button>
-        <button type="button" onClick="window.open('http://127.0.0.12:5555')">12</button>
-        <button type="button" onClick="JavaScript:doGET('save/{dumpfile}')" style="background-color:#fced0d">Save as sys.pydat</button><input type="text" size="18" value="sysDumpNapCoin.dat" id="pdumpfile" />
-        <button type="button" onClick="JavaScript:doGET('load/{dumpfile}')" style="background-color:#fced0d">Load from sys.pydat</button>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/GET_POST.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/js/GET_POST.js"></script>
 
-    </p>
-           <table width="100%" border="1">
-               <tr>
-                   <td>
-                       <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('info')" style="background-color:#4CAF50"> /info</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('debug')" style="background-color:#0eb14d"> /debug</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('debug/reset-chain')" style="background-color:#0eb14d"> /debug/reset-chain</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('debug/mine/{minerAddressd}/{difficulty}')" style="background-color:#0eb14d"> /debug/mine/{minerAddress}/{difficulty}</button><input type="text" size="12" value="0" id="pminerAddressd" /><input type="text" size="5" value="0" id="pdifficulty" />
-                       <br /><button type="button" onClick="JavaScript:doGET('blocks')" style="background-color:#e912e1"> /blocks</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('blocks/{number}')" style="background-color:#e912e1" )> /blocks/{number}</button><input type="text" size="5" value="0" id="pnumber" />
-                       <br /><button type="button" onClick="JavaScript:doGET('transactions/pending')" style="background-color:#ffd800"> /transactions/pending</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('transactions/confirmed')" style="background-color:#ffd800"> /transactions/confirmed</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('transactions/{TXHash}')" style="background-color:#ffd800"> /transactions/{TXHash}</button><input type="text" size="32" value="0" id="pTXHash" />
-                       <br /><button type="button" onClick="JavaScript:doPOST('transactions/send')" style="background-color:#ffd800"><b>POST </b>/transactions/send</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('balances')" style="background-color:#ff0000"> /balances</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('address/{addresst}/transactions')" style="background-color:#ff0000"> /address/{address}/transactions</button><input type="text" size="24" value="0" id="paddresst" />
-                       <br /><button type="button" onClick="JavaScript:doGET('address/{addressb}/balance')" style="background-color:#ff0000"> /address/{address}/balance</button><input type="text" size="24" value="0" id="paddressb" />
-                       <br /><button type="button" onClick="JavaScript:doGET('peers')" style="background-color:#b6ff00"> /peers</button>
-                       <br /><button type="button" onClick="JavaScript:doPOST('peers/connect')" style="background-color:#b6ff00"><b>POST </b>/peers/connect</button>
-                       <br /><button type="button" onClick="JavaScript:doPOST('peers/notify-new-block')" style="background-color:#b6ff00"><b>POST </b>/peers/notify-new-block</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('listNodes')" style="background-color:#5e5858"> /listNodes [test API only!]</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('mining/get-mining-job/{minerAddress}')" style="background-color:#0c10f4"> /mining/get-mining-job/{minerAddress}</button><input type="text" size="18" value="0" id="pminerAddress" />
-                       <br /><button type="button" onClick="JavaScript:doPOST('mining/submit-mined-block')" style="background-color:#0c10f4"><b>POST </b>/mining/submit-mined-block</button>
-                   </td>
-                   <td>
-                       Place data for any <b>POST</b> commands in here:<br />
-                       <textarea id="POSTData" cols="100" rows="5">
-{
-  "peerUrl":"http://127.0.0.1:5555"
-}
-                        </textarea><br /><br />
-                       REST-API log: <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
-                       <div>
-                           <textarea id="response" cols="100" rows="15">
-                            </textarea>
-                       </div>
-                   </td>
-               </tr>
-           </table>
+
+    <div class="tab maintab">
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Block')">Block</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'TX')">Transaction</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Mining')">Mining</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Query')">NodeInfo</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
+    </div>
+    Provide <span id="inputText1">blocknumber</span><input type="text" id="inputVal1" value="" size="20"><br />
+    Output as JSON or <input type="checkbox" id="useTable">Table<br />
+    <div id="Block" class="tabcontent maintab">
+        <div class="tab subtab blockTab">
+            <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'allBlocks'); doDirect('blocks','AB')">All blocks</button>
+            <button class="tablinks blockTab" onclick="openTab(event, 'blockTab', 'blockNum')">Block by number</button>
+        </div>
+        <div id="allBlocks" class="tabcontent blockTab">
+            Limit for table view:<br />
+            <div id="optionsAB"></div>
+            <span id="resultAB">Command results....</span>
+        </div>
+        <div id="blockNum" class="tabcontent blockTab">
+            <span id="optionsBN">Command results....</span>
+            <span id="resultBN">Command results....</span>
+        </div>
+    </div>
+
+    <div id="TX" class="tabcontent maintab">
+        <div class="tab subtab txTab">
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">Pending</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">Confirnmed</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">by TXHash</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">by address</button>
+        </div>
+       
+    </div>
+
+    <div id="Balance" class="tabcontent maintab">
+        <div class="tab subtab balTab">
+            <button class="tablinks balTab" onclick="openTab(event, 'blockTab', 'blockAll')">All non-zero balances</button>
+            <button class="tablinks balTab" onclick="openTab(event, 'blockTab', 'blockAll')">by address</button>
+        </div>
+    </div>
+
+    <div id="Mining" class="tabcontent maintab">
+        <div class="tab subtab mineTab">
+            <button class="tablinks blockTab" onclick="openTab(event, 'mineTab', 'blockAll')">Current MineInfo</button>
+        </div>
+    </div>
+
+    <div id="Query" class="tabcontent maintab">
+        <div class="tab subtab qTab">
+            <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
+            <button class="tablinks qTab" onclick="openTab(event, 'qTab', 'peerDat')">Peers</button>
+        </div>
+        <div id="nInfo" class="tabcontent qTab">
+            <div id="optionsNI"></div>
+            <span id="resultNI">Command results....</span>
+        </div>
+    </div>
+
+    <div id="Info" class="tabcontent maintab">
+        With this browser you can access blockchain information from the node directly. By directly connecting to
+        a node, you can even check for differences in fork situations, because each block provides its respective information.<br />
+        For some commands you need to provide some extra data in the common field.
+    </div>
+    <hr />
+
+
     <script>
-        var cnt = 1;
-        // helper function, but currently port fixex
-        function getPort() {
-            return 5555
-        }
-
-        function fillURL(inDat) {
-            var items = inDat.split("{");
-            //var test = inDat.match("/{.+}/g");
-            for (var i = 1; i < items.length; i = i + 1) {
-                var test = items[i].indexOf("}");
-                toReplace = items[i].substr(0,test);
-                repl = document.getElementById("p" + toReplace).value;
-                inDat = inDat.replace("{"+toReplace + "}", repl);
-            }
-            return inDat;
-        }
-
-        // helper function to show results as 
-        function addLog(text, start) {
-            if (start == true) {
-                ntext = "\n---- [Command count:" + cnt + "]" + text
-                cnt++
-            } else {
-                //ntext = "\n\r==> Reply:\n\r"+text
-                ntext= text
-            }
-            document.getElementById("response").value = document.getElementById("response").value + ntext;
-            return ntext
-        }
-
-        // generic function to post data from the input text area field
-        function doPOST(url) {
-            port = getPort()
-            if (port < 1024) {
-                newContent = "Error: No Port";
-            } else {
-                url = fillURL(url);
-                //var url = getDomain() + ":" + port + "/" + url;
-                datax = document.getElementById("POSTData").value.replace(/\\n/g, "");
-                var data = JSON.parse(datax);
-                keep = "==> POST / " + url + " with: " + datax;
-                var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function () {
-                    if (this.readyState == 4) {
-                        if (this.status == 200) {
-                            text = xhr.responseText.replace(/\n/g, "");
-                            var json = JSON.parse(xhr.responseText);
-                            var input = document.createElement("textarea");
-                            input.value = text.replace(/",/g, "\",\r\n").replace(/],/g, "],\r\n");
-                            input.setAttribute('cols', 40);
-                            input.setAttribute('rows', 5);
-                            document.getElementById("response").appendChild(input);
-                        } else {
-                            text = "Error: " + this.status + " ==> " + xhr.responseText;
-                        }
-                        addLog("\n!!!!Completed: " + keep + "\nReply:\n" + text, false);
+        function tablify(jsonList, order,level,pref) {
+            var res = "";
+            var th = "";
+            var useorder = [];
+            var suborder = [];
+            if (order.length == 0) {
+                if (typeof jsonList[0] === "string") {
+                    // special case
+                    for (var det = 0; det < jsonList.length; det++) {
+                        res = res + jsonList[det] + "<br />"
                     }
-                };
-                xhr.open("POST", url, true);
-                xhr.setRequestHeader("Content-Type", "application/json");
-                xhr.send(JSON.stringify(data));
+                    return res;
+                }
+                for (var key in jsonList[0]) {
+                    if (jsonList[0].hasOwnProperty(key)) {
+                        order.push(pref + key);
+                        useorder.push(key);
+                    }
+                }
+            } else {
+                for (var i = 0; i < order.length; i++) {
+                    var spl = order[i].split(":");
+                    if (useorder.indexOf(spl[0]) < 0) {
+                        useorder.push(spl[0]);
+                    }
+                    if (spl.length > 1) {
+                        var sorder = "";
+                        for (var j = 1; j < spl.length; j++) {
+                            sorder = sorder + spl[j] + ":";
+                        }
+                        suborder.push(sorder.substring(0, sorder.length - 1));
+                    }
+                }
             }
-            keep = addLog(keep, true);
-            addLog("\n   ... waiting for reply ....", false)
+
+            var col = "style='background-color:#87CEFA'";
+            switch (level) {
+                case 0:
+                    col = "style='background-color:#87CEFA'";
+                    break;
+                case 1:
+                    col = "style='background-color:#6495ED'";
+                    break;
+                case 2:
+                    col = "style='background-color:#B0E0E6'";
+                    break;
+                    
+            }
+            for (var i = 0; i < useorder.length; i++) {
+                th = th + "<th "+col+">" + useorder[i] + "</th>";
+            }
+            for (var cnt = 0; cnt < jsonList.length; cnt++) {
+                res = res + "<tr><td>" + (cnt + 1) + "</td>";
+                for (var det = 0; det < useorder.length; det++) {
+                    if (jsonList[cnt].hasOwnProperty(useorder[det])) {
+                        if (jsonList[cnt][useorder[det]] instanceof Array) {
+                            res = res + "<td>";
+                            var wasEmpty = (suborder.length == 0);
+                            res = res + tablify(jsonList[cnt][useorder[det]], suborder, level + 1, pref + useorder[det] + ":") + "</td>";
+                            if (wasEmpty) {
+                                order.push.apply(order,suborder);
+                            }
+                        } else {
+                            res = res + "<td>" + jsonList[cnt][useorder[det]] + "</td>";
+                        }
+                    }
+                }
+                res = res + "</tr>";
+            }
+            res = "<table border='1'><th>#</th>" + th + res + "</table>"
+            return res;
         }
 
-        // helper function for debugging the standard API calls to test, configure etc.
-        function doGET(url) {
-            keep=""
-            port = getPort();
-            if (port < 1024) {
-                newContent = "No Port";
-            } else {
-                url = fillURL(url);
-                //url = getDomain() + ":" + port + "/" + url;
-                var xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function () {
-                    if (this.readyState == 4) {
-                        if (this.status == 200) {
-                            text = this.responseText;
-                        } else {
-                            text = "Error: " + this.status + " ==> " + this.responseText;
-                        }
-                        addLog("\n!!!! Completed: "+keep+"\nReply:\n"+text,false);
-                    }
-                };
-                xhttp.open("GET", url, true);
-                xhttp.send();
-                keep = "==> GET / " + url;
+        function breakup(json) {
+            return "<pre>"+JSON.stringify(json, null, 2)+"</pre>";
+        }
+
+
+        function addCheckBoxes(id, options) {
+            options.sort();
+            var parentElement = document.getElementById(id);
+
+            for (var count = 0; count < options.length;count++) {
+                var newCheckBox = document.createElement('input');
+                newCheckBox.type = 'checkbox';
+                newCheckBox.id = id + 'opt'+count;
+                newCheckBox.classList.add(id + 'opt');
+                newCheckBox.value = options[count]
+                parentElement.appendChild(newCheckBox);
+                parentElement.appendChild(document.createTextNode(options[count]+" "));
             }
-            keep = addLog(keep, true);
-            addLog("\n    ... waiting for reply ....",false)
+        }
+
+        function doDirect(url, ext) {
+            var id = "#result" + ext;
+            var repl = doGETSynch(url);
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
+                var opts = []
+                var addOptions = true;
+                $(".options" + ext+"opt").each(function () {
+                    addOptions = false;
+                    if ($(this).is(':checked')) {
+                        opts.push($(this).val());
+                    }
+                });
+                if (document.getElementById("useTable").checked) {
+                    if (json instanceof Array) {
+                        $(id).html(tablify(json, opts, 0, ""));
+                    } else {
+                        $(id).html(tablify([json], opts, 0, ""));
+                    }
+                    if (addOptions) {//first time
+                        //repl[1] = Array.from(new Set(repl[1]));
+                        addCheckBoxes("options" + ext, opts)
+                    }
+                } else {
+                    $(id).html(breakup(json));
+                }
+            } else {
+                $(id).text("Command rejected with reason: " + JSON.stringify(json));
+            }
+        }
+
+        /*
+        * Tab Manager
+        */
+        function openTab(evt, tabs, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent " + tabs);
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks " + tabs);
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            evt.currentTarget.className += " active";
+            document.getElementById(tabName).style.display = "block";
         }
     </script>
 </body>
