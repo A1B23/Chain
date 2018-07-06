@@ -22,6 +22,8 @@ from project.nspec.wallet.modelW import m_db
 def finalise(peer, port, type):
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
+    useVis = m_cfg['useDelay']
+    m_cfg['useDelay'] = False
     c_peer.setPeersAs(peer, port)
     thread = Thread(target=c_peer.checkEveryXSecs, args=(m_cfg['peersCheck'],))
     thread.start()
@@ -37,7 +39,7 @@ def finalise(peer, port, type):
     if (type == "Wallet"):
         #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
         m_db['db'] = sqlite3.connect(m_db['DATABASE'])
-
+    m_cfg['useDelay'] = useVis
 
 @app.after_request
 def after_request(response):
@@ -67,7 +69,7 @@ def init(parser):
     parser.add_argument('-minP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
     parser.add_argument('-maxP', '--maxPeers', default=1, type=int, help='max peer communication, if more peers are known')
     #TODO set default to False after testing
-    parser.add_argument('-delay', '--useDelay', default=False, help='use delay option to hold GET/POST until visualisation is updated')
+    parser.add_argument('-delay', '--useDelay', default=True, type=bool, help='use delay option to hold GET/POST until visualisation is updated')
     parser.add_argument('-mod', '--mode', default="y", help='modus of miner to work, e.g. y=await user to trigger mining')
     args = parser.parse_args()
     port = args.port

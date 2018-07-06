@@ -31,7 +31,7 @@ function doPOSTSynch(url, updateField, data) {
                 document.getElementById(updateField).appendChild(input);
             }
         } else {
-            json = { "message": xhr.responseText };
+            json = JSON.parse(xhr.responseText);
         }
         if (updateField != null) {
             document.getElementById(updateField).value = document.getElementById(updateField).value + text;
@@ -52,11 +52,10 @@ function doGETSynch(url) {
         var xhttp = new XMLHttpRequest();
         xhttp.open("GET", url, false);
         xhttp.send();
-        if (xhttp.status == 200) {
+        //if (xhttp.status == 200) {
             json = JSON.parse(xhttp.responseText)
-        } else {
-            json = { "message": xhttp.responseText };
-        }
+        //} else {
+        //    json = JSON.parse(xhr.responseText);
     }
     return [json, xhttp.status];
 }
@@ -92,11 +91,26 @@ function doPOST(url, updateField, getField) {
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.send(JSON.stringify(data));
         }
-        //keep = addLog(keep, true);
-        //addLog("\n   ... waiting for reply ....", false)
     }
 
     // helper function for debugging the standard API calls to test, configure etc.
+    function doGETCallback(url, callBack,callBackData) {
+        keep = ""
+        port = getPort();
+        if (port < 1024) {
+            newContent = "No Port";
+        } else {
+            var url = fillURL(url);
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    callBack(this.responseText, callBackData);
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+    }
     function doGET(url,updateField) {
         keep = ""
         port = getPort();
@@ -118,10 +132,7 @@ function doPOST(url, updateField, getField) {
             };
             xhttp.open("GET", url, true);
             xhttp.send();
-            //keep = "==> GET / " + url;
         }
-        //keep = addLog(keep, true);
-        //addLog("\n    ... waiting for reply ....", false)
     }
 
     function fillURL(inDat) {

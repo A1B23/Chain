@@ -103,12 +103,10 @@
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/GET_POST.js"></script>
 
-
     <div class="tab maintab">
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Block')">Block</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'TX')">Transaction</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Mining')">Mining</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Query')">NodeInfo</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
     </div>
@@ -117,7 +115,7 @@
     <div id="Block" class="tabcontent maintab">
         <div class="tab subtab blockTab">
             <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'allBlocks'); doDirect('blocks','AB')">All blocks</button>
-            <button class="tablinks blockTab" onclick="openTab(event, 'blockTab', 'blockNum')">Block by number</button>
+            <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'blockNum')">Block by number</button>
         </div>
         <div id="allBlocks" class="tabcontent blockTab">
             Limit for table view:<br />
@@ -133,12 +131,29 @@
 
     <div id="TX" class="tabcontent maintab">
         <div class="tab subtab txTab">
-            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">Pending</button>
-            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">Confirnmed</button>
-            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">by TXHash</button>
-            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'createWallet')">by address</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'txP');doDirect('transactions/pending', 'TP')">Pending</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'txC');doDirect('transactions/confirmed', 'TC')">Confirmed</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'txH')">by TXHash</button>
+            <button class="tablinks txTab" onclick="openTab(event, 'txTab', 'txA')">by address</button>
         </div>
-
+        <div id="txP" class="tabcontent txTab">
+            <div id="optionsTP"></div>
+            <span id="resultTP">Command results....</span>
+        </div>
+        <div id="txC" class="tabcontent txTab">
+            <div id="optionsTC"></div>
+            <span id="resultTC">Command results....</span>
+        </div>
+        <div id="txH" class="tabcontent txTab">
+            Provide TXHash<input type="text" id="paramTH" value="" size="40"><button class="tablinks txTab" onclick="JavaScript:doParameter('transactions/?', 'TH');">Submit</button><br />
+            <div id="optionsTH"></div>
+            <span id="resultTH">Command results....</span>
+        </div>
+        <div id="txA" class="tabcontent txTab">
+            Provide address<input type="text" id="paramTA" value="" size="40"><button class="tablinks txTab" onclick="JavaScript:doParameter('address/?/transactions', 'TA');">Submit</button><br />
+            <div id="optionsTA"></div>
+            <span id="resultTA">Command results....</span>
+        </div>
     </div>
 
     <div id="Balance" class="tabcontent maintab">
@@ -157,16 +172,12 @@
         </div>
     </div>
 
-    <div id="Mining" class="tabcontent maintab">
-        <div class="tab subtab mineTab">
-            <button class="tablinks blockTab" onclick="openTab(event, 'mineTab', 'blockAll')">Current MineInfo</button>
-        </div>
-    </div>
-
     <div id="Query" class="tabcontent maintab">
         <div class="tab subtab qTab">
             <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerDat');doDirect('peers','PE')">Peers</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerList');doDirect('listNodes','PL')">PeerInfo</button>
+
         </div>
         <div id="nInfo" class="tabcontent qTab">
             <div id="optionsNI"></div>
@@ -175,6 +186,10 @@
         <div id="peerDat" class="tabcontent qTab">
             <div id="optionsPE"></div>
             <span id="resultPE">Command results....</span>
+        </div>
+        <div id="peerList" class="tabcontent qTab">
+            <div id="optionsPL"></div>
+            <span id="resultPL">Command results....</span>
         </div>
     </div>
 
@@ -259,7 +274,19 @@
                                 suborder = [];
                             }
                         } else {
-                            res = res + "<td>" + jsonList[cnt][useorder[det]] + "</td>";
+                            if ((typeof jsonList[cnt][useorder[det]] != "string") &&
+                                (typeof jsonList[cnt][useorder[det]] != "boolean") &&
+                                (typeof jsonList[cnt][useorder[det]] != "number"))   {
+                                res = res + "<td>";
+                                var wasEmpty = (suborder.length == 0);
+                                res = res + tablify([jsonList[cnt][useorder[det]]], suborder, level + 1, pref + useorder[det] + ":", horizontal) + "</td>";
+                                if (wasEmpty) {
+                                    order.push.apply(order, suborder);
+                                    suborder = [];
+                                }
+                            } else {
+                                res = res + "<td>" + jsonList[cnt][useorder[det]] + "</td>";
+                            }
                         }
                     }
                     if (!horizontal) {
@@ -326,7 +353,6 @@
                         $(id).html(tablify([json], opts, 0, "", horizontal));
                     }
                     if (addOptions) {//first time
-                        //repl[1] = Array.from(new Set(repl[1]));
                         addCheckBoxes("options" + ext, opts)
                     }
                 } else {

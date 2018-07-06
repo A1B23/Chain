@@ -21,33 +21,49 @@ from time import sleep
 
 cntDelay = [0]
 class peers:
+
+    #TODO when we receive info etc. from an unknonw node and outr count is below needd
+    # then why does the peer list not take it as new node???
+    def visualDelay(self, url, json):
+        print("Added delay info "+url)
+        myDelay = cntDelay[0]
+        m_Delay.append({"delayID": myDelay, "url": url, "json": json})
+        cntDelay[0] = cntDelay[0] + 1
+        try:
+            maxCount = 10 # delay at most 10 seconds then move on, but keep the buffer anyway
+            while (maxCount > 0) and (len(m_Delay) > 0):
+                for item in m_Delay:
+                    if 'delayID' in item:
+                        if item['delayID'] == myDelay:
+                            sleep(1)
+                            maxCount = maxCount - 1
+                            break
+                    if 'releaseID' in item:
+                        if item['releaseID'] == myDelay:
+                            sleep(1)
+                            maxCount = maxCount - 1
+                            break
+
+        except Exception:  # means no ,m_Delay
+            myDelay = -1
+        print("...continue processing for " + url + " ("+str(myDelay) + ", " + str(maxCount) + ")")
+
+
     def doPOST(self, url, json):
-        if (m_cfg['useDelay'] == True):
-            myDelay = cntDelay[0]
-            m_Delay.append({"delay": myDelay, "url": url, "json": json})
-            cntDelay[0] = cntDelay[0] + 1
-            try:
-                while (m_Delay[0]['delay'] == myDelay):
-                    sleep(1)
-            except Exception: #means no ,m_Delay
-                myDelay=-1
+        if m_cfg['useDelay'] == True:
+            self.visualDelay(url, json)
         return requests.post(url=url, json=json)
+
 
     def doGET(self, url):
         if (m_cfg['useDelay'] == True):
-            myDelay = cntDelay[0]
-            m_Delay.append({"delay": myDelay, "url": url})
-            cntDelay[0] = cntDelay[0] + 1
-            try:
-                while (m_Delay[0]['delay'] == myDelay):
-                    sleep(1)
-            except Exception: #means no ,m_Delay
-                myDelay=-1
+            self.visualDelay(url, {})
         #return requests.get(url=url)
         return requests.get(url=url, headers={'accept': 'application/json'})
 
+
     def asynchPOST(self, url, json, skipPeer):
-        cnt=0
+        cnt = 0
         if (url[0] != "/"):
             url = "/"+url
         print("Current asynch list: "+str(m_cfg['peers']))
@@ -60,7 +76,7 @@ class peers:
                     self.doPOST(url=peer + url, json=json)
                     cnt = cnt + 1
                     m_cfg['peers'][peer]['active'] = True
-                    if (cnt> m_cfg['minPeers']): #TODO stop sending when min reached, do more?
+                    if (cnt > m_cfg['minPeers']): #TODO stop sending when min reached, do more?
                         break
                 except Exception:
                     m_cfg['peers'][peer]['numberFail'] = m_cfg['peers'][peer]['numberFail'] + 1
@@ -189,6 +205,13 @@ class peers:
         return True
 
     def addPeer(self, url, addCheck):
+        pos = url.index("//")
+        try:
+            pos = url.index("/", pos+2)
+            url = url[0:pos]
+        except Exception:
+            pos=-1
+
         for x in m_cfg['peers']:
             if (url.startswith(x)):
                 return False

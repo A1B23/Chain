@@ -452,7 +452,8 @@
         */
         $(".alert").css("display", "none");
         initState();
-        user = prompt("Please enter your username", "User");
+        user = prompt("Please enter your username", "");
+        //user = "User";
 
         function h(message) {
             return "<u>" + message + "</u>";
@@ -763,7 +764,7 @@
                 doAlert("Tx succeeded " + hash, 8);
                 $("#TxHash").text(hash);
             } else {
-                doAlert(JSON.parse(json), 0);
+                doAlert(JSON.stringify(json), 0);
             }
         }
 

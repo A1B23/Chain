@@ -96,7 +96,7 @@ class transactions:
 
     def getTXForHash(self,hash):
         if (len(hash) != len(defHash)):
-            errMsg("Invalid Hash Len",400)
+            return errMsg("Invalid Hash Len", 400)
         response = self.getPendTXByHash(hash)
         # if a given hash is found already, no other exists, else keep searching
         if (len(hash) == 0) or (len(response) == 0):

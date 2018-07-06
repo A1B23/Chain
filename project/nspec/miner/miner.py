@@ -65,8 +65,7 @@ def isDataValid(resp_text):
 def pull():
     if (cfg['scanning'] < 8):
         return
-
-    if (cfg['scanning'] >8):
+    elif (cfg['scanning'] >8):
         cfg['scanning'] = 0
         if (m_cfg['mode'] == "y"):
             print("enter m <return> to start mining")
@@ -75,9 +74,11 @@ def pull():
             while (choice != "m"):
                 choice = input().lower()
 
-
     print("==== First Stage : Request mining data from Node: "+str(m_cfg['peers']))
     try:
+        if m_cfg['useDelay'] and (cfg['scanning'] == 8):
+            print("Delay pull for animation....")
+            sleep(3) #TODO This sleep is trial first
         resp_text = getCandidate()
         if (isDataValid(resp_text) == False):
             # no point to waste time and effort on this invalid/incomplete candidate
@@ -120,6 +121,7 @@ def pullCandidate():
                 sleep(int(candidate['difficulty']/2))
             else:
                 sleep(2)
+
         except Exception:
             print("Pulling candidate block failed...")
 
@@ -146,7 +148,7 @@ def doMine():
                     candidate['nonce'] = (candidate['nonce'] + 1) % cfg['maxNonce']  # increment modulus max
                     count = count + 1
                     show = show + 1
-                    if (show > 10000):
+                    if (show > 20000):
                         print(str(count) + " "+str(candidate['nonce']))
                         show = 0
 

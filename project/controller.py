@@ -12,12 +12,25 @@ from copy import deepcopy
 
 c_MainIntf = mainInterface()
 
-@app.route('/visual')
-def visual():
-    dat = []
-    if (len(m_Delay)>0):
-        dat = m_Delay.pop(0)
+@app.route('/visualGet')
+def visualGet():
+    dat = {}
+    for item in m_Delay:
+        if 'delayID' in item:
+            dat = deepcopy(item)
+            item['releaseID'] = dat['delayID']
+            del item['delayID']
+            break
     return jsonify(dat), 200
+
+@app.route('/visualRelease/<int:id>')
+def visualRelease(id):
+    for item in m_Delay:
+        if ('releaseID' in item) and (item['releaseID'] == id):
+            rel = item
+            break
+    m_Delay.remove(rel)
+    return jsonify(rel), 200
 
 
 @app.route('/cfg')
@@ -71,7 +84,7 @@ def blocks():
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /blocks/{number}
-@app.route('/blocks/<number>')
+@app.route('/blocks/<int:number>')
 def blocks_getByNumber(number):
     linkInfo = {"blockNumber": number}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
@@ -165,7 +178,7 @@ def mining_submitBlock():
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 #GET /debug/mine/{minerAddress}/{difficulty}
-@app.route('/debug/mine/<minerAddress>/<difficulty>')
+@app.route('/debug/mine/<minerAddress>/<int:difficulty>')
 def debug_mining(minerAddress, difficulty):
     linkInfo = {"address": minerAddress, "difficulty": difficulty}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)

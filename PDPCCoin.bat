@@ -47,7 +47,7 @@ set minPeers=2
 set maxPeers=3
 set col=2B
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --useDelay %delay%"
 
 set nodeIPnum=4
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%

@@ -5,8 +5,8 @@ from flask import jsonify, request, render_template
 import hashlib, os, json, binascii, datetime, requests
 from project.nspec.wallet.transactions import *
 from project.pclass import c_peer
-from project.models import m_info
-from project.utils import setOK,errMsg
+from project.models import m_info, m_transaction_order
+from project.utils import setOK, errMsg, putDataInOrder
 import sqlite3
 from project.nspec.wallet.modelW import m_db, regexWallet
 from contextlib import closing
@@ -217,6 +217,8 @@ class wallet:
                 signedTX, TxExpectedHash = self.signTx(pk, recAddress, msg, value, fee, senderAddr, senderPK)
                 #TODO do we want to verify the TX hash somehow after we received the reply from node?
                 resps = c_peer.sendPOSTToPeers("transactions/send", signedTX)
+                if len(resps) == 0:
+                    return errMsg("No peer reachable, please retry again or check peer settings...", 400)
                 #TODO should we compare all replies??? Not really??? Just take first one?
                 resp = resps[0].json()
                 return setOK(resp)

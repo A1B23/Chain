@@ -25,26 +25,26 @@
     Welcome to PDPC_Coin <b>Visualiser:</b><br />
     <button type="button" class="options" id="test">test</button>
     <select id="viewsizes" class="options">
-        <option value="0">close</option>
         <option value="1">small</option>
         <option value="3">medium</option>
         <option value="5">large</option>
-
     </select>
+    Show Control: <input type="checkbox" id="ctrl">Show page: <input type="checkbox" id="GUI"><br /><br />
     <div id="control"></div>
     <div class="iframes" id="views">
         <table id="sets">
             <tr>
                 <td class="options">
                     Scan: <input type="checkbox" id="scan"><br />
-                    <button type="button" class="options" onClick="JavaScript:scan(0)">start</button><br />
-                    <button type="button" class="options" onClick="JavaScript:scan(-1)">stop</button><br />
-                    <button type="button" class="options" onClick="JavaScript:step()">step</button>
+                    <button type="button" class="options" onClick="JavaScript: newScan();">newScan</button><br />
+                    <button type="button" class="options" onClick="JavaScript:collectRun()">run</button><br />
+                    <button type="button" class="options" onClick="JavaScript:collectPause()">pause</button><br />
+                    <button type="button" class="options" onClick="JavaScript:collectStep()">step</button>
                 </td>
                 <td id="opt" class="options alt1">
                     IPMinMax 127.0.0.x:
-                    <input type="text" value="1" class="options" size="5" id="IPMin">
-                    <input type="text" value="5" class="options" size="5" id="IPMax">
+                    <input type="text" value="0" class="options" size="5" id="IPMin">
+                    <input type="text" value="0" class="options" size="5" id="IPMax">
                     <br />
                     Circle
                     <select id="circle" class="options">
@@ -171,8 +171,8 @@
                 </td>
                 <td id="opt" class="options alt1">
                     IPMinMax 127.0.0.x:
-                    <input type="text" value="0" class="options" size="5" id="IPMin">
-                    <input type="text" value="0" class="options" size="5" id="IPMax">
+                    <input type="text" value="1" class="options" size="5" id="IPMin">
+                    <input type="text" value="5" class="options" size="5" id="IPMax">
                     <br />
                     Circle
                     <select id="circle" class="options">
@@ -205,8 +205,9 @@
         </table>
     </div>
     <div id='radar' align="center">
-        Time Delay <input type="range" min="50" max="2000" value="200" class="slider" id="delay">
-        Canvas Width <input type="range" min="100" max="900" value="500" class="slider" id="twidth" oninput="resizeCanvas();">
+        Refresh Data Rate <input type="range" min="350" max="2500" value="800" class="slider" id="refreshRate">
+        Anim Delay <input type="range" min="10" max="500" value="150" class="slider" id="animDelay">
+        Canvas Width <input type="range" min="100" max="1200" value="500" class="slider" id="twidth" oninput="resizeCanvas();">
         Canvas Height <input type="range" min="100" max="900" value="500" class="slider" id="theight" oninput="resizeCanvas();">
         <br />
         <canvas onmousemove="draw(event)" id="canvas" class="border">Oops, no canvas supported by your browser?</canvas>
@@ -220,14 +221,22 @@
 
     <script>
         ctx = null
+        totalScan = 0;
+        collectCount = 0;
+        collect = false;
+        initScan = true;
+        maxIter = 32; 
 
         function clearDom(dom) {
             return dom.replace(/\./g, "").replace(/:/g, "").replace(/\//g, "");
         }
+
         $(document).ready(function () {
             ctx = $("#canvas")[0].getContext('2d');
             $("#scan").prop("checked", false);
+            $("#ctrl").prop("checked", true);
             init();
+            lastGUI = "";
             drawGrid();
         });
 
@@ -238,14 +247,21 @@
                 "M": {}
             }
 
+            comNodes = []
+
             rings = [[], [], [], [], []]
 
             col = {
-                "B": ['rgb(255,0,0)', 'rgb(0,255,255)', 'rgb(255,255,0)'],
-                "M": ['rgb(0,255,0)', 'rgb(0,0,255)', 'rgb(255,255,255)'],
-                "W": ['rgb(255,0,255)', 'rgb(0,0,255)', 'rgb(0,255,0)'],
+                "B": ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+                "M": ['rgb(210,105,30)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+                "W": ['rgb(255,255,0)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
             }
 
+            animCol = {
+                "info": ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+                "peers": ['rgb(210,105,30)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+                "W": ['rgb(255,255,0)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+            }
             ctx.canvas.width = getWidth();
             ctx.canvas.height = getHeight();
         }
@@ -259,9 +275,6 @@
         }
         function draw(evt) {
             globMousePos = getMousePos(ctx.canvas, evt);
-
-            //ctx.fillStyle = "#000000";
-            //ctx.fillRect(pos.x, pos.y, 4, 4);
         }
 
         function getMousePos(canvas, evt) {
@@ -282,7 +295,11 @@
             $(".iframes").each(function () {
                 $(this).hide();
             });
-
+            if (document.getElementById("ctrl").checked) {
+                $("#views").show();
+            } else {
+                $("#views").hide();
+            }
         }
 
         function setFramesHeight() {
@@ -306,30 +323,159 @@
                 if (nodes.hasOwnProperty(typ)) {
                     for (var dom in nodes[typ]) {
                         var dx = getXYType(typ, dom);
-                        if ((dx[0] - dx[2] < globMousePos.x) && (dx[0] + dx[2] > globMousePos.x) &&
-                            (dx[1] - dx[2] < globMousePos.y) && (dx[1] + dx[2] > globMousePos.y)) {
+                        if ((dx.x - dx.size < globMousePos.x) && (dx.x + dx.size > globMousePos.x) &&
+                            (dx.y - dx.size < globMousePos.y) && (dx.y + dx.size > globMousePos.y)) {
+                            lastGUI = "#" + clearDom(dom);
                             $("#" + clearDom(dom)).show();
                             return;
                         }
                     }
                 }
             }
-            $("#views").show();
-
         });
 
-        function drawCom(fromType,fromDom,toType,toDom, iter) {
-            iter = iter + 1
+        function collected(jsonIn, data) {
+            var json = JSON.parse(jsonIn);
+            if (json.hasOwnProperty("delayID")) {
+                var typ = data[0];
+                var from = data[1];
+                var to = json.url;
+                var pos = to.indexOf(":",6);
+                if (pos > 0) {
+                    var toDom = to.substring(0, pos + 5);
+                    comNodes.push({ 'iter': 0, 'fromType': typ, 'fromDom': from, 'url': to,'toType':getType(toDom), 'toDom': toDom, 'delayID': json.delayID });
+                }
+            }
             drawCanvas();
-            if (iter < 10) {
-                var from = getXYType(fromType, fromDom);
-                var to = getXYType(toType, toDom);
-                var deltax = (to.x - from.x) / 10 * iter;
-                var delta = { 'x': from.x + deltax, 'y': deltax * from.slope + from.y, 'size': from.size };
-                drawNode("B", "http://127.0.0.2:5555", delta, col['M']);
-                setTimeout(function () { drawCom(fromType, fromDom, toType, toDom, iter) }, +$("#delay")[0].value);
-            } 
+        }
 
+        function drawAllComs() {
+            var lenc = comNodes.length;
+            for (var com = 0; com < lenc; com++) {
+                var item = comNodes[com];
+                if (item.hasOwnProperty('delta')) {
+                    var show = item.url.substring(item.url.indexOf("/", 8)+1);
+                    var node = item.delta;
+                    var gr = ctx.createRadialGradient(node.x, node.y, node.size / 4, node.x, node.y, node.size);
+                    var cols = ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'];
+                    if (animCol.hasOwnProperty(show)) {
+                        cols = animCol[show];
+                    }
+                    gr.addColorStop(0, cols[0]);
+                    gr.addColorStop(0.5, cols[1]);
+                    gr.addColorStop(1, cols[2]);
+                    ctx.fillStyle = gr;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2, false);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.fillStyle = "black";
+                    ctx.font = "10px _sans";
+                    ctx.textBaseline = "top";
+                    var use_y = node.y;
+                    ctx.fillText(show, node.x , node.y+(node.toRight?-node.size*2:node.size));
+                }
+            }
+        }
+
+        function doCollect(contin) {
+            if (collectCount <= 0) {
+                for (var typ in nodes) {
+                    if (nodes.hasOwnProperty(typ)) {
+                        for (var dom in nodes[typ]) {
+                            if (nodes[typ].hasOwnProperty(dom)) {
+                                collectionCount++;
+                                doGETCallback(dom + "/visualGet", collected, [typ, dom]);
+                            }
+                        }
+                    }
+                }
+            }
+            if ((collect == true) && contin) {
+                var tim = +$("#refreshRate").val();
+                setTimeout(function () { doCollect(true); }, tim);
+            }
+
+        }
+
+        function collectRun() {
+            collect = true;
+            setTimeout(function () { doCollect(true);},100)
+        }
+
+        function collectPause() {
+            collect = false;
+        }
+
+        function collectStep() {
+            collect = false;
+            doCollect(false);
+        }
+
+        setTimeout(function () { updateCom() }, 100);
+
+        function releaseFor(url) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4) {
+                    // we ignore reply for now, but maybe can make use of reply for animation....
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+
+        function updateCom() {
+            var comNodesL = comNodes.length;
+            if (comNodesL > 0) {
+                for (var com = 0; com < comNodesL; com++) {
+                    var item = comNodes[com];
+                    if (item.iter >= maxIter) {
+                        comNodes.splice(com, 1);
+                        com--;
+                        comNodesL--;
+                        releaseFor(item.fromDom+"/visualRelease/"+item.delayID);
+                        continue;
+                    }
+                    var from = getXYType(item.fromType, item.fromDom)
+                    if (from.hasOwnProperty(item.toDom)) {;
+                        var to = getXYType(item.toType, item.toDom);
+                        var deltax = (to.x - from.x) / maxIter * item.iter;
+                        var use_y = from.y;
+                        var use_x = from.x;
+                        var toright = true;
+                        if (to.x<from.x) {
+                            use_y += 7;
+                            use_x -= 7;
+                            toright = false;
+                        } else {
+                            use_y -= 9;
+                            use_x += 9;
+                        }
+
+                        comNodes[com]['delta'] = { 'x': use_x + deltax, 'y': deltax * from[item.toDom].slope + use_y, 'size': 10 ,'toRight': toright};
+                    } else {
+                        console.log("No to Dom for " + com);
+                        console.log(from);
+                        comNodes[com]['delta'] = { 'x': from.x, 'y': from.y, 'size': 10 };
+                    }
+                }
+                drawCanvas();
+                for (var com = 0; com < comNodesL; com++) {
+                    comNodes[com].iter = comNodes[com].iter + 1;
+                }
+            }
+            setTimeout(function () { updateCom() },+$("#animDelay").val());
+        }
+
+        function newScan() {
+            collectPause();
+            init();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            collectSizes();
+            drawGrid();
+            //setTimeout(function () { reScan() }, 100);
+            reScan();
         }
 
         $("#test").on("click", function () {
@@ -339,10 +485,31 @@
 
         $("#scan").on("change", function () {
             if (this.checked) {
-                setTimeout(function () { doScan(); }, 100);
+                setTimeout(function () {
+                    if (initScan == false) {
+                        reScan();
+                    } else {
+                        newScan();
+                    }
+                }, 100);
             }
         });
 
+        $("#ctrl").on("change", function () {
+            if (this.checked) {
+                $("#views").show();
+            } else {
+                $("#views").hide();
+            }
+        });
+
+        $("#GUI").on("change", function () {
+            if (this.checked) {
+                $(lastGUI).show();
+            } else {
+                hideFrames();
+            }
+        });
 
         function setShadow(on) {
             ctx.shadowColor = 'black';
@@ -351,48 +518,40 @@
             ctx.shadowOffsetY = 5;
         }
 
-        stopit = false;
-        // TODO make the scanning button inactive, else scan runs multiple times
-        function doScan() {
-            init();
-            var ring = 0
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            collectSizes();
-            drawGrid();
-            scans = []
-            $("td[id*='opt']").each(function () {
-                var min = parseInt($(this).find("#IPMin")[0].value);
-                var max = parseInt($(this).find("#IPMax")[0].value);
-                var typ = $(this).find("#type")[0];
-                // TODO alert ignore double
-                if ((min * max > 0) && (min > 0) && (min < 128) && (max < 128)) {
-                    for (var ipx = min; ipx <= max; ipx++) {
-                        //TODO get the scan directly here and only update the relevant ring!!!
-                        scans.push([ipx, typ.value, ring]);
+        function reScan() {
+            initScan = false;
+            if (totalScan <= 0) {
+                var scans = [];
+                var ring = 0;
+                $("td[id*='opt']").each(function () {
+                    var min = parseInt($(this).find("#IPMin")[0].value);
+                    var max = parseInt($(this).find("#IPMax")[0].value);
+                    var typ = $(this).find("#type")[0];
+                    // TODO alert ignore double
+                    if ((min * max > 0) && (min > 0) && (min < 128) && (max < 128)) {
+                        for (var ipx = min; ipx <= max; ipx++) {
+                            //TODO get the scan directly here and only update the relevant ring!!!
+                            scans.push([ipx, typ.value, ring]);
+                        }
                     }
+                    ring++;
+                });
+                totalScan = scans.length
+                for (var i = 0; i < scans.length; i++) {
+                    scanFor(scans[i][0], scans[i][1], scans[i][2]);
                 }
-                ring++;
-            });
-            totalScan = scans.length
-            for (var i = 0; i < scans.length; i++) {
-                scanFor(scans[i][0], scans[i][1], scans[i][2]);
+                scans = [];
             }
-            scans = [];
-            $("#scan").prop("checked", false);
+            var sc = $("#scan");
+            if (sc.is(":checked")) {
+                setTimeout(function () { reScan() }, 5000);
+            }
         }
 
         function scanFor(ipIn, typIn, ringIn) {
             var ip = ipIn;
             var typ = typIn.substring(0, 1);
             var ring = ringIn;
-            if (ip < 0) {
-                stopit = true;
-            } else {
-                stopit = false;
-            }
-            if (stopit) {
-                return;
-            }
             port = 5555
             var dom = "http://127.0.0." + ip + ":" + port
             var url = dom + "/cfg";
@@ -426,9 +585,11 @@
                             } else {
                                 addLog(" ===> []", false);
                             }
-                            $('<iframe src="' + dom + '" frameborder="1" class="iframes" scrolling="yes" id="' + clearDom(dom) + '" title="' + dom + '" width="100%"></iframe>')
-                                .appendTo('#control').hide();
-                            setFramesHeight();
+                            if (found == false) {
+                                $('<iframe src="' + dom + '" frameborder="1" class="iframes" scrolling="yes" id="' + clearDom(dom) + '" title="' + dom + '" width="100%"></iframe>')
+                                    .appendTo('#control').hide();
+                                setFramesHeight();
+                            }
                         } else {
                             addLog("Wrong node detected in range: " + jstext['type'] + "for ring " + ring + " expected " + typ);
                         }
@@ -441,17 +602,8 @@
 
                         }
                     }
-                    if (!stopit) {
-                        //setTimeout(scan(ip + 1), 200);
-                    }
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    drawGrid();
-                    calcCoords();
-                    drawAllNodes();
                     totalScan--;
-                    if (totalScan <= 0) {
-                        drawCanvas();
-                    }
+                    drawCanvas();
                 }
             };
             xhttp.open("GET", url, true);
@@ -467,7 +619,7 @@
                 //ntext = "\n\r==> Reply:\n\r"+text
                 ntext = text
             }
-            document.getElementById("response").value = document.getElementById("response").value + ntext;
+            //document.getElementById("response").value = document.getElementById("response").value + ntext;
             return ntext
         }
 
@@ -486,8 +638,15 @@
                     ctx.closePath();
                     ctx.fill();
                 } else {
-                    ctx.fillStyle = "orange";
-                    ctx.fillRect(node.x, node.y, node.size, node.size);
+                    var gr = ctx.createRadialGradient(node.x, node.y, node.size / 4, node.x, node.y, node.size);
+                    gr.addColorStop(0, cols[0]);
+                    gr.addColorStop(0.5, "red");
+                    gr.addColorStop(1, "orange");
+                    ctx.fillStyle = gr;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2, false);
+                    ctx.closePath();
+                    ctx.fill();
                 }
                 ctx.fillStyle = "black";
                 ctx.font = "10px _sans";
@@ -526,14 +685,15 @@
             setShadow(true);
             drawAllNodes();
             ctx.restore();
+            drawAllComs();
         }
 
         function drawGrid() {
-            ctx.setLineDash([5,5])
+            ctx.setLineDash([5, 5])
             var sradx = Math.trunc((getWidth() * .45) / (rings.length * 1));
             var srady = Math.trunc((getHeight() * .45) / (rings.length * 1));
             var center_x = getWidth() / 2;
-            var center_y = getHeight() / 2; 
+            var center_y = getHeight() / 2;
             ctx.strokeStyle = "lightgrey";
             ctx.fillStyle = "lightgrey";
             ctx.lineWidth = 1;
@@ -541,7 +701,7 @@
 
             for (var ring = 1; ring <= rings.length; ring++) {
                 ctx.beginPath();
-                ctx.ellipse(center_x, center_y, sradx * ring, srady*ring,0, 2 * Math.PI, false);
+                ctx.ellipse(center_x, center_y, sradx * ring, srady * ring, 0, 2 * Math.PI, false);
                 ctx.stroke();
             }
             ctx.setLineDash([])
@@ -573,12 +733,24 @@
             return {}
         }
 
+        function getType(dom) {
+            for (var typ in nodes) {
+                if (nodes.hasOwnProperty(typ)) {
+                    if (nodes[typ].hasOwnProperty(dom)) {
+                        return typ;
+                    }
+                }
+            }
+            console.log("not found " + dom);
+            return "";
+        }
+
         function calcCoords() {
             var sradx = Math.trunc((getWidth() * .45) / (rings.length * 1));
             var srady = Math.trunc((getHeight() * .45) / (rings.length * 1));
 
             var center_x = getWidth() / 2;
-            var center_y = getHeight() / 2;   
+            var center_y = getHeight() / 2;
 
             for (var ring = 0; ring < rings.length; ring++) {
                 r = rings[ring];
@@ -610,7 +782,7 @@
                                     var drawTo = getXY(peer);
                                     if (Object.keys(drawTo).length > 0) {
                                         var slope = (drawTo.y - drawFrom.y) / (drawTo.x - drawFrom.x);
-                                        nodes[typ][dom]['draw'].slope = slope;
+                                        nodes[typ][dom]['draw'][peer] = { 'slope': slope };
                                     }
                                 }
                             }
@@ -632,7 +804,6 @@
                 }
             }
         }
-
 
 
         function drawArrow(fromx, fromy, tox, toy, size) {
@@ -681,6 +852,9 @@
                                     var drawTo = getXY(peer);
                                     if (Object.keys(drawTo).length > 0) {
                                         ctx.strokeStyle = 'green';
+                                        if (nodes[typ][dom]['ping'] == false) {
+                                            ctx.strokeStyle = 'orange';
+                                        }
                                         ctx.lineWidth = 2;
                                         ctx.beginPath();
                                         ctx.moveTo(drawFrom.x, drawFrom.y);
@@ -693,7 +867,7 @@
                                         ctx.strokeStyle = 'red';
                                         ctx.lineWidth = 2;
                                         ctx.beginPath();
-                                        ctx.moveTo(drawFrom[0], drawFrom[1]);
+                                        ctx.moveTo(drawFrom.x, drawFrom.y);
                                         ctx.lineTo(0, 0);
                                         ctx.stroke();
                                         ctx.closePath();
@@ -706,7 +880,24 @@
                 }
             }
         }
-
+        function doGETCallback(url, callBack, callBackData) {
+            keep = ""
+            port = 5555;
+            if (port < 1024) {
+                newContent = "No Port";
+            } else {
+                //var url = fillURL(url);
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4) {
+                        collectCount--;
+                        callBack(this.responseText, callBackData);
+                    }
+                };
+                xhttp.open("GET", url, true);
+                xhttp.send();
+            }
+        }
     </script>
 </body>
 </html>
