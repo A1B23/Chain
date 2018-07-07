@@ -224,16 +224,16 @@
                 }
             } else {
                 for (var i = 0; i < order.length; i++) {
-                    var spl = order[i].split(":");
+                    var spl = order[i].split(":::");
                     if (useorder.indexOf(spl[0]) < 0) {
                         useorder.push(spl[0]);
                     }
                     if (spl.length > 1) {
                         var sorder = "";
                         for (var j = 1; j < spl.length; j++) {
-                            sorder = sorder + spl[j] + ":";
+                            sorder = sorder + spl[j] + ":::";
                         }
-                        suborder.push(sorder.substring(0, sorder.length - 1));
+                        suborder.push(sorder.substring(0, sorder.length - 3));
                     }
                 }
             }
@@ -268,7 +268,7 @@
                         if (jsonList[cnt][useorder[det]] instanceof Array) {
                             res = res + "<td>";
                             var wasEmpty = (suborder.length == 0);
-                            res = res + tablify(jsonList[cnt][useorder[det]], suborder, level + 1, pref + useorder[det] + ":", horizontal) + "</td>";
+                            res = res + tablify(jsonList[cnt][useorder[det]], suborder, level + 1, pref + useorder[det] + ":::", horizontal) + "</td>";
                             if (wasEmpty) {
                                 order.push.apply(order, suborder);
                                 suborder = [];
@@ -279,7 +279,7 @@
                                 (typeof jsonList[cnt][useorder[det]] != "number"))   {
                                 res = res + "<td>";
                                 var wasEmpty = (suborder.length == 0);
-                                res = res + tablify([jsonList[cnt][useorder[det]]], suborder, level + 1, pref + useorder[det] + ":", horizontal) + "</td>";
+                                res = res + tablify([jsonList[cnt][useorder[det]]], suborder, level + 1, pref + useorder[det] + ":::", horizontal) + "</td>";
                                 if (wasEmpty) {
                                     order.push.apply(order, suborder);
                                     suborder = [];

@@ -48,25 +48,27 @@ def genNodeID():
     # still need to sha over it and return
     return hex_string[0:len(defNodeID)]
 
+def checkType(asSet, type):
+    return (asSet == type) or (asSet == "*"+type)
 
 def isMiner():
-    return m_cfg['type'] == "Miner"
+    return checkType(m_cfg['type'], "Miner")
 
 
 def isWallet():
-    return m_cfg['type'] == "Wallet"
+    return checkType(m_cfg['type'], "Wallet")
 
 
 def isBCNode():
-    return m_cfg['type'] == "BCNode"
+    return checkType(m_cfg['type'], "BCNode")
 
 
 def isFaucet():
-    return m_cfg['type'] == "Faucet"
+    return checkType(m_cfg['type'],"Faucet")
 
 
 def isExplorer():
-    return m_cfg['type'] == "Explorer"
+    return checkType(m_cfg['type'], "Explorer")
 
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):

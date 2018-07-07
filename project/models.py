@@ -38,7 +38,8 @@ m_cfg = {
     # 2 means we are checking for peers again... default for starting up
     "statusChain": False,
     "statusPeer": True,
-    "useDelay": False
+    "useDelay": False,
+    "debug": False
 }
 
 m_info = {

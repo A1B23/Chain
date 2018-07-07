@@ -9,7 +9,7 @@ from project.InterfaceLocking import mainInterface
 from project.classes import c_blockchainNode, c_walletInterface
 from project.pclass import c_peer
 from copy import deepcopy
-
+from project.models import m_cfg
 c_MainIntf = mainInterface()
 
 @app.route('/visualGet')
@@ -58,10 +58,10 @@ def get_info():
 @app.route('/debug')
 def debug():
     response = []
-    response.extend(m_cfg)
-    response.extend(m_info)
-    response.extend(m_pendingTX)
-    response.extend(m_BufferMinerCandidates)
+    response.append(m_cfg)
+    response.append(m_info)
+    response.append(m_pendingTX)
+    response.append(m_BufferMinerCandidates)
 
     return jsonify(response), 200
 
@@ -190,29 +190,21 @@ def debug_mining(minerAddress, difficulty):
 #float 	Like int but for floating point values.
 #path 	Like string but accepts slashes.
 
-@app.route("/debug/GUI", methods=['GET'])
-def indexDebug():
-    if (isBCNode()):
-        return render_template("indexBC _debug.html")
-    if (isWallet()):
-        return render_template("TabWallet_debug.html")
 
-    response = {
-        'NodeType': m_cfg['type'],
-        'info': "This URL/API is not available"
-     }
-    return jsonify(response), 400
-
-@app.route("/",methods=['GET'])
+@app.route("/", methods=['GET'])
 def index():
+    addOn = ""
+    if m_cfg['debug'] == True:
+        addOn = "_debug"
+
     if (isBCNode()):
-        return render_template("indexBC.html")
+        return render_template("indexBC" + addOn + ".html")
     if (isWallet()):
-        return render_template("TabWallet.html")
+        return render_template("TabWallet" + addOn + ".html")
 
     response = {
         'NodeType': m_cfg['type'],
-        'info': "This URL/API is not available"
+        'info': "Requested URL/API is not available"
      }
     return jsonify(response), 400
 
@@ -305,6 +297,7 @@ def clrNode():
         if not (k in python_obj):
             return 'Invalid param', 400
 
+    #TODO what was clrNode and setNode() doing?
     oldNodes = setNode(python_obj['node'], m_info['nodeURL'])
     for oldNode in oldNodes:
         if oldNode in m_cfg['nodes']:
