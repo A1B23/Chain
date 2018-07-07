@@ -1,18 +1,19 @@
 from project import app, render_template
-from flask import Flask, jsonify, request
-import datetime, requests
-from project.models import *
+from flask import request
 from project.nspec.blockchain.modelBC import *
 from project.utils import *
 import json
 from project.InterfaceLocking import mainInterface
-from project.classes import c_blockchainNode, c_walletInterface
+from project.classes import c_blockchainNode
 from project.pclass import c_peer
 from copy import deepcopy
-from project.models import m_cfg
+from project.models import m_cfg, m_visualCFG
+import re
+
 c_MainIntf = mainInterface()
 
-@app.route('/visualGet')
+
+@app.route('/visualGet', methods=["GET"])
 def visualGet():
     dat = {}
     for item in m_Delay:
@@ -23,7 +24,7 @@ def visualGet():
             break
     return jsonify(dat), 200
 
-@app.route('/visualRelease/<int:id>')
+@app.route('/visualRelease/<int:id>', methods=["GET"])
 def visualRelease(id):
     for item in m_Delay:
         if ('releaseID' in item) and (item['releaseID'] == id):
@@ -33,29 +34,45 @@ def visualRelease(id):
     return jsonify(rel), 200
 
 
-@app.route('/cfg')
+@app.route('/visualCfg', methods=["POST"])
+def visualCfg():
+    try:
+        values = request.get_json()
+        if (values['active'] is True):
+            pattern = re.compile(values['pattern'])
+            m_visualCFG['active'] = True
+            m_visualCFG['pattern'] = pattern
+            return setOK(values)
+        m_visualCFG['active'] = False
+        m_Delay.clear()
+        return setOK("Tracking switched off")
+    except Exception:
+        return errMsg("JSON not decodeable or missing item", 400)
+
+
+@app.route('/cfg', methods=["GET"])
 def get_cfg():
     return jsonify(m_cfg), 200
 
 ### TODO remove after debugging
-@app.route('/load/<file>')
+@app.route('/load/<file>', methods=["GET"])
 def loadSys(file):
     linkInfo = {"file": file}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-@app.route('/save/<file>')
+@app.route('/save/<file>', methods=["GET"])
 def saveSys(file):
     linkInfo = {"file": file}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /info
-@app.route('/info')
+@app.route('/info', methods=["GET"])
 def get_info():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /debug
-@app.route('/debug')
+@app.route('/debug', methods=["GET"])
 def debug():
     response = []
     response.append(m_cfg)
@@ -66,7 +83,7 @@ def debug():
     return jsonify(response), 200
 
 #GET /debug/reset-chain
-@app.route('/debug/reset-chain')
+@app.route('/debug/reset-chain', methods=["GET"])
 def debug_resetChain():
     ## this is a very special case, as it is not GET but actually a POST issue
     m_isPOST.append("Reset Chain")
@@ -78,31 +95,31 @@ def debug_resetChain():
     return ret
 
 #GET /blocks
-@app.route('/blocks')
+@app.route('/blocks', methods=["GET"])
 def blocks():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /blocks/{number}
-@app.route('/blocks/<int:number>')
+@app.route('/blocks/<int:number>', methods=["GET"])
 def blocks_getByNumber(number):
     linkInfo = {"blockNumber": number}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /transactions/pending
-@app.route('/transactions/pending')
+@app.route('/transactions/pending', methods=["GET"])
 def transactions_pending():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /transactions/confirmed
-@app.route('/transactions/confirmed')
+@app.route('/transactions/confirmed', methods=["GET"])
 def transactions_confirmed():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /transactions/{TXHash}
-@app.route('/transactions/<TXHash>')
+@app.route('/transactions/<TXHash>', methods=["GET"])
 def transactions_hash(TXHash):
     linkInfo = {"TXHash": TXHash}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
@@ -118,19 +135,19 @@ def transactions_send():
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 #GET /balances
-@app.route('/balances')
+@app.route('/balances', methods=["GET"])
 def balances():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /address/{address}/transactions
-@app.route('/address/<address>/transactions')
+@app.route('/address/<address>/transactions', methods=["GET"])
 def address_transaction(address):
     linkInfo = {"address": address}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 #GET /address/{address}/balance
-@app.route('/address/<address>/balance')
+@app.route('/address/<address>/balance, methods=["GET"]')
 def address_balance(address):
     linkInfo = {"address": address}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
@@ -146,7 +163,7 @@ def peers_notifyNewBlock():
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 #GET /peers
-@app.route('/peers')
+@app.route('/peers', methods=["GET"])
 def peers():
     return c_peer.listPeers()
 
@@ -162,7 +179,7 @@ def peers_connect():
     return c_peer.peersConnect(request.path, linkInfo, values, request)
 
 #GET /mining/get-mining-job/{miner-address}
-@app.route('/mining/get-mining-job/<minerAddress>')
+@app.route('/mining/get-mining-job/<minerAddress>', methods=["GET"])
 def mining_getMiningJob(minerAddress):
     linkInfo = {"minerAddress": minerAddress}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
@@ -178,7 +195,7 @@ def mining_submitBlock():
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 #GET /debug/mine/{minerAddress}/{difficulty}
-@app.route('/debug/mine/<minerAddress>/<int:difficulty>')
+@app.route('/debug/mine/<minerAddress>/<int:difficulty>', methods=["GET"])
 def debug_mining(minerAddress, difficulty):
     linkInfo = {"address": minerAddress, "difficulty": difficulty}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
@@ -236,7 +253,7 @@ def wallet_transfer():
         return errMsg("JSON not decodeable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-@app.route('/wallet/list/wallet/<user>')
+@app.route('/wallet/list/wallet/<user>', methods=["GET"])
 def getWallets(user):
     linkInfo = {'user': user}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
@@ -282,7 +299,7 @@ def getWalletTx(type, wallet, user):
 
 
 ################## the following two are only for testing while developing peer module
-@app.route("/listNodes")
+@app.route("/listNodes", methods=["GET"])
 def listNodes():
     return jsonify(m_cfg['peers']), 200
 

@@ -76,7 +76,7 @@ def pull():
 
     print("==== First Stage : Request mining data from Node: "+str(m_cfg['peers']))
     try:
-        if m_cfg['useDelay'] and (cfg['scanning'] == 8):
+        if m_cfg['canTrack'] and (cfg['scanning'] == 8):
             print("Delay pull for animation....")
             sleep(3) #TODO This sleep is trial first
         resp_text = getCandidate()

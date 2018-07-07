@@ -7,6 +7,8 @@ if __name__ == "__main__":
         "/cfg$",
         "/info$",
         "/debug$",
+        "/load/[0-9a-fA-F]+$",
+        "/save/[0-9a-fA-F]+$",
         "/debug/reset-chain",
         "/blocks$",
         "/blocks/[0-9]+$",

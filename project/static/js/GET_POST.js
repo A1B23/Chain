@@ -18,7 +18,7 @@ function doPOSTSynch(url, updateField, data) {
         var xhr = new XMLHttpRequest();
         xhr.open("POST", url, false);
         xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify(data));
+        xhr.send((typeof data == 'string')?data:JSON.stringify(data));
         var json = { "message": "fail" };
         if (xhr.status == 200) {
             text = xhr.responseText.replace(/\n/g, "");
@@ -75,16 +75,20 @@ function doPOST(url, updateField, getField) {
                 if (this.readyState == 4) {
                     if (this.status == 200) {
                         text = xhr.responseText.replace(/\n/g, "");
-                        var json = JSON.parse(xhr.responseText);
-                        var input = document.createElement("textarea");
-                        input.value = text.replace(/",/g, "\",\r\n").replace(/],/g, "],\r\n");
-                        input.setAttribute('cols', 40);
-                        input.setAttribute('rows', 5);
-                        document.getElementById(updateField).appendChild(input);
+                        if (updateField.length > 0) {
+                            var json = JSON.parse(xhr.responseText);
+                            var input = document.createElement("textarea");
+                            input.value = text.replace(/",/g, "\",\r\n").replace(/],/g, "],\r\n");
+                            input.setAttribute('cols', 40);
+                            input.setAttribute('rows', 5);
+                            document.getElementById(updateField).appendChild(input);
+                        }
                     } else {
                         text = "Error: " + this.status + " ==> " + xhr.responseText;
                     }
-                    document.getElementById(updateField).value = document.getElementById(updateField).value + text
+                    if (updateField.length > 0) {
+                        document.getElementById(updateField).value = document.getElementById(updateField).value + text;
+                    }
                 }
             };
             xhr.open("POST", url, true);

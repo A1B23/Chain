@@ -36,17 +36,14 @@ function resizeCanvas() {
     drawCanvas();
 }
 
-
-
-
 function drawNode(typ, dom, node, cols) {
     var n = nodes[typ];
     if (n.hasOwnProperty(dom)) {
         var item = n[dom]
         if (item['ping'] === true) {
-            var gr = ctx.createRadialGradient(node.x, node.y, node.size / 4, node.x, node.y, node.size);
+            var gr = ctx.createRadialGradient(node.x-node.size/2, node.y-node.size/2, node.size / 5, node.x, node.y, node.size);
             gr.addColorStop(0, cols[0]);
-            gr.addColorStop(0.5, cols[1]);
+            gr.addColorStop(0.75, cols[1]);
             gr.addColorStop(1, cols[2]);
             ctx.fillStyle = gr;
             ctx.beginPath();
@@ -218,3 +215,4 @@ function calcCoords() {
         }
     }
 }
+

@@ -22,25 +22,32 @@
 </head>
 <body>
     Welcome to PDPC_Coin <b>Visualiser:</b><br />
-    <button type="button" class="options" id="test">test</button>
+    Show Control: <input type="checkbox" id="ctrl">
+    &nbsp;&nbsp;
+    Show page: <input type="checkbox" id="GUI">
     <select id="viewsizes" class="options">
         <option value="1">small</option>
         <option value="3">medium</option>
         <option value="5">large</option>
     </select>
-    Show Control: <input type="checkbox" id="ctrl">
-    Show page: <input type="checkbox" id="GUI"><br /><br />
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="alt1">
+        Cont. Scan: <input type="checkbox" id="scan">
+        <button type="button" class="options" onClick="JavaScript: newScan();">newScan</button>
+    </span>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <span class="alt2">
+        Tracking:
+        <button type="button" class="options" id="crun" onClick="JavaScript:collectRun()">run</button>
+        <button type="button" class="options" id="cpause" onClick="JavaScript:collectPause()">pause</button>
+        <button type="button" class="options" id="cstep" onClick="JavaScript:collectStep()">step</button>
+        <button type="button" class="options" onClick="JavaScript: collectRegex($('#trackRegex').val());">Limit(regex)</button><input type="text" value="" class="options" size="30" id="trackRegex">
+        <button type="button" class="options" id="csusp" onClick="JavaScript: collectSuspend();">Suspend tracking</button>
+    </span>
     <div id="control"></div>
     <div class="iframes" id="views">
         <table id="sets">
             <tr>
-                <td class="options">
-                    Scan: <input type="checkbox" id="scan"><br />
-                    <button type="button" class="options" onClick="JavaScript: newScan();">newScan</button><br />
-                    <button type="button" class="options" onClick="JavaScript:collectRun()">run</button><br />
-                    <button type="button" class="options" onClick="JavaScript:collectPause()">pause</button><br />
-                    <button type="button" class="options" onClick="JavaScript:collectStep()">step</button>
-                </td>
                 <td id="opt" class="options alt1">
                     IPMinMax 127.0.0.x:
                     <input type="text" value="0" class="options" size="5" id="IPMin">
@@ -212,12 +219,7 @@
         <br />
         <canvas onmousemove="draw(event)" id="canvas" class="border">Oops, no canvas supported by your browser?</canvas>
     </div>
-    REST-API log:
-    <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
-    <div>
-        <textarea id="response" cols="120" rows="15">
-                    </textarea>
-    </div>
+
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/vis_hooks.js"></script>
     <script>

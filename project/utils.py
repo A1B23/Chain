@@ -62,6 +62,8 @@ def isWallet():
 def isBCNode():
     return checkType(m_cfg['type'], "BCNode")
 
+def isABCNode(ref):
+    return checkType(ref, "BCNode")
 
 def isFaucet():
     return checkType(m_cfg['type'],"Faucet")

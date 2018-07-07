@@ -45,6 +45,35 @@ function drawAllComs() {
     }
 }
 
+function collectRegex(regex) {
+    $("#csusp").prop("disabled", false);
+    for (var typ in nodes) {
+        if (nodes.hasOwnProperty(typ)) {
+            for (var dom in nodes[typ]) {
+                if (nodes[typ].hasOwnProperty(dom)) {
+                    doPOSTSynch(dom + "/visualCfg", { 'active': true, 'pattern': regex });
+                }
+            }
+        }
+    }
+}
+
+function collectSuspend() {
+    if ($("#crun").text() != "run") {
+        collectPause();
+    }
+    $("#csusp").prop("disabled", true);
+    for (var typ in nodes) {
+        if (nodes.hasOwnProperty(typ)) {
+            for (var dom in nodes[typ]) {
+                if (nodes[typ].hasOwnProperty(dom)) {
+                    doPOSTSynch(dom + "/visualCfg",  { 'active': false, 'pattern': "" });
+                }
+            }
+        }
+    }
+}
+
 function doCollect(contin) {
     if (collectCount <= 0) {
         for (var typ in nodes) {
@@ -66,12 +95,22 @@ function doCollect(contin) {
 }
 
 function collectRun() {
-    collect = true;
-    setTimeout(function () { doCollect(true); }, 100)
+    if ($("#crun").text() == "run") {
+        $("#crun").text("stop");
+        collect = true;
+        $("#cstep").prop("disabled", true);
+        $("#cpause").prop("disabled", false);
+        setTimeout(function () { doCollect(true); }, 100)
+    } else {
+        collectPause();
+    }
 }
 
 function collectPause() {
     collect = false;
+    $("#crun").text("run");
+    $("#cstep").prop("disabled", false);
+    $("#cpause").prop("disabled", true);
 }
 
 function collectStep() {
@@ -122,12 +161,14 @@ function updateCom() {
 
                 comNodes[com]['delta'] = { 'x': use_x + deltax, 'y': deltax * from[item.toDom].slope + use_y, 'size': 10, 'toRight': toright };
             } else {
-                console.log("No to Dom for " + com);
+                console.log("No to Dom for " + com + " "+item);
                 console.log(from);
                 comNodes[com]['delta'] = { 'x': from.x, 'y': from.y, 'size': 10 };
             }
         }
-        drawCanvas();
+        if (collect) {
+            drawCanvas();
+        }
         for (var com = 0; com < comNodesL; com++) {
             comNodes[com].iter = comNodes[com].iter + 1;
         }
@@ -136,20 +177,25 @@ function updateCom() {
 }
 
 function doGETCallback(url, callBack, callBackData) {
-    keep = ""
-    port = 5555;
-    if (port < 1024) {
-        newContent = "No Port";
-    } else {
-        //var url = fillURL(url);
-        var xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4) {
-                collectCount--;
-                callBack(this.responseText, callBackData);
-            }
-        };
-        xhttp.open("GET", url, true);
-        xhttp.send();
-    }
+    var port = 5555;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            collectCount--;
+            callBack(this.responseText, callBackData);
+        }
+    };
+    xhttp.open("GET", url, true);
+    xhttp.send();
+}
+
+function doPOSTSynch(url, data) {
+    var port = 5555;
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, false);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send((typeof data == 'string') ? data : JSON.stringify(data));
+    var json = { "message": "fail" };
+    json = JSON.parse(xhr.responseText);
+    return [json, xhr.status];
 }

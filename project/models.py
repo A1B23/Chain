@@ -13,6 +13,8 @@ defGenesisDate = "2018-06-06T00:00:00.000Z"
 m_peerSkip = []
 m_Delay = []
 
+m_visualCFG = {"active": False, "pattern": []}
+
 m_peerInfo = {
     "numberFail": 0,
     "active": False,
@@ -38,7 +40,7 @@ m_cfg = {
     # 2 means we are checking for peers again... default for starting up
     "statusChain": False,
     "statusPeer": True,
-    "useDelay": False,
+    "canTrack": False,
     "debug": False
 }
 

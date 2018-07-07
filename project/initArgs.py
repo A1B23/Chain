@@ -1,10 +1,5 @@
-from project.pclass import c_peer
-from project.models import m_cfg, m_info
 from project.nspec.blockchain.modelBC import *
 from project.utils import *
-from logging.handlers import RotatingFileHandler
-import logging
-from project.utils import isBCNode
 from project.classes import c_blockchainNode
 from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
@@ -22,9 +17,9 @@ from project.nspec.wallet.modelW import m_db
 def finalise(peer, port, type):
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
-    useVis = m_cfg['useDelay']
+    useVis = m_cfg['canTrack']
     #temporarily switch off any delay to allow peer initialisation to go ahead without delay
-    m_cfg['useDelay'] = False
+    m_cfg['canTrack'] = False
     c_peer.setPeersAs(peer, port)
     thread = Thread(target=c_peer.checkEveryXSecs, args=(m_cfg['peersCheck'],))
     thread.start()
@@ -41,7 +36,7 @@ def finalise(peer, port, type):
         #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
         m_db['db'] = sqlite3.connect(m_db['DATABASE'])
 
-    m_cfg['useDelay'] = useVis
+    m_cfg['canTrack'] = useVis
 
 @app.after_request
 def after_request(response):
@@ -70,7 +65,7 @@ def init(parser):
     parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: NAPCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
     parser.add_argument('-maP', '--maxPeers', default=1, type=int, help='max peer communication, if more peers are known')
-    parser.add_argument('-delay', '--useDelay', default="N", help='use delay option to hold GET/POST until visualisation is updated')
+    parser.add_argument('-trk', '--canTrack', default="N", help='use delay option to hold GET/POST until visualisation is updated')
     parser.add_argument('-mod', '--mode', default="y", help='modus of miner to work, e.g. y=await user to trigger mining')
     parser.add_argument('-deb', '--asDebug', default="N", help='activate the debug GUI for the node instead of the user GUI')
 
@@ -101,8 +96,8 @@ def init(parser):
     m_cfg['minPeers'] = args.minPeers
     m_cfg['maxPeers'] = args.maxPeers
     m_cfg['mode'] = args.mode
-    if args.useDelay == "Y":
-        m_cfg['useDelay'] = True
+    if args.canTrack == "Y":
+        m_cfg['canTrack'] = True
         print("Animation delay activated")
 
     if args.asDebug == "Y":

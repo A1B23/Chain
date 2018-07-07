@@ -25,6 +25,8 @@
                    <td>
                        <button type="button" onClick="document.getElementById('response').value=''">Reset Log</button>
                        <br /><button type="button" onClick="JavaScript:doGET('cfg')" style="background-color:#5e5858"> /cfg</button>
+                       <br /><button type="button" onClick="JavaScript:doGET('load/{file}')" style="background-color:#5e5858"> /load/{fromFile}</button><input type="text" size="32" value="0" id="pfromFile"  />
+                       <br /><button type="button" onClick="JavaScript:doGET('save/{file}')" style="background-color:#5e5858"> /save/{toFile}</button><input type="text" size="32" value="0" id="ptoFile"  />
                        <br /><button type="button" onClick="JavaScript:doGET('info')" style="background-color:#4CAF50"> /info</button>
                        <br /><button type="button" onClick="JavaScript:doGET('debug')" style="background-color:#0eb14d"> /debug</button>
                        <br /><button type="button" onClick="JavaScript:doGET('debug/reset-chain')" style="background-color:#0eb14d"> /debug/reset-chain</button>

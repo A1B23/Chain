@@ -177,6 +177,7 @@
             <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerDat');doDirect('peers','PE')">Peers</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerList');doDirect('listNodes','PL')">PeerInfo</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'cfg');doDirect('cfg','PC')">CfgInfo</button>
 
         </div>
         <div id="nInfo" class="tabcontent qTab">
@@ -190,6 +191,10 @@
         <div id="peerList" class="tabcontent qTab">
             <div id="optionsPL"></div>
             <span id="resultPL">Command results....</span>
+        </div>
+        <div id="cfg" class="tabcontent qTab">
+            <div id="optionsPC"></div>
+            <span id="resultPC">Command results....</span>
         </div>
     </div>
 
