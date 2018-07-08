@@ -60,11 +60,11 @@ rem ###################### Miner hard coded parameters
 set typeDir=Miner
 rem we keep the sam address as blockchain above!
 set col=5B
-set mode=y
+set mode=Y
 set minPeers=1
 set maxPeers=1
 set nodeIPnum=32
-rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %delay% -mod %mode% --asDebug %asDebug%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %delay% -mod %mode% --asDebug %asDebug%"
 set nodeIPnum=34
 start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %delay% -mod %mode% --asDebug %asDebug%"
 

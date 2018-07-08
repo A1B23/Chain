@@ -66,7 +66,7 @@ def init(parser):
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
     parser.add_argument('-maP', '--maxPeers', default=1, type=int, help='max peer communication, if more peers are known')
     parser.add_argument('-trk', '--canTrack', default="N", help='use delay option to hold GET/POST until visualisation is updated')
-    parser.add_argument('-mod', '--mode', default="y", help='modus of miner to work, e.g. y=await user to trigger mining')
+    parser.add_argument('-mod', '--mode', default="Y", help='modus of miner to work, e.g. y=await user to trigger mining')
     parser.add_argument('-deb', '--asDebug', default="N", help='activate the debug GUI for the node instead of the user GUI')
 
     args = parser.parse_args()

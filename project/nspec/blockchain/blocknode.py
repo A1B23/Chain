@@ -57,17 +57,14 @@ class blockChainNode:
 
     def getMinerCandidate(self, minerAddress):
         if minerAddress in m_BufferMinerCandidates:
-            cand = m_BufferMinerCandidates[minerAddress]
+            cand = m_BufferMinerCandidates[minerAddress]['mineCandidate']
             if cand['index'] == m_candidateBlock['index']:
-                if cand['minerBlock']['blockDataHash'] == m_candidateBlock['index']['blockDataHash']:
-                    cand['countRepeat'] = cand['countRepeat'] + 1
+                if m_BufferMinerCandidates[minerAddress]['minerBlock']['blockDataHash'] == m_candidateBlock['blockDataHash']:
+                    m_BufferMinerCandidates[minerAddress]['countRepeat'] = m_BufferMinerCandidates[minerAddress]['countRepeat'] + 1
                     ### If there is no solution and no miner can find a solution, then unless a new tx
                     ### comes in the network hangs, so need to limit the number of reuse here and change the timestamp
-                    if cand['countRepeat'] < maxSameBlockPerMiner:
-                        #need a temp copy so as to remove counter
-                        cand2 = deepcopy(cand)
-                        del cand2['countRepeat']
-                        return setOK(jsonify(cand2)) #if nothing has changed, return same block
+                    if m_BufferMinerCandidates[minerAddress]['countRepeat'] < maxSameBlockPerMiner:
+                        return setOK(cand) #if nothing has changed, return same block
 
         # as candidate blocks change with every new TX and different miners might deal
         # with different blocks, we must keep the miner specific block in case the
@@ -83,8 +80,8 @@ class blockChainNode:
             if len(tx) > 0:    #otherwise it is empty coinbase
                 fees = fees + tx['fee']
             else:
-                if fees != 0:
-                    return errMsg("Invalid CoinBase fee TX in block", 404)
+                if fees != minBlockReward:
+                    return errMsg("Invalid minimum CoinBase fee TX in block", 404)
         coinBase = deepcopy(m_coinBase)
         candidateMiner['index'] = len(m_Blocks)
         coinBase['minedInBlockIndex'] = len(m_Blocks)
@@ -110,10 +107,11 @@ class blockChainNode:
 
         candidateMiner['blockDataHash'] = sha256StrToHex(forHash[:-1] + "}")
         print("Generate new candidate for miner: " + minerAddress + " with Hash: " + candidateMiner['blockDataHash'] + " reward: " + str(fees))
-        m_BufferMinerCandidates[minerAddress] = deepcopy(candidateMiner)
+        m_BufferMinerCandidates[minerAddress] = {}
+        m_BufferMinerCandidates[minerAddress]['mineCandidate'] = deepcopy(candidateMiner)
         m_BufferMinerCandidates[minerAddress]['countRepeat'] = 0
         m_BufferMinerCandidates[minerAddress]['minerBlock'] = minerSpecificBlock
-        return setOK(jsonify(candidateMiner))
+        return setOK(candidateMiner)
 
 
     def minerFoundSolution(self, minerSolution):
@@ -125,10 +123,11 @@ class blockChainNode:
         #which includes the correct address
         minerAddress = ""
         for miner in m_BufferMinerCandidates:
-            if m_BufferMinerCandidates[miner]['blockDataHash'] == minerSolution['blockDataHash']:
+            if m_BufferMinerCandidates[miner]['mineCandidate']['blockDataHash'] == minerSolution['blockDataHash']:
                     minerAddress = miner
                     #make copy to avoid parallel changes through bad/new miner request
-                    known = deepcopy(m_BufferMinerCandidates[minerAddress])
+                    known = deepcopy(m_BufferMinerCandidates[minerAddress]['mineCandidate'])
+                    minerSpecificBlock = deepcopy(m_BufferMinerCandidates[minerAddress]['minerBlock'])
                     break
 
         if len(minerAddress) == 0:
@@ -153,7 +152,6 @@ class blockChainNode:
             # found it, every miner must now start newly, because the block is gone
             m_BufferMinerCandidates.clear()
 
-            minerSpecificBlock = known['minerBlock']
             minerSpecificBlock['transactions'][0]['dateCreated'] = minerSolution['dateCreated']
             minerSpecificBlock['transactions'][0]['to'] = minerAddress
             minerSpecificBlock['blockHash'] = minerSolution['blockHash']

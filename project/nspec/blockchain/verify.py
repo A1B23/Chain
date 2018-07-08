@@ -36,7 +36,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
         #TODO confirm that 0 value transactions are allowed per slides
         if (trans['value'] < 0):
             colErr = colErr + "Minimun value 0 micro-coins, you sent: " + str(trans['value'])
-    if (len(trans['from']) != len(trans['to'])) or (len(trans['from']) != defAdr):
+    if (len(trans['from']) != len(trans['to'])) or (len(trans['from']) != len(defAdr)):
         colErr = colErr + "Invalid from/to address length"
     return colErr
 
