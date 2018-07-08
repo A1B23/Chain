@@ -41,7 +41,7 @@
         <button type="button" class="options" id="crun" onClick="JavaScript:collectRun()">run</button>
         <button type="button" class="options" id="cpause" onClick="JavaScript:collectPause()">pause</button>
         <button type="button" class="options" id="cstep" onClick="JavaScript:collectStep()">step</button>
-        <button type="button" class="options" onClick="JavaScript: collectRegex($('#trackRegex').val());">Limit(regex)</button><input type="text" value="" class="options" size="30" id="trackRegex">
+        <button type="button" class="options" onClick="JavaScript: collectRegex($('#trackRegex').val());">Limit(regex)</button><input type="text" value="." class="options" size="30" id="trackRegex">
         <button type="button" class="options" id="csusp" onClick="JavaScript: collectSuspend();">Suspend tracking</button>
     </span>
     <div id="control"></div>
@@ -214,7 +214,7 @@
     <div id='radar' align="center">
         Refresh Data Rate <input type="range" min="350" max="2500" value="800" class="slider" id="refreshRate">
         Anim Delay <input type="range" min="10" max="500" value="150" class="slider" id="animDelay">
-        Canvas Width <input type="range" min="100" max="1200" value="500" class="slider" id="twidth" oninput="resizeCanvas();">
+        Canvas Width <input type="range" min="100" max="1200" value="1000" class="slider" id="twidth" oninput="resizeCanvas();">
         Canvas Height <input type="range" min="100" max="900" value="500" class="slider" id="theight" oninput="resizeCanvas();">
         <br />
         <canvas onmousemove="draw(event)" id="canvas" class="border">Oops, no canvas supported by your browser?</canvas>
@@ -272,7 +272,9 @@
 
 
         function draw(evt) {
+            if (ctx != null) { 
             globMousePos = getMousePos(ctx.canvas, evt);
+            }
         }
 
 

@@ -65,6 +65,8 @@ set minPeers=1
 set maxPeers=1
 set nodeIPnum=32
 start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %delay% -mod %mode% --asDebug %asDebug%"
+set nodeIPnum=33
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %delay% -mod %mode% --asDebug %asDebug%"
 set nodeIPnum=34
 start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %delay% -mod %mode% --asDebug %asDebug%"
 

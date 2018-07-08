@@ -1,10 +1,3 @@
-from flask import Flask, jsonify, request
-from project.models import *
-from project.nspec.blockchain.modelBC import *
-from copy import deepcopy
-from project.utils import d, checkRequiredFields, isSameChain
-from project.nspec.blockchain.balance import addNewRealBalance
-from project.pclass import c_peer
 from project.nspec.blockchain.verify import *
 from project.nspec.blockchain.balance import *
 from threading import Thread
@@ -44,10 +37,9 @@ class blockchain:
         m_pendingTX.clear()
         m_AllBalances.clear()
         m_BufferMinerCandidates.clear()
-        addNewRealBalance(defAdr,0)
-        #m_Blocks.append(m_genesisSet[useNet])
+        addNewRealBalance(defAdr, 0)
         err = self.verifyThenAddBlock(m_genesisSet[useNet])
-        if (len(err)>0):
+        if len(err) > 0:
             #TODO make sure this does not happen
             print("Ooops, it appears that the genesis Block is not correct, please fix... for test we continue despite "+err)
             m_Blocks.append(m_genesisSet[useNet])
@@ -72,36 +64,36 @@ class blockchain:
         while (ret != 200) and (len(allPeersInfo)>0):
             #some peers exists and may have blocks, so we follow them
             maxIdx = -1
-            maxDiff =-1
+            maxDiff = -1
             cnt = -1
             for detail, detail200 in allPeersInfo:
                 cnt = cnt + 1
-                if (detail200 != 200):
+                if detail200 != 200:
                     #TODO actually should remove!!!!
                     continue
-                m, l, f = checkRequiredFields(detail, m_info, [],False)
-                if (isSameChain(detail) and (len(m) ==0)):
-                    if (maxDiff < detail['cumulativeDifficulty']):
+                m, l, f = checkRequiredFields(detail, m_info, [], False)
+                if (isSameChain(detail) is True) and (len(m) == 0):
+                    if maxDiff < detail['cumulativeDifficulty']:
                         maxDiff = detail['cumulativeDifficulty']
                         maxIdx = cnt
-            if (maxIdx >= 0):
+            if maxIdx >= 0:
                 bestPeer = allPeersInfo[maxIdx][0]['nodeUrl']
                 #bestPeer = bestPeer[0]
                 #bestPeer = bestPeer['nodeUrl']
                 #navkov has wrong nodeUrl info, so change this to fix url is used in initargs!!!
                 #bestPeer = 'https://stormy-everglades-34766.herokuapp.com'
                 blockList, ret = c_peer.sendGETToPeer(bestPeer+"/blocks")
-                if (ret == 200):
+                if ret == 200:
                     isFirst = True
                     for block in blockList:
-                        if (isFirst):
+                        if isFirst is True:
                             #TODO compare block with my genesis
                             # if any verification fails, set ret to -1
                             isFirst = False
                             #cumDiff = cumDiff + block['difficulty']
                             m_info['cumulativeDifficulty']=block['difficulty']
                             continue
-                        if (ret == 200):
+                        if ret == 200:
                             if len(self.verifyThenAddBlock(block)) != 0:
                                 self.initChain()
                                 break
@@ -144,11 +136,11 @@ class blockchain:
         while True:
             url = base + str(len(m_Blocks))
             res, stat = c_peer.sendGETToPeer(url)
-            if (stat == 200):
+            if stat == 200:
                 m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
-                if (len(m) == 0):
+                if len(m) == 0:
                     err = self.verifyThenAddBlock(res)
-                    if (len(err)>0):
+                    if len(err) > 0:
                         #TODO roll back por what?
                         return err
                     #TODO now we should inform all our peers about the block, apart form the one which sent
@@ -156,7 +148,7 @@ class blockchain:
             else:
                 # TODO must roll back or not?????
                 return "No valid information, disconnect..."
-            if(len(m_Blocks)>=res['index']):
+            if len(m_Blocks) >= res['index']:
                 break
            # TODO now asynch we must send the new blocks to all peers for info?
         # TODO cleear up pending transactions
@@ -167,12 +159,12 @@ class blockchain:
     def receivedBlockNotificationFromPeer(self, blockInfo):
         m, l, f = checkRequiredFields(blockInfo, m_informsPeerNewBlock, [],False)
         if (len(m) == 0) and (l == 0):
-            if (blockInfo['blocksCount']<len(m_Blocks)):
+            if blockInfo['blocksCount'] < len(m_Blocks):
                 return errMsg("Chain shorter than current, current is:" +str(len(m_Blocks)), 400)
-            if (blockInfo['blocksCount'] == len(m_Blocks)):
-                if (blockInfo['cumulativeDifficulty'] < m_stats['m_cumulativeDifficulty']):
+            if blockInfo['blocksCount'] == len(m_Blocks):
+                if blockInfo['cumulativeDifficulty'] < m_stats['m_cumulativeDifficulty']:
                     return errMsg("Chain difficulty lower current, current is:" + str(m_stats['m_cumulativeDifficulty']), 400)
-                elif (blockInfo['cumulativeDifficulty'] == m_stats['m_cumulativeDifficulty']):
+                elif blockInfo['cumulativeDifficulty'] == m_stats['m_cumulativeDifficulty']:
                     # Note: we ignore timestamp and use the other criterioa to settle
                     # TODO first compare the length of TX, longer wins
                     # TODO else compare the value involved
@@ -183,8 +175,8 @@ class blockchain:
                     del m_Blocks[len(m_Blocks)-1]
 
             base = blockInfo['nodeUrl']
-            url=base
-            if (base[-1] != "/"):
+            url = base
+            if base[-1] != "/":
                   base = base+"/"
             base = base + "blocks/"
             shareToPeers = len(m_Blocks)    # start point
@@ -192,7 +184,7 @@ class blockchain:
             #TODO make sure that threading does not create issues later
             #but as of now it is better to ack first the notification and then
             #start assking for blocks, as there could be more than one
-            threadx = Thread(target=self.getMissingBlocksFromPeer, args=(base,url))
+            threadx = Thread(target=self.getMissingBlocksFromPeer, args=(base, url))
             threadx.start()
             return setOK("Thank you for the notification.")
         else:
@@ -202,12 +194,12 @@ class blockchain:
     def verifyThenAddBlock(self, block):
         #check structure of block and TX, but not yet the balances
         err = verifyBlockAndAllTX(block)
-        if (len(err)) > 0:
+        if len(err) > 0:
             return err
 
         #structures are all corrcet so now check balances and update them
         err = confirmUpdateBalances(block['transactions'], block['index'])
-        if (len(err) > 0):
+        if len(err) > 0:
             return err
         # clear all transactions involved in the block
         m_Blocks.append(deepcopy(block))
@@ -222,8 +214,8 @@ class blockchain:
         return ""
 
     def getBlockByNumber(self, blockNr):
-        if (blockNr >= 0):
-            if (blockNr < len(m_Blocks)):
+        if blockNr >= 0:
+            if blockNr < len(m_Blocks):
                 #TODO first we assume blockID equals bolckID as we simplify this
                 # nonethe less should we check the index in the block matches the outside??
                 # if no then how????
@@ -232,7 +224,7 @@ class blockchain:
 
     def getJSONBlockByNumber(self, blockNr):
         blk = self.getBlockByNumber(blockNr)
-        if (len(blk) > 0):
+        if len(blk) > 0:
             return jsonify(blk), 200
         response = {
             'errorMsg': 'BlockNumber not valid or not existent: '+str(blockNr)
