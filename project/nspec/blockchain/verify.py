@@ -1,41 +1,43 @@
 from project.utils import *
 from project.nspec.blockchain.modelBC import *
-from copy import deepcopy
 from project.pclass import c_peer
 from project.nspec.blockchain.balance import *
 
 
 firstTime = [True]
-def verifyBasicTX(trans,isCoinBase,ref):
-    m, l, f = checkRequiredFields(trans, ref , [],False)
+def verifyBasicTX(trans, isCoinBase, ref):
+    m, l, f = checkRequiredFields(trans, ref, [], False)
     colErr = ""
     for x in m:
-        if (colErr == ""):
+        if colErr == "":
             colErr = "Missing field(s): '" + x + "'"
         else:
             colErr = colErr + "and '" + x + "'"
-    if (l != 0):
+    if l != 0:
         # TODO test only still unclear about data structure so for test accept both
         if (l != 1) or ("transactionDataHash" not in trans):
             colErr = colErr + " Invalid number of fields in transaction"
-    if (colErr == ""):  # final checks
+    if colErr == "":  # final checks
         if (len(trans['senderSignature']) != 2):
             colErr = colErr + " Invalid number of elements in 'senderSignature' field"
-    if (not isinstance(trans['fee'], int)):
+        #TODO check senderSigLengths
+    if not isinstance(trans['fee'], int):
         colErr = colErr + "Fees must be integer, you sent: " + str(trans['fee'])
     else:
-        if (isCoinBase):
-            if (trans['fee'] != 0):
+        if isCoinBase is True:
+            if trans['fee'] != 0:
                 colErr = colErr + "Coinbase fee should be zero, you sent: " + str(trans['fee'])
         else:
-            if (trans['fee'] < m_stats['m_minFee']):
+            if trans['fee'] < m_stats['m_minFee']:
                 colErr = colErr + "Minimun fee 10 micro-coins, you sent: " + str(trans['fee'])
-    if (not isinstance(trans['value'], int)):
+    if not isinstance(trans['value'], int):
         colErr = colErr + "Value must be integer, you sent: " + str(trans['value'])
     else:
         #TODO confirm that 0 value transactions are allowed per slides
         if (trans['value'] < 0):
             colErr = colErr + "Minimun value 0 micro-coins, you sent: " + str(trans['value'])
+    if (len(trans['from']) != len(trans['to'])) or (len(trans['from']) != defAdr):
+        colErr = colErr + "Invalid from/to address length"
     return colErr
 
 
@@ -73,7 +75,7 @@ def receivedNewTransaction(trans, fromPeer, share):
     # Checks for missing / invalid fields / invalid field values
     colErr = verifyBasicTX(trans, False, m_transaction) #such can never be coinbase, so False!
 
-    if (colErr == ""):
+    if colErr == "":
         trx = deepcopy(trans)
         passOn = deepcopy(trans)
         del trx["senderSignature"]  # this must be excluded from the hash

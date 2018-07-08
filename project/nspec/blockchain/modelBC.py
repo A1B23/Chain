@@ -7,6 +7,7 @@ m_newBlock = {}
 m_pendingTX = {}
 m_BufferMinerCandidates = {}
 minBlockReward = 50000
+maxSameBlockPerMiner = 5
 
 
 m_stats = {
@@ -16,7 +17,7 @@ m_stats = {
 
 m_coinBase = {
     "from": defAdr,     # fix
-    "to": "9a9f082f37270ff54c5ca4204a0e4da6951fe917",       # miners address received via GET
+    "to": defAdr,       # miners address received via GET
     "value": -1,                                       # sum of all transaction fees
     "fee": 0,                                               # miners don't pay fees, so zero
     "dateCreated": "2018-02-10T17:53:48.972Z",              # coinBase creation timestamp, mining time must be later
@@ -29,7 +30,7 @@ m_coinBase = {
 
 m_transaction = {
     "from": defAdr,
-    "to": "9a9f082f37270ff54c5ca4204a0e4da6951fe917",
+    "to": defAdr,
     "value": 0,
     "fee": 0,
     "dateCreated":  "2018-02-10T17:53:48.972Z",
@@ -43,11 +44,11 @@ m_transaction = {
 
 m_staticTransactionRef = {
     "from": defAdr,
-    "to": "9a9f082f37270ff54c5ca4204a0e4da6951fe917",
-    "value": 0,
-    "fee": 0,
+    "to": defAdr,
+    "value": -1,
+    "fee": -1,
     "dateCreated":  "2018-02-10T17:53:48.972Z",
-    "data": "coinbase tx",
+    "data": "Coinbase TX",
     "senderPubKey": defPub,
     "transactionDataHash": "needtocalculatethehashhere",
     "senderSignature": [defSig, defSig],
@@ -56,7 +57,7 @@ m_staticTransactionRef = {
 }
 
 m_staticBalanceInfo = {
-    "curBalance": 0,
+    "curBalance": -1,
     "createdInBlock": -1,
     "confirm": []
 }
@@ -65,7 +66,7 @@ m_candidateMiner = {
     "index": 1,
     "transactionsIncluded": 0,
     "difficulty": 5,
-    "expectedReward": minBlockReward , ## don't chnange this
+    "expectedReward": minBlockReward , #even if changed here, the code corrects again
     "rewardAddress": "",
     "blockDataHash": "15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
 }
@@ -109,9 +110,9 @@ m_candidateBlock = {
 }
 
 m_informsPeerNewBlock = {
-    "blocksCount": 51,
-    "cumulativeDifficulty": 283,
-    "nodeUrl": "http://chain-node-03.herokuapp.com:5555"
+    "blocksCount": -1,
+    "cumulativeDifficulty": -1,
+    "nodeUrl": "" #""http://chain-node-03.herokuapp.com:5555"
 }
 
 m_genesisSet = [

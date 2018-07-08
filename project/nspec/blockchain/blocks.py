@@ -102,7 +102,7 @@ class blockchain:
                             m_info['cumulativeDifficulty']=block['difficulty']
                             continue
                         if (ret == 200):
-                            if (len(self.verifyThenAddBlock(block))!=0):
+                            if len(self.verifyThenAddBlock(block)) != 0:
                                 self.initChain()
                                 break
                         else:
@@ -221,7 +221,7 @@ class blockchain:
         m_info['pendingTransactions'] = len(m_pendingTX)
         return ""
 
-    def getBlockByNumber(self,blockNr):
+    def getBlockByNumber(self, blockNr):
         if (blockNr >= 0):
             if (blockNr < len(m_Blocks)):
                 #TODO first we assume blockID equals bolckID as we simplify this
@@ -230,7 +230,7 @@ class blockchain:
                 return m_Blocks[blockNr]
         return{}
 
-    def getJSONBlockByNumber(self,blockNr):
+    def getJSONBlockByNumber(self, blockNr):
         blk = self.getBlockByNumber(blockNr)
         if (len(blk) > 0):
             return jsonify(blk), 200

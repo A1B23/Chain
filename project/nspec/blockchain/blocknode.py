@@ -1,27 +1,20 @@
-from project.models import *
-from flask import jsonify
-import time
-import random
 from project.utils import *
-import hashlib
-from copy import deepcopy
 from project.nspec.blockchain.transact import transactions
 from project.nspec.blockchain.blocks import blockchain
 from project.nspec.blockchain.modelBC import *
 from project.pclass import c_peer
-from project.models import m_Miner_order
+from copy import deepcopy
 
 class blockChainNode:
     c_tx = transactions()
     c_blockchainHandler = blockchain()
-
 
     def bufferSys(self):
         sysout = {}
         sysout['m_info'] = m_info
         sysout['m_cfg'] = m_cfg
         sysout['m_peerInfo'] = m_peerInfo
-        sysout['m_pendingTX'] = m_pending
+        sysout['m_pendingTX'] = m_pendingTX
         sysout['m_Blocks'] = m_Blocks
         sysout['m_BufferMinerCandidates'] = m_BufferMinerCandidates
         sysout['m_stats'] = m_stats
@@ -34,7 +27,7 @@ class blockChainNode:
         myNodeID = m_info['nodeId']
         m_info.clear()
         m_info.update(sysIn['m_info'])
-        m_info["nodeUrl"]=myUrl
+        m_info["nodeUrl"] = myUrl
         m_info["nodeId"] = myNodeID
         m_cfg.clear()
         m_cfg.update(sysIn['m_cfg'])
@@ -54,7 +47,7 @@ class blockChainNode:
                 ret = self.c_blockchainHandler.verifyThenAddBlock(block)
                 if (len(ret) > 0):
                     # TODO revert if loading failed!?!?!
-                    return jsonify(ret), 400
+                    return errMsg(ret, 400)
 
         m_pendingTX.clear()
         m_pendingTX.update(sysIn['m_pendingTX'])
@@ -66,40 +59,48 @@ class blockChainNode:
         if minerAddress in m_BufferMinerCandidates:
             cand = m_BufferMinerCandidates[minerAddress]
             if cand['index'] == m_candidateBlock['index']:
-                cand['countRepeat'] = cand['countRepeat'] + 1
-                ### If there is no solution and no miner can find a solution, then unless a new tx
-                ### comes in the network hangs, so need to limit the number of reuse here and change the timestamp
-                if (cand['countRepeat']<5):
-                    cand2 = deepcopy(cand)
-                    del cand2['countRepeat']
-                    return jsonify(cand2), 200 #if nothing has changed, return same block
+                if cand['minerBlock']['blockDataHash'] == m_candidateBlock['index']['blockDataHash']:
+                    cand['countRepeat'] = cand['countRepeat'] + 1
+                    ### If there is no solution and no miner can find a solution, then unless a new tx
+                    ### comes in the network hangs, so need to limit the number of reuse here and change the timestamp
+                    if cand['countRepeat'] < maxSameBlockPerMiner:
+                        #need a temp copy so as to remove counter
+                        cand2 = deepcopy(cand)
+                        del cand2['countRepeat']
+                        return setOK(jsonify(cand2)) #if nothing has changed, return same block
 
+        # as candidate blocks change with every new TX and different miners might deal
+        # with different blocks, we must keep the miner specific block in case the
+        # miner succeeds
+        minerSpecificBlock = deepcopy(m_candidateBlock)
+        # TODO need house-keeping if miners disappear and don't come back,
+        # else we get a queue overflow attack by fake miners
         candidateMiner = deepcopy(m_candidateMiner)
         candidateMiner['rewardAddress'] = minerAddress
-        m_candidateBlock['minedBy'] = minerAddress
-        fees = 0
+        minerSpecificBlock['minedBy'] = minerAddress
+        fees = minBlockReward
         for tx in m_candidateBlock['transactions']:
-            if (len(tx) >0):    #otherwise it is empty coinbase
+            if len(tx) > 0:    #otherwise it is empty coinbase
                 fees = fees + tx['fee']
             else:
-                if (fees>0):
-                    errMsg("Invalid empty TX in block", 404)
-        candidateMiner['index'] = len(m_Blocks) #m_candidateBlock['index']
-        candidateMiner['expectedReward'] = candidateMiner['expectedReward'] +fees
+                if fees != 0:
+                    return errMsg("Invalid CoinBase fee TX in block", 404)
         coinBase = deepcopy(m_coinBase)
+        candidateMiner['index'] = len(m_Blocks)
+        coinBase['minedInBlockIndex'] = len(m_Blocks)
+        candidateMiner['expectedReward'] = fees
+        coinBase['value'] = fees
         coinBase['to'] = minerAddress
         coinBase['dateCreated'] = getTime()
-        coinBase['value'] = candidateMiner['expectedReward']
-        coinBase['minedInBlockIndex'] = len(m_Blocks)
         coinBase['transactionDataHash'] = sha256ToHex(m_transaction_order, coinBase)
-        m_candidateBlock['transactions'][0] = coinBase #just overwrite first TX, miner gets money for empty as well
-        candidateMiner['transactionsIncluded'] = len(m_candidateBlock['transactions']) #inlcudes coinbase
+        minerSpecificBlock['transactions'][0] = coinBase #just overwrite first TX, miner gets money for empty as well
+        candidateMiner['transactionsIncluded'] = len(minerSpecificBlock['transactions']) #inlcudes coinbase
         # now the block is done, hash it for miner
         # need to calculate now the hash for this specific miner based candidateBlock
         # the hash for the miner has to be in specific order of data
         forHash = "{"
         for txs in m_candidateMiner_order:
-            if (txs == 'transactions'):
+            if txs == 'transactions':
                 forHash = forHash + '"' + txs + '":['
                 for tx in m_candidateBlock['transactions']:
                     forHash = forHash + putDataInOrder(m_txorderForBlockHash, tx)
@@ -107,60 +108,80 @@ class blockChainNode:
             else:
                 forHash = forHash + addItems(txs, m_candidateBlock[txs])
         candidateMiner['blockDataHash'] = sha256StrToHex(forHash[:-1] + "}")
-        print("Generate new candidate for miner: " + minerAddress + " with " + candidateMiner['blockDataHash'])
+        print("Generate new candidate for miner: " + minerAddress + " with Hash: " + candidateMiner['blockDataHash'] + " reward: " + str(fees))
         m_BufferMinerCandidates[minerAddress] = deepcopy(candidateMiner)
         m_BufferMinerCandidates[minerAddress]['countRepeat'] = 0
-        return jsonify(candidateMiner), 200
+        m_BufferMinerCandidates[minerAddress]['minerBlock'] = minerSpecificBlock
+        return setOK(jsonify(candidateMiner))
 
-    def minerFoundSolution(self,minerSolution):
-        # TODO we must check it all
-        #{"blockDataHash": "15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
-        # "dateCreated": "2018-05-20T04:36:36Z", "nonce": "735530",
-        # "blockHash": "0000020135f1c30b68733e9805f52fdc758fff4b07149929edbd995d30167ae1"}
+
+    def minerFoundSolution(self, minerSolution):
         colErr = checkSameFields(minerSolution, m_minerFoundNonce, True)
-        if (colErr != ""):
+        if colErr != "":
             return errMsg(colErr, 400)
-        for minerAddress in m_BufferMinerCandidates:
-            known = m_BufferMinerCandidates[minerAddress]
-            if known['blockDataHash'] == minerSolution['blockDataHash']:
-                sol = minerSolution['blockHash']
-                dif = known['difficulty']
-                fail = (len(sol) < dif) or (sol[:dif] != ("0" * dif))
-                if (fail):
-                    return errMsg("Submitted block hash does not fulfill difficulty ", 400)
 
-                # calculate hash based on nonce and then compare
-                blockHash = makeMinerHash(minerSolution)
-                if (blockHash != minerSolution['blockHash']):
-                    return errMsg("Incorrect block hash", 400)
+        #miner does not say who he is, so need to find the match in blockDataHash
+        #which includes the correct address
+        minerAddress = ""
+        for miner in m_BufferMinerCandidates:
+            if m_BufferMinerCandidates[miner]['blockDataHash'] == minerSolution['blockDataHash']:
+                    minerAddress = miner
+                    #make copy to avoid parallel changes through bad/new miner request
+                    known = deepcopy(m_BufferMinerCandidates[minerAddress])
+                    break
 
-                # TODO timestamp must be bigger than when the candidate was sent, nut
-                # TODO timestap cannot be too far into the future, maybe allow 1 minute?
+        if len(minerAddress) == 0:
+            return errMsg("Block not found or already mined", 404)
 
-                # TODO is this double updtae with minerdareCreated to TX and block creation correct???
-                m_candidateBlock['transactions'][0]['dateCreated'] = minerSolution['dateCreated']
-                m_candidateBlock['transactions'][0]['to'] = minerAddress
-                m_candidateBlock['minedBy'] = minerAddress
-                m_candidateBlock['blockHash'] = minerSolution['blockHash']
-                m_candidateBlock['nonce'] = minerSolution['nonce']
-                m_candidateBlock['dateCreated'] = minerSolution['dateCreated']
-                m_candidateBlock['blockDataHash'] = minerSolution['blockDataHash']
-                err = self.c_blockchainHandler.verifyThenAddBlock(m_candidateBlock)
-                if (len(err) > 0):
-                    return errMsg("Internal error on setting up block",400)
-                toPeer = dict(m_informsPeerNewBlock)
+        try:
+            sol = minerSolution['blockHash']
+            dif = known['difficulty']
+            fail = (len(sol) < dif) or (sol[:dif] != ("0" * dif))
+            if fail is True:
+                return errMsg("Submitted block hash does not fulfill difficulty ",400)
+
+            # calculate hash based on nonce and then compare
+            blockHash = makeMinerHash(minerSolution)
+            if (blockHash != minerSolution['blockHash']):
+                return errMsg("Incorrect block hash", 400)
+
+
+            # TODO timestamp must be bigger than when the candidate was sent, nut
+            # TODO timestap cannot be too far into the future, maybe allow 1 minute?
+
+            # this was the right, and no matter what comes now or was registered since we
+            # found it, every miner must now start newly, because the block is gone
+            m_BufferMinerCandidates.clear()
+
+            minerSpecificBlock = known['minerBlock']
+            minerSpecificBlock['transactions'][0]['dateCreated'] = minerSolution['dateCreated']
+            minerSpecificBlock['transactions'][0]['to'] = minerAddress
+            minerSpecificBlock['blockHash'] = minerSolution['blockHash']
+            minerSpecificBlock['nonce'] = minerSolution['nonce']
+            minerSpecificBlock['dateCreated'] = minerSolution['dateCreated']
+            minerSpecificBlock['blockDataHash'] = minerSolution['blockDataHash']
+            err = self.c_blockchainHandler.verifyThenAddBlock(minerSpecificBlock)
+            if len(err) > 0:
+                colErr = "Internal error on setting up block"
+                minerAddress=""
+            else:
+                toPeer = deepcopy(m_informsPeerNewBlock)
                 toPeer["blocksCount"] = len(m_Blocks)
                 toPeer["cumulativeDifficulty"] = 55 # TODO this still need to be counted
                 toPeer["nodeUrl"] = m_info['nodeUrl']
                 c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer, "")
-                return setOK("Block accepted, reward paid: "+str(known['expectedReward'])+" microcoins")
+        except Exception:
+            colErr = colErr + " and grave error encountered"
 
-        #TODO call errMsg
-        #TODO confirm
-        #After a new block is mined in the network (by someone)
-        #All pending mining jobs are deleted (because are no longer valid)
-        #When a miner submits a mined block later  404 "Not Found"
+        # this was the right, and no matter what else happened or comes now or was registered since we
+        # found it, every miner must now start newly, because the block is gone, so
+        # if since previous clear another one registered, clear all again and start anew
+        m_BufferMinerCandidates.clear()
 
-        return errMsg("Block not found or already mined", 404)
+        if len(minerAddress) > 0:
+            return setOK("Block accepted, reward paid: "+str(known['expectedReward'])+" microcoins")
+
+        return errMsg(colErr, 400)
+
 
 

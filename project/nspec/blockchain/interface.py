@@ -1,18 +1,11 @@
-from flask import Flask, jsonify, request
-from project.utils import *
-import json
-from project.nspec.blockchain.modelBC import m_Blocks
 from project.classes import c_blockchainNode
-# this is the dummy function only, your function comes from the import!
-from project.pclass import c_peer
 from project.nspec.blockchain.verify import *
 from project.nspec.blockchain.balance import *
-
 
 firstCall = True
 class chainInterface:
 
-    def nodeSpecificGETNow(self,url,linkInfo):
+    def nodeSpecificGETNow(self, url, linkInfo):
         urlID = url[1:6]
         #TODO ensure for all who have no parameter in URL hat linkoinfo is empty!
         if (urlID == 'block'):
@@ -22,7 +15,7 @@ class chainInterface:
                 return c_blockchainNode.c_blockchainHandler.getJSONBlockByNumber((int) (linkInfo['blockNumber']))
 
         elif (urlID == "minin"):
-            if (len(linkInfo) ==1):
+            if (len(linkInfo) == 1):
                 return c_blockchainNode.getMinerCandidate(linkInfo['minerAddress'])
 
         elif (urlID == "trans"):
@@ -79,7 +72,7 @@ class chainInterface:
         return errMsg(response), 400
 
     # this is the dummy function only, your functoin comes from the import!
-    def nodeSpecificPOSTNow(self,url,linkInfo,json,request):
+    def nodeSpecificPOSTNow(self, url, linkInfo, json, request):
         # linkInfo is a json object containing the information from the URL
         urlID = url[1:6]
         if (urlID == "trans"):

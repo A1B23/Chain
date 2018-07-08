@@ -12,7 +12,7 @@ from project.nspec.blockchain.verify import *
 
 
 class transactions:
-    def getPendTXByAddress(self,address):
+    def getPendTXByAddress(self, address):
         response = []
         for tx in m_pendingTX:
             if (address == ""):
@@ -22,7 +22,7 @@ class transactions:
                     response.append(m_pendingTX[tx])
         return response
 
-    def getTXForAddress(self,address):
+    def getTXForAddress(self ,address):
         #TODO move to models
         reply = {
           "address": "44fe0696beb6e24541cc0e8728276c9ec3af2a75",
