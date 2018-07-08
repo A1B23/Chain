@@ -22,7 +22,7 @@ m_peerInfo = {
 }
 
 m_TemplateSingleBalance = {
-  "safeBalance": 0,   #confirm count 6+
+  "safeBalance": "not provided: this is a matter of user preference, it should be done by wallet, not the node",   #deviates from confirm count 6+
   "confirmedBalance": 0,
   "pendingBalance": 0
 }

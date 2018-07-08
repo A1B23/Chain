@@ -107,6 +107,7 @@ class blockChainNode:
                 forHash = forHash + "],"
             else:
                 forHash = forHash + addItems(txs, m_candidateBlock[txs])
+
         candidateMiner['blockDataHash'] = sha256StrToHex(forHash[:-1] + "}")
         print("Generate new candidate for miner: " + minerAddress + " with Hash: " + candidateMiner['blockDataHash'] + " reward: " + str(fees))
         m_BufferMinerCandidates[minerAddress] = deepcopy(candidateMiner)
@@ -136,9 +137,8 @@ class blockChainNode:
         try:
             sol = minerSolution['blockHash']
             dif = known['difficulty']
-            fail = (len(sol) < dif) or (sol[:dif] != ("0" * dif))
-            if fail is True:
-                return errMsg("Submitted block hash does not fulfill difficulty ",400)
+            if (len(sol) < dif) or (sol[:dif] != ("0" * dif)):
+                return errMsg("Submitted block hash does not fulfill difficulty ", 400)
 
             # calculate hash based on nonce and then compare
             blockHash = makeMinerHash(minerSolution)
