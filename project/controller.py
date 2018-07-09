@@ -15,24 +15,35 @@ c_MainIntf = mainInterface()
 
 @app.route('/visualGet', methods=["GET"])
 def visualGet():
-    dat = {}
-    for item in m_Delay:
-        if 'delayID' in item:
-            dat = deepcopy(item)
-            item['releaseID'] = dat['delayID']
-            del item['delayID']
-            break
-    return jsonify(dat), 200
+    try:
+        dat = {}
+        for item in m_Delay:
+            if 'delayID' in item:
+                dat = deepcopy(item)
+                item['releaseID'] = dat['delayID']
+                del item['delayID']
+                break
+        return jsonify(dat), 200
+    except Exception:
+        print("visualGet Failed")
+    return errMsg("Request failed", 400)
 
 @app.route('/visualRelease/<int:id>', methods=["GET"])
 def visualRelease(id):
-    for item in m_Delay:
-        if ('releaseID' in item) and (item['releaseID'] == id):
-            rel = item
-            break
-    m_Delay.remove(rel)
-    return jsonify(rel), 200
-
+    try:
+        found = False
+        for item in m_Delay:
+            if ('releaseID' in item) and (item['releaseID'] == id):
+                rel = item
+                found = True
+                break
+        if found is True:
+            m_Delay.remove(rel)
+            return jsonify(rel), 200
+        return errMsg("Unexpected Release for "+str(id), 400)
+    except Exception:
+        print("visualRelease Failed")
+    return errMsg("Request failed", 400)
 
 @app.route('/visualCfg', methods=["POST"])
 def visualCfg():

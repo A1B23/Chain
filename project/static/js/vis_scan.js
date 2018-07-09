@@ -72,7 +72,7 @@ function scanFor(ipIn, typIn, ringIn) {
                     if (avail.hasOwnProperty(dom)) {
                         nodes[typ][dom]['ping'] = true;
                     } else {
-                        nodes[typ][dom] = { "ping": true, "ring": ring, "cfg": jstext, "peers": jstext['peers'] };
+                        nodes[typ][dom] = { "ping": true, "ring": ring, "cfg": jstext, "peers": jstext['peers'], 'doCollect':true};
                     }
 
                     if (!text.startsWith("[]")) {

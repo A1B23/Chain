@@ -25,7 +25,6 @@ class peers:
     # then why does the peer list not take it as new node???
     def visualDelay(self, url, json):
         if (m_visualCFG['active'] is True) and (m_visualCFG['pattern'].search(url)):
-            print("Added delay info "+url)
             myDelay = cntDelay[0]
             m_Delay.append({"delayID": myDelay, "url": url, "json": json})
             cntDelay[0] = cntDelay[0] + 1
@@ -46,7 +45,6 @@ class peers:
 
             except Exception:  # means no ,m_Delay
                 myDelay = -1
-            print("...continue processing for " + url + " ("+str(myDelay) + ", " + str(maxCount) + ")")
 
 
     def doPOST(self, url, json):
@@ -181,6 +179,22 @@ class peers:
         for peer in findPeer:
             self.addPeer(peer, True)
 
+    def ensureBCNode(self, peer):
+        try:
+            s1 = self.doGET(peer + "/cfg")
+            reply2 = json.loads(s1.text)
+            # peers can actually only be BCNode, all else make no sense
+            if isABCNode(reply2['type']):
+                return True
+            # as it is invalid peer, don't try again, but keep in list in case we got spoofed reply
+        except Exception:
+            s1 = "" #nothing to do but need to capture the exception
+
+        if peer in m_cfg['peers']:
+            m_cfg['peers'][peer]['active'] = False
+        return False
+
+
     def suitableReply(self, peer):
         try:
             s1 = self.doGET(peer + "/info")
@@ -192,14 +206,11 @@ class peers:
                 del m_cfg['peers'][peer]
                 m_info['peers'] = len(m_cfg['peers'])
                 return False
-            s1 = self.doGET(peer + "/cfg")
-            reply2 = json.loads(s1.text)
-            # peers can actually only be BCNode, all else make no sense
-            if isABCNode(reply2['type']):
+            #if a peer was detected and accepted, then no need to check for type again
+            if (peer in m_cfg['peers']) and (m_cfg['peers'][peer]['active'] is True):
                 return reply
-            #as it is invalid peer, don't try again
-            del m_cfg['peers'][peer]
-            m_info['peers'] = len(m_cfg['peers'])
+            if self.ensureBCNode(peer):
+                return reply
             return {}
         except Exception:
             return {}
@@ -304,7 +315,12 @@ class peers:
             for peer in rem:
                 del m_cfg['peers'][peer]
             m_cfg['statusPeer'] = False
-            sleep(sleepSecs) #TODO adjust to 60 after testing
+            #verify on corrcet peer type
+            for peer in m_cfg['peers']:
+                if m_cfg['peers'][peer]['active'] is True:
+                    self.ensureBCNode(peer)
+
+            sleep(sleepSecs) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
     # TODO newNode set too late and several vars not used??
     def peersConnect(self, path, linkInfo, values, request):

@@ -3,16 +3,16 @@ collect = false;
 
 function collected(jsonIn, data) {
     var json = JSON.parse(jsonIn);
+    nodes[data[0]][data[1]]['doCollect'] = true
     if (json.hasOwnProperty("delayID")) {
-       
         var typ = data[0];
         var from = data[1];
         var to = json.url;
         var pos = to.indexOf(":", 6);
         if (pos > 0) {
+            nodes[data[0]][data[1]]['doCollect'] = false
             var toDom = to.substring(0, pos + 5);
             comNodes.push({ 'iter': 0, 'fromType': typ, 'fromDom': from, 'url': to, 'toType': getType(toDom), 'toDom': toDom, 'delayID': json.delayID });
-            nodes[typ][from]['doCollect'] = false
         }
     } 
     drawCanvas();
@@ -76,53 +76,33 @@ function collectSuspend() {
     }
 }
 
-function doCollect(contin) {
-    //if (collectCount <= 0) {
-        for (var typ in nodes) {
-            if (nodes.hasOwnProperty(typ)) {
-                for (var dom in nodes[typ]) {
-                    if (nodes[typ].hasOwnProperty(dom)) {
-                        if (!nodes[typ][dom].hasOwnProperty('doCollect')) {
-                            nodes[typ][dom]['doCollect'] = true;
-                        }
-                        if (nodes[typ][dom]['doCollect']) {
-                            //collectCount++;
-                            doGETCallback(dom + "/visualGet", collected, [typ, dom]);
-                        }
-                    }
-                }
+function collectPerType(typ,isLast) {
+    for (var dom in nodes[typ]) {
+        if (nodes[typ].hasOwnProperty(dom)) {
+            if (nodes[typ][dom]['doCollect']) {
+                doGETCallback(dom + "/visualGet", collected, [typ, dom]);
             }
         }
-    //} else {
-    //    collectCount = collectCount / 2;
-    //}
-    if ((collect == true) && contin) {
-        var tim = +$("#refreshRate").val();
-        setTimeout(function () { doCollect(true); }, tim);
     }
-
+    if (isLast) {
+        if (collect == true) {
+            var tim = +$("#refreshRate").val();
+            setTimeout(function () { doCollect(true); }, tim);
+        }
+    }
 }
 
-function doCollectOld(contin) {
-    if (collectCount <= 0) {
-        for (var typ in nodes) {
-            if (nodes.hasOwnProperty(typ)) {
-                for (var dom in nodes[typ]) {
-                    if (nodes[typ].hasOwnProperty(dom)) {
-                        collectCount++;
-                        doGETCallback(dom + "/visualGet", collected, [typ, dom]);
-                    }
-                }
-            }
+function doCollect(contin) {
+    var lTyp = Object.keys(nodes).length
+    for (var typ in nodes) {
+        if (nodes.hasOwnProperty(typ)) {
+            // need to break the link of typ and localise it
+            lTyp--;
+            (function (useType,isLast) {
+                setTimeout(function () { collectPerType(useType,isLast); }, 0);
+            })(typ,(lTyp==0) && contin);
         }
-    } else {
-        collectCount = collectCount / 2;
     }
-    if ((collect == true) && contin) {
-        var tim = +$("#refreshRate").val();
-        setTimeout(function () { doCollect(true); }, tim);
-    }
-
 }
 
 function collectRun() {
@@ -133,7 +113,7 @@ function collectRun() {
         $("#cpause").prop("disabled", false);
         setTimeout(function () { doCollect(true); }, 100)
     } else {
-        collectPause();
+        collectSuspend();
     }
 }
 
@@ -152,14 +132,19 @@ function collectStep() {
 setTimeout(function () { updateCom() }, 100);
 
 function releaseFor(url) {
-    var xhttp = new XMLHttpRequest();
-    //xhttp.onreadystatechange = function () {
-    //    if (this.readyState == 4) {
-    //        // we ignore reply for now, but maybe can make use of reply for animation....
-    //    }
-    //};
-    xhttp.open("GET", url, false);
-    xhttp.send();
+    try {
+        var xhttp = new XMLHttpRequest();
+        //xhttp.onreadystatechange = function () {
+        //    if (this.readyState == 4) {
+        //        // we ignore reply for now, but maybe can make use of reply for animation....
+        //    }
+        //};
+        xhttp.open("GET", url, false);
+        xhttp.send();
+    } catch (err) {
+        console.log("Error for " + url + " as " + err.message);
+        setTimeout(function () { releaseFor(url) }, 100);
+    }
 }
 
 function updateCom() {
@@ -167,13 +152,15 @@ function updateCom() {
     if (comNodesL > 0) {
         for (var com = 0; com < comNodesL; com++) {
             var item = comNodes[com];
+            if (item.iter == Math.floor(maxIter / 3)) {
+                doGETCallback(item.fromDom + "/visualGet", collected, [item.fromType, item.fromDom]);
+            }
             if (item.iter >= maxIter) {
                 comNodes.splice(com, 1);
                 com--;
                 comNodesL--;
                 releaseFor(item.fromDom + "/visualRelease/" + item.delayID);
                 nodes[item.fromType][item.fromDom]['doCollect'] = true;
-                //releaseFor(item.fromDom + "/visualRelease/" + item.delayID);
                 continue;
             }
             var from = getXYType(item.fromType, item.fromDom)
@@ -194,8 +181,8 @@ function updateCom() {
 
                 comNodes[com]['delta'] = { 'x': use_x + deltax, 'y': deltax * from[item.toDom].slope + use_y, 'size': 10, 'toRight': toright };
             } else {
-                console.log("No to Dom for " + com + " "+item);
-                console.log(from);
+                //console.log("No to Dom for " + com + " "+item);
+                //console.log(from);
                 comNodes[com]['delta'] = { 'x': from.x, 'y': from.y, 'size': 10 };
             }
         }
@@ -210,27 +197,36 @@ function updateCom() {
 }
 
 function doGETCallback(url, callBack, callBackData) {
-    var port = 5555;
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            collectCount--;
-            callBack(this.responseText, callBackData);
-        }
-    };
-    xhttp.open("GET", url, true);
-    xhttp.send();
-    //collectCount--;
-    //callBack(xhttp.responseText, callBackData);
+    try {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4) {
+                collectCount--;
+                callBack(this.responseText, callBackData);
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+        nodes[callBackData[0]][callBackData[1]]['doCollect'] = false
+    } catch (err) {
+        collectCount--;
+        console.log("Error for doGETCallBack" + url + " as " + err.message);
+        nodes[callBackData[0]][callBackData[1]]['doCollect'] = true
+    }
 }
 
 function doPOSTSynch(url, data) {
-    var port = 5555;
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, false);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    xhr.send((typeof data == 'string') ? data : JSON.stringify(data));
-    var json = { "message": "fail" };
-    json = JSON.parse(xhr.responseText);
-    return [json, xhr.status];
+    try {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, false);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send((typeof data == 'string') ? data : JSON.stringify(data));
+        var json = { "message": "fail" };
+        json = JSON.parse(xhr.responseText);
+        return [json, xhr.status];
+    } catch (err) {
+        console.log("Error for doPOSTSynch" + url + " as " + err.message);
+        return doPOSTSynch(url, data);
+    }
+
 }

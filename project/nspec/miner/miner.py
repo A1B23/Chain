@@ -64,19 +64,10 @@ def isDataValid(resp_text):
 
 
 def pull():
-    if cfg['done'] is True:
-        if m_cfg['mode'] == "Y":
-            print("Enter m <return> to start mining")
-            choice = "s"
-            while choice != "m":
-                choice = input().lower()
-        cfg['done'] = False
-    print("==== First Stage : Request mining data from Node: "+str(m_cfg['peers']))
     try:
         resp_text = getCandidate()
         if "peerError" in resp_text:
             return
-        print("Received: "+str(resp_text))
         if isDataValid(resp_text) is False:
             # no point to waste time and effort on this invalid/incomplete candidate
             print("Invalid node block data detected, ignored....")
@@ -93,7 +84,6 @@ def pull():
             newCandidate['dateCreated'] = getEstimatedTimeStamp(newCandidate['difficulty'])
             newCandidate['fixDat'] = newCandidate['blockDataHash'] + "|" + newCandidate['dateCreated'] + "|"
             newCandidate['nonce'] = random.randint(0, cfg['maxNonce']-1)  # avoid that each miner starts at same level
-            print("Start Nonce = "+str(newCandidate['nonce']))
             cfg['findNonce'] = True
             cfg['waitAck'] = False
 
@@ -107,13 +97,8 @@ def pull():
 def pullCandidate():
     while True:
         try:
-            print("Initiate timed pull for refresh")
             pull()
-            if len(newCandidate) > 0:
-                sleep(int(newCandidate['difficulty']/2))
-            else:
-                sleep(2)
-
+            sleep(int(newCandidate['difficulty']/2)+1)
         except Exception:
             print("Pulling candidate block failed...")
 
@@ -127,7 +112,16 @@ def doMine():
             sleep(1)
             cfg['waitAck'] = True
         cfg['waitAck'] = False
+        if m_cfg['mode'] == "Y":
+            print("Enter m <return> to start mining")
+            choice = "s"
+            while choice != "m":
+                choice = input().lower()
+            while cfg['findNonce'] is False:
+                sleep(1)
+                cfg['waitAck'] = True
         candidate = deepcopy(newCandidate)
+        print("Start Nonce "+str(candidate['nonce']))
         try:
             # Request and wait a response from the N/W
             foundSolution = False
@@ -139,7 +133,7 @@ def doMine():
                 candidate['nonce'] = (candidate['nonce'] + 1) % cfg['maxNonce']  # increment modulus max
                 count = count + 1
                 show = show + 1
-                if show > 2000:
+                if show > 20000:
                     print(str(count) + " "+str(candidate['nonce']))
                     show = 0
 
