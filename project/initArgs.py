@@ -21,7 +21,7 @@ def finalise(peer, port, type):
     #temporarily switch off any delay to allow peer initialisation to go ahead without delay
     m_cfg['canTrack'] = False
     c_peer.setPeersAs(peer, port)
-    thread = Thread(target=c_peer.checkEveryXSecs, args=(m_cfg['peersCheck'],))
+    thread = Thread(target=c_peer.checkEveryXSecs)
     thread.start()
     while m_cfg['statusPeer'] == True:
         sleep(1)

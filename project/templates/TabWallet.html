@@ -102,9 +102,8 @@
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/GET_POST.js"></script>
 
-
-    Current State: <span id="state">No wallet selected</span>
-    <button class="keys" id="login" onclick="JavaScript: openTab(event, 'maintab', 'Info'); user = ''; initState(); $('#login').text('Logged Out');" style="background-color:#ef12b4">Logout</button>
+    User: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">LogIn</button>
+    <br />Current State: <span id="state">No wallet selected</span>
 
     <div class="tab maintab">
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Wallets</button>
@@ -167,7 +166,7 @@
             Keys are managed within so-called 'wallets'. Wallets only hold keys, they don't contain 'monetary' value.
             Before payments can be made or balances be queried, a specific wallte needs to be activated.
             Keys can be grouped in different wallets, as wallets are distinguished by names.<br />
-            A wallet <b>must</b> be selected in order to make payment/transfer or to create additional keys.  
+            A wallet <b>must</b> be selected in order to make payment/transfer or to create additional keys.
         </div>
         <div id="TBDw" class="tabcontent walletTab">
             This function/feature is not yet implemented...
@@ -452,11 +451,28 @@
         */
         $(".alert").css("display", "none");
         initState();
-        user = prompt("Please enter your username", "");
-        //user = "User";
+
+        user = "";
 
         function h(message) {
             return "<u>" + message + "</u>";
+        }
+
+
+        function logUser(event) {
+            if ($("#login").text() == "LogIn") {
+                user = $("#userName").val().trim();
+                if (user.length > 0) {
+                    $('#login').text('LogOut');
+                    $("#userName").val("***");
+                }
+            } else {
+                openTab(event, 'maintab', 'Info');
+                $("#userName").val("");
+                user = '';
+                initState();
+                $('#login').text('LogIn');
+            }
         }
 
         function getInfo() {
@@ -570,7 +586,7 @@
             var dat = { "name": wallet, "numKeys": keys, "keyNames": [] };
             var names = 0;
             for (var i = 1; i <= keys; i++) {
-                var nam = $("#key" + i + "Name"+ext).val().trim();
+                var nam = $("#key" + i + "Name" + ext).val().trim();
                 if (nam === "") {
                     continue;
                 }
@@ -594,7 +610,7 @@
             var xxsel = document.getElementById("quickSelWallet").checked;
             closeWallet();
             if (name.length > 0) {
-                var dat = getKeyInput(name,"")
+                var dat = getKeyInput(name, "")
                 if (dat.length == 0) {
                     return
                 }
@@ -688,7 +704,7 @@
         }
 
         /*
-         * Keys section 
+         * Keys section
          */
 
         function createKeys() {
@@ -696,7 +712,7 @@
             if (dat.length == 0) {
                 return
             }
-            
+
             var repl = doPOSTSynch("wallet/createKey", null, dat);
             var json = repl[0];
             var code = repl[1];

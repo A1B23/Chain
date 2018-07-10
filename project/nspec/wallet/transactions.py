@@ -1,7 +1,6 @@
 from Crypto.Random import random
-from pycoin.ecdsa import generator_secp256k1, sign, verify
-import hashlib, os, json, binascii, datetime
-from project.utils import sha256ToHex
+from pycoin.ecdsa import generator_secp256k1
+import hashlib
 
 
 def generate_private_key() -> str:
@@ -29,11 +28,15 @@ def get_pub_key_compressed(pub_key):
 def public_key_compressed_to_address(public_key_compressed):
   return ripemd160(public_key_compressed)
 
-def get_public_address(priv_key_hex):
+def get_public_address_from_privateKey(priv_key_hex):
     priv_key_int = private_key_hex_to_int(priv_key_hex)
     pub_key = private_key_to_public_key(priv_key_int)
     pub_key_compressed = get_pub_key_compressed(pub_key)
-    pub_addr = public_key_compressed_to_address(pub_key_compressed)
-    return pub_addr
+    return get_public_address_from_publicKey(pub_key_compressed)
 
+def get_public_address_from_publicKey(pub_key_compressed):
+    #pub_key_compressed = get_pub_key_compressed(pub_key)
+    pub_addr = public_key_compressed_to_address(pub_key_compressed)
+    #TODO add leading zeros to ensure correct length!!!! just in case
+    return pub_addr
     

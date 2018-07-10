@@ -1,13 +1,3 @@
-from project.models import *
-from flask import jsonify
-import time
-import random
-from project.nspec.blockchain.modelBC import *
-from project.utils import *
-import hashlib
-from copy import deepcopy
-#from project.nspec.blockchain.blocks import *
-from project.pclass import c_peer
 from project.nspec.blockchain.verify import *
 
 

@@ -4,7 +4,7 @@ from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG
 from project.utils import checkRequiredFields
 from copy import deepcopy
 from time import sleep
-import re
+import random
 
 #TODO
 #To avoid double-connecting to the same peer
@@ -18,18 +18,22 @@ import re
 #It is invalid or does not respond -> delete it
 #You may run this check once per minute or when you send a notification about a new block
 
-cntDelay = [0]
 class peers:
 
     #TODO when we receive info etc. from an unknonw node and outr count is below needd
     # then why does the peer list not take it as new node???
-    def visualDelay(self, url, json):
-        if (m_visualCFG['active'] is True) and (m_visualCFG['pattern'].search(url)):
-            myDelay = cntDelay[0]
-            m_Delay.append({"delayID": myDelay, "url": url, "json": json})
-            cntDelay[0] = cntDelay[0] + 1
+    def makeDelay(self, url, json, isAsyncPost):
+        if m_cfg['canTrack'] is True:
+            if (m_visualCFG['active'] is True) and (m_visualCFG['pattern'].search(url)):
+                id = random.randint(1, 1000000)
+                m_Delay.append({"delayID": id, "url": url, "json": json, "asynchPOST": isAsyncPost})
+                return id
+        return -1
+
+    def visualDelay(self, myDelay):
+        if (myDelay > 0) and (m_visualCFG['active'] is True):
             try:
-                maxCount = 10  # delay at most 10 seconds then move on, but keep the buffer anyway
+                maxCount = 12  # delay at most x seconds in total then move on, but keep the buffer anyway
                 while (maxCount > 0) and (len(m_Delay) > 0):
                     for item in m_Delay:
                         if 'delayID' in item:
@@ -48,15 +52,12 @@ class peers:
 
 
     def doPOST(self, url, json):
-        if m_cfg['canTrack'] is True:
-            self.visualDelay(url, json)
-        return requests.post(url=url, json=json)
+        self.visualDelay(self.makeDelay(url, json, False))
+        return requests.post(url=url, json=json, headers={'accept': 'application/json'})
 
 
     def doGET(self, url):
-        if m_cfg['canTrack'] is True:
-            self.visualDelay(url, {})
-        #return requests.get(url=url)
+        self.visualDelay(self.makeDelay(url, {}, False))
         return requests.get(url=url, headers={'accept': 'application/json'})
 
 
@@ -70,10 +71,10 @@ class peers:
             #    continue
             if m_cfg['peers'][peer]['active'] is True:
                 try:
-                    print("sending asynch " + peer + url + str(json))
-                    self.doPOST(url=peer + url, json=json)
+                    print("asynch: " + peer + url + str(json))
+                    if self.makeDelay(peer + url,json, True) <= 0:
+                        self.doPOST(peer + url, json)
                     cnt = cnt + 1
-                    m_cfg['peers'][peer]['active'] = True
                     if cnt > m_cfg['minPeers']: #TODO stop sending when min reached, do more?
                         break
                 except Exception:
@@ -85,7 +86,7 @@ class peers:
         #TODO after some time, clear this buffer, maybe as part of checking peers availability?
         #TODO or alternatively by the size/len of it???
         #TODO cut the buffer short if POST is too long???
-        m_peerSkip.append({"url":url,"json":json})
+        m_peerSkip.append({"url": url, "json": json})
         thread.start()
 
     def hasActivePeers(self):
@@ -239,6 +240,7 @@ class peers:
 
 
     def addPeer(self, url, addCheck):
+        #TODO when node receives packet form peer and is lacking peers, why is the sender not taken in?
         pos = url.index("//")
         try:
             pos = url.index("/", pos+2)
@@ -280,7 +282,7 @@ class peers:
 
 
     #this is a thread running every x seconds to check peers are still there
-    def checkEveryXSecs(self, sleepSecs):
+    def checkEveryXSecs(self):
         while True:
             if(not "statusChain" in m_cfg):
                 m_cfg['statusChain'] = False       # backward compatibility
@@ -320,7 +322,7 @@ class peers:
                 if m_cfg['peers'][peer]['active'] is True:
                     self.ensureBCNode(peer)
 
-            sleep(sleepSecs) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
+            sleep(m_cfg['peersCheckDelay']) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
     # TODO newNode set too late and several vars not used??
     def peersConnect(self, path, linkInfo, values, request):
@@ -331,7 +333,7 @@ class peers:
         #check = json.loads(values)
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)
         if len(m) > 0:
-            return errMsg("Missing field 'peerUrl': " + newNode, 400)
+            return errMsg("Missing field 'peerUrl': " + str(values), 400)
         newNode = values['peerUrl']
         peers = m_cfg['peers']
         for k in peers:

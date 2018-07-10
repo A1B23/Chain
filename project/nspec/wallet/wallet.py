@@ -1,11 +1,14 @@
 from project.nspec.wallet.transactions import *
 from project.pclass import c_peer
-from project.models import m_info, m_transaction_order
+from project.models import m_transaction_order
+from pycoin.ecdsa import generator_secp256k1, sign
 from project.utils import setOK, errMsg, putDataInOrder
 import sqlite3
 from project.nspec.wallet.modelW import m_db, regexWallet
 from contextlib import closing
 import re
+import datetime
+from project.nspec.blockchain.verify import verifyAddr, verifyPubKey
 
 
 class wallet:
@@ -203,13 +206,16 @@ class wallet:
                 keys = self.getDataFor(finalAddress, toWallet, "address", user)
                 recAddress = keys[0]
             keys = self.getDataFor(keyref, fromWallet, "", user)
-            #TODO get address based on wallet info and database verification even for address
+            #get address based on wallet info and database verification even for address
             #get final address based on SQL query with final address and walref
             if (len(keys)>0):
-                pk = keys[2]
+                privKey = keys[2]
                 senderPK = keys[3]
                 senderAddr = keys[4]
-                signedTX, TxExpectedHash = self.signTx(pk, recAddress, msg, value, fee, senderAddr, senderPK)
+                colErr = verifyAddr(senderAddr, senderPK) + verifyAddr(recAddress)
+                if len(colErr) > 0:
+                    return errMsg(colErr, 400)
+                signedTX, TxExpectedHash = self.signTx(privKey, recAddress, msg, value, fee, senderAddr, senderPK)
                 #TODO do we want to verify the TX hash somehow after we received the reply from node?
                 resps = c_peer.sendPOSTToPeers("transactions/send", signedTX)
                 if len(resps) == 0:

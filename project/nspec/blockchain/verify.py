@@ -2,9 +2,12 @@ from project.utils import *
 from project.nspec.blockchain.modelBC import *
 from project.pclass import c_peer
 from project.nspec.blockchain.balance import *
-
+from project.nspec.wallet.transactions import get_public_address_from_publicKey
+from project.models import re_addr, re_pubKey
 
 firstTime = [True]
+
+
 def verifyBasicTX(trans, isCoinBase, ref):
     m, l, f = checkRequiredFields(trans, ref, [], False)
     colErr = ""
@@ -36,10 +39,43 @@ def verifyBasicTX(trans, isCoinBase, ref):
         #TODO confirm that 0 value transactions are allowed per slides
         if (trans['value'] < 0):
             colErr = colErr + "Minimun value 0 micro-coins, you sent: " + str(trans['value'])
-    if (len(trans['from']) != len(trans['to'])) or (len(trans['from']) != len(defAdr)):
-        colErr = colErr + "Invalid from/to address length"
+    if isCoinBase is True:
+        # TODO complete other coinbase checks
+        colErr = colErr + verifyPubKey(trans['senderPubKey'])
+        if trans['senderPubKey'] != defPub:
+            colErr = colErr + "Invalid pubKey in Coinbase"
+        if trans['from'] != defAdr:
+            colErr = colErr + "Invalid from in Coinbase"
+    else:
+        colErr = colErr + verifyAddr(trans['from'], trans['senderPubKey'])
+    colErr = colErr + verifyAddr(trans['to'])
     return colErr
 
+
+def verifyAddr(addr, pubKey=""):
+    #First is actually a duplicate of second pattern, but refines the reply
+    if len(addr) != len(defAdr):
+        return "Invalid address length"
+    if addr == defAdr:
+        return "Invalid address, all zero reserved for Genesis"
+    if not re_addr.match(addr):
+        return "Invalid address format"
+    if len(pubKey) > 0:
+        colErr = verifyPubKey(pubKey)
+        if len(colErr) != 0:
+            return colErr
+        if (get_public_address_from_publicKey(pubKey) != addr):
+            return "Invalid address-public key instance"
+    return ""
+
+def verifyPubKey(pubKey):
+    if len(pubKey) != len(defPub):
+        return "Invalid public Key length"
+    if pubKey == defPub:
+        return "Invalid pubKey, all zero reserved for Genesis"
+    if not re_pubKey.match(pubKey):
+        return "Invalid public key format"
+    return ""
 
 
 def verifyBlockAndAllTX(block):
@@ -82,11 +118,7 @@ def receivedNewTransaction(trans, fromPeer, share):
         hash = sha256ToHex(m_transaction_order, trx)
 
         #TODO Validates the transaction public key, validates the signature
-        # valid = verify(generator_secp256k1, pub_key, tran_hash, tran_signature)
-        # print("Is signature valid? " + str(valid))
-
-        # Calculates the transaction data hash (unique transaction ID)
-        trans["transactionDataHash"]= hash
+        trans["transactionDataHash"] = hash
 
         # Checks for collisions -> duplicated transactions are skipped
         if hash in m_pendingTX:

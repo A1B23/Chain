@@ -39,6 +39,8 @@ def visualRelease(id):
                 break
         if found is True:
             m_Delay.remove(rel)
+            if rel['asynchPOST'] is True:
+                requests.post(url=rel['url'], json=rel['json'], headers={'accept': 'application/json'})
             return jsonify(rel), 200
         return errMsg("Unexpected Release for "+str(id), 400)
     except Exception:

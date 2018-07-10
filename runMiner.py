@@ -9,6 +9,6 @@ if __name__ == "__main__":
         "/debug/reset-chain",
         "/peers",
         "/listNodes",  # TODO test only
-        "/mining/get-mining-job/[0-9a-fA-F]+$"
+        "/mining/get-mining-job/[0-9a-f]+$"
     ])
     main("Miner")

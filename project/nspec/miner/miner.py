@@ -8,7 +8,7 @@ from project.utils import checkRequiredFields
 from project.models import defHash, m_cfg
 from project.nspec.miner.modelM import *
 from project.pclass import c_peer
-from project.nspec.wallet.transactions import get_public_address, generate_private_key
+from project.nspec.wallet.transactions import get_public_address_from_privateKey, generate_private_key
 from copy import deepcopy
 
 
@@ -65,6 +65,7 @@ def isDataValid(resp_text):
 
 def pull():
     try:
+        print("asking")
         resp_text = getCandidate()
         if "peerError" in resp_text:
             return
@@ -75,6 +76,7 @@ def pull():
             return
 
         if (cfg['findNonce'] is False) or (cfg['lastHash'] != resp_text['blockDataHash']):
+            print("new block data")
             cfg['findNonce'] = False
             while cfg['waitAck'] is False:
                 sleep(1)
@@ -111,7 +113,6 @@ def doMine():
         while cfg['findNonce'] is False:
             sleep(1)
             cfg['waitAck'] = True
-        cfg['waitAck'] = False
         if m_cfg['mode'] == "Y":
             print("Enter m <return> to start mining")
             choice = "s"
@@ -121,6 +122,7 @@ def doMine():
                 sleep(1)
                 cfg['waitAck'] = True
         candidate = deepcopy(newCandidate)
+        cfg['waitAck'] = False
         print("Start Nonce "+str(candidate['nonce']))
         try:
             # Request and wait a response from the N/W
@@ -159,7 +161,7 @@ def doMine():
                 }
 
                 for peer in m_cfg['peers']:
-                    resp = c_peer.doPOST(peer + "/mining/submit-mined-block", json=ndata)
+                    resp = c_peer.doPOST(url=peer + "/mining/submit-mined-block", json=ndata)
                     break
                 if resp.status_code == 200:
                     print("MINING SUCCESS (" + str(count) + " tries): " + resp.text)
@@ -175,8 +177,9 @@ def doMine():
 def initMiner():
     random.seed(a=getFutureTimeStamp(0))
     cfg['pulling'] = True
+    #TODO this must revert to wallet, else every time a  miner comes back up it looses all its money as keys are gone!!!!
     cfg['privKey'] = generate_private_key()
-    cfg['address'] = get_public_address(cfg['privKey'])
+    cfg['address'] = get_public_address_from_privateKey(cfg['privKey'])
     thread = Thread(target=pullCandidate)
     thread.start()
     thread2 = Thread(target=doMine)

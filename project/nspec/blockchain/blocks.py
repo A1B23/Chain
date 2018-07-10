@@ -143,21 +143,20 @@ class blockchain:
                     if len(err) > 0:
                         #TODO roll back por what?
                         return err
-                    #TODO now we should inform all our peers about the block, apart form the one which sent
-                    c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res,peer)
+                    # inform all our peers about the block
+                    c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res, peer)
             else:
                 # TODO must roll back or not?????
                 return "No valid information, disconnect..."
-            if len(m_Blocks) >= res['index']:
+            if len(m_Blocks) > res['index']:
                 break
-           # TODO now asynch we must send the new blocks to all peers for info?
         # TODO cleear up pending transactions
         # clear the separate flag for block other GETS
         return ""
 
     #TODO should this be replaced with verifyThenAddBlock??
     def receivedBlockNotificationFromPeer(self, blockInfo):
-        m, l, f = checkRequiredFields(blockInfo, m_informsPeerNewBlock, [],False)
+        m, l, f = checkRequiredFields(blockInfo, m_informsPeerNewBlock, [], False)
         if (len(m) == 0) and (l == 0):
             if blockInfo['blocksCount'] < len(m_Blocks):
                 return errMsg("Chain shorter than current, current is:" +str(len(m_Blocks)), 400)

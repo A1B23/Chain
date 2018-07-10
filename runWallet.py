@@ -12,7 +12,7 @@ if __name__ == "__main__":
         "/debug$",
         "/transactions/pending",
         "/transactions/confirmed",
-        "/transactions/[0-9a-fA-F]+$",
+        "/transactions/[0-9a-f]+$",
         "/balances",
         #"/address/[0-9a-fA-F]+/transactions",
         #"/address/[0-9a-fA-F]+/balance",
@@ -25,8 +25,8 @@ if __name__ == "__main__":
         "/wallet/list/allbalance/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
         "/wallet/list/allkeybalance/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
         "/wallet/list/allbalances/[0-9a-zA-Z]+$",
-        "/wallet/list/allTXs/[012345]/[0-9a-zA-Z]+$",
-        "/wallet/list/allTX/[012345]/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",
+        "/wallet/list/allTXs/[012345]/[0-9a-z]+$",
+        "/wallet/list/allTX/[012345]/[0-9a-zA-Z]+/[0-9a-z]+$",
     ])
 
     m_permittedPOST.clear()
