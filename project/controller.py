@@ -1,13 +1,14 @@
 from project import app, render_template
-from flask import request
-from project.nspec.blockchain.modelBC import *
-from project.utils import *
-import json
+from flask import request, jsonify
+#from project.nspec.blockchain.modelBC import
+from project.utils import setOK, errMsg, isBCNode, isWallet
+import json, requests
 from project.InterfaceLocking import mainInterface
 from project.classes import c_blockchainNode
 from project.pclass import c_peer
 from copy import deepcopy
-from project.models import m_cfg, m_visualCFG
+from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
+from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates
 import re
 
 c_MainIntf = mainInterface()

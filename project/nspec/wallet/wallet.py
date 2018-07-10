@@ -1,14 +1,16 @@
-from project.nspec.wallet.transactions import *
+from project.nspec.wallet.transactions import generate_private_key, private_key_hex_to_int, private_key_to_public_key
+from project.nspec.wallet.transactions import get_pub_key_compressed, public_key_compressed_to_address
 from project.pclass import c_peer
 from project.models import m_transaction_order
 from pycoin.ecdsa import generator_secp256k1, sign
+from hashlib import sha256
 from project.utils import setOK, errMsg, putDataInOrder
 import sqlite3
 from project.nspec.wallet.modelW import m_db, regexWallet
 from contextlib import closing
 import re
 import datetime
-from project.nspec.blockchain.verify import verifyAddr, verifyPubKey
+from project.nspec.blockchain.verify import verifyAddr
 
 
 class wallet:

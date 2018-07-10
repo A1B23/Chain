@@ -1,5 +1,7 @@
-from project.nspec.blockchain.verify import *
-
+from project.nspec.blockchain.verify import m_pendingTX
+from project.models import defAdr, defHash
+from project.nspec.blockchain.modelBC import m_Blocks
+from project.utils import setOK, errMsg
 
 class transactions:
     def getPendTXByAddress(self, address):

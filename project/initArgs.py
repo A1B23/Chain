@@ -1,11 +1,11 @@
-from project.nspec.blockchain.modelBC import *
-from project.utils import *
+from project.nspec.blockchain.modelBC import m_genesisSet
+from project.utils import genNodeID
 from project.classes import c_blockchainNode
 from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
 from project import app
 from argparse import ArgumentParser
-from project.models import m_cfg
+from project.models import m_cfg, m_info
 from project.pclass import c_peer
 from threading import Thread
 import sys
@@ -59,8 +59,8 @@ def main(type):
 
 def init(parser):
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
-    parser.add_argument('-hip', '--host', default="127.0.0.2", help='hostname/IP')
-    parser.add_argument('-con', '--connect', default="4", help='list of 127.0.0.x peers to send messages')
+    parser.add_argument('-hip', '--host', default="127.0.0.6", help='hostname/IP')
+    parser.add_argument('-con', '--connect', default="2,5", help='list of 127.0.0.x peers to send messages')
     parser.add_argument('-cID', '--chainID', default="", help='identify net by genesis blockHash')
     parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: NAPCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')

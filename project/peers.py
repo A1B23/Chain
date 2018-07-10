@@ -1,10 +1,12 @@
-from project.utils import *
+from project.utils import checkRequiredFields, isABCNode, setOK, errMsg
 from threading import Thread
-from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG
-from project.utils import checkRequiredFields
+from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
+from project.nspec.blockchain.modelBC import m_Blocks
 from copy import deepcopy
 from time import sleep
 import random
+import requests, json
+
 
 #TODO
 #To avoid double-connecting to the same peer
@@ -236,8 +238,15 @@ class peers:
         reply = self.suitableReply(peer)
         if len(reply) == 0:
             return False
-        return self.isPeerAliveAndValid(peer, reply)
-
+        if self.isPeerAliveAndValid(peer, reply) is True:
+            if ('blocksCount' in reply) and (reply['blocksCount'] > len(m_Blocks)):
+                base = peer
+                if base[-1] != "/":
+                    base = base + "/"
+                base = base + "blocks/"
+                m_cfg['missingBlock'] = {base, peer}
+            return True
+        return False
 
     def addPeer(self, url, addCheck):
         #TODO when node receives packet form peer and is lacking peers, why is the sender not taken in?

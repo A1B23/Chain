@@ -1,11 +1,20 @@
-from project.nspec.blockchain.verify import *
-from project.nspec.blockchain.balance import *
+from project.nspec.blockchain.verify import verifyBlockAndAllTX
+from project.nspec.blockchain.balance import m_AllBalances, addNewRealBalance, confirmUpdateBalances
 from threading import Thread
+from project.models import useNet, m_info, m_cfg, defAdr
+from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
+from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_candidateBlockBalance, m_static_emptyBlock
+from project.nspec.blockchain.modelBC import m_stats
+from project.utils import checkRequiredFields, isSameChain, setOK, errMsg
+from project.pclass import c_peer
+from copy import deepcopy
+
+from flask import jsonify
 
 
 class blockchain:
 
-    def setNetBasedOnChainID(self,id):
+    def setNetBasedOnChainID(self, id):
         # the id is the blochhash, so find the index and the
         useID = 1 #just default value
         self.resetChain()
@@ -130,7 +139,7 @@ class blockchain:
         # TODO add all leftover transactions
 
 
-    def getMissingBlocksFromPeer(self, base,peer):
+    def getMissingBlocksFromPeer(self, base, peer):
         m_BufferMinerCandidates.clear()
         m_candidateBlockBalance.clear()
         while True:
@@ -141,7 +150,7 @@ class blockchain:
                 if len(m) == 0:
                     err = self.verifyThenAddBlock(res)
                     if len(err) > 0:
-                        #TODO roll back por what?
+                        # TODO roll back por what?
                         return err
                     # inform all our peers about the block
                     c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res, peer)
@@ -176,7 +185,7 @@ class blockchain:
             base = blockInfo['nodeUrl']
             url = base
             if base[-1] != "/":
-                  base = base+"/"
+                  base = base + "/"
             base = base + "blocks/"
             shareToPeers = len(m_Blocks)    # start point
             #TODO keep POST lock now active with a separate flag!!!

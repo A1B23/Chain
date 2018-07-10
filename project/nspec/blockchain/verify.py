@@ -1,9 +1,11 @@
-from project.utils import *
-from project.nspec.blockchain.modelBC import *
+from project.utils import checkRequiredFields, errMsg, sha256ToHex
+from project.nspec.blockchain.modelBC import m_stats, m_completeBlock, m_Blocks, m_staticTransactionRef
+from project.nspec.blockchain.modelBC import m_transaction, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.pclass import c_peer
-from project.nspec.blockchain.balance import *
 from project.nspec.wallet.transactions import get_public_address_from_publicKey
-from project.models import re_addr, re_pubKey
+from project.models import re_addr, re_pubKey, defAdr, defPub, m_transaction_order, m_cfg, m_info
+from copy import deepcopy
+from flask import jsonify
 
 firstTime = [True]
 
@@ -41,9 +43,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
             colErr = colErr + "Minimun value 0 micro-coins, you sent: " + str(trans['value'])
     if isCoinBase is True:
         # TODO complete other coinbase checks
-        colErr = colErr + verifyPubKey(trans['senderPubKey'])
-        if trans['senderPubKey'] != defPub:
-            colErr = colErr + "Invalid pubKey in Coinbase"
+        colErr = colErr + verifyPubKey(trans['senderPubKey'], True)
         if trans['from'] != defAdr:
             colErr = colErr + "Invalid from in Coinbase"
     else:
@@ -61,18 +61,23 @@ def verifyAddr(addr, pubKey=""):
     if not re_addr.match(addr):
         return "Invalid address format"
     if len(pubKey) > 0:
-        colErr = verifyPubKey(pubKey)
+        colErr = verifyPubKey(pubKey, False)
         if len(colErr) != 0:
             return colErr
         if (get_public_address_from_publicKey(pubKey) != addr):
             return "Invalid address-public key instance"
     return ""
 
-def verifyPubKey(pubKey):
+def verifyPubKey(pubKey, isCoinBase):
     if len(pubKey) != len(defPub):
         return "Invalid public Key length"
     if pubKey == defPub:
-        return "Invalid pubKey, all zero reserved for Genesis"
+        if isCoinBase is False:
+            return "Invalid pubKey, all zero reserved for Genesis"
+    else:
+        if isCoinBase is True:
+            return "Invalid pubKey, all zero reserved for Genesis"
+
     if not re_pubKey.match(pubKey):
         return "Invalid public key format"
     return ""

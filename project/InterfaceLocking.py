@@ -1,7 +1,7 @@
-from project.utils import isBCNode, isMiner, isWallet, checkRequiredFields
+from project.utils import isBCNode, isWallet, checkRequiredFields
 from project.nspec.blockchain.interface import chainInterface
 from project.nspec.wallet.interface import walletInterface
-from project.models import *
+from project.models import m_permittedPOST, m_permittedGET, m_cfg, m_simpleLock, m_isPOST, m_peerSkip
 from time import sleep
 import re
 from flask import jsonify

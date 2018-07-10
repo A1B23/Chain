@@ -1,7 +1,13 @@
-from project.utils import *
+from project.utils import checkRequiredFields, errMsg, setOK, sha256ToHex, putDataInOrder, sha256StrToHex, checkSameFields
+from project.utils import makeMinerHash, getTime, addItems
 from project.nspec.blockchain.transact import transactions
 from project.nspec.blockchain.blocks import blockchain
-from project.nspec.blockchain.modelBC import *
+from project.nspec.blockchain.modelBC import m_genesisSet, m_candidateBlock, m_candidateMiner, m_coinBase, m_minerFoundNonce
+from project.nspec.blockchain.modelBC import m_informsPeerNewBlock
+from project.nspec.blockchain.modelBC import minBlockReward, maxSameBlockPerMiner
+from project.nspec.blockchain.modelBC import m_pendingTX, m_AllBalances, m_BufferMinerCandidates, m_stats, m_Blocks
+from project.models import m_info, m_peerInfo, m_candidateMiner_order, m_transaction_order, m_txorderForBlockHash
+from project.models import m_cfg
 from project.pclass import c_peer
 from copy import deepcopy
 

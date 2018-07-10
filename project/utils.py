@@ -1,12 +1,10 @@
 import time
 import random
-import requests
 import json
 import datetime
 import hashlib
 from flask import jsonify
-from project.models import *
-from copy import deepcopy
+from project.models import m_cfg, defNodeID
 
 #Call this for debuggin print to screen which needs to be removed at the end
 def d(mes):
