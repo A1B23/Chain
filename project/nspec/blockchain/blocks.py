@@ -1,6 +1,7 @@
 from project.nspec.blockchain.verify import verifyBlockAndAllTX
 from project.nspec.blockchain.balance import m_AllBalances, addNewRealBalance, confirmUpdateBalances
 from threading import Thread
+from time import sleep
 from project.models import useNet, m_info, m_cfg, defAdr
 from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_candidateBlockBalance, m_static_emptyBlock
@@ -54,8 +55,20 @@ class blockchain:
             m_Blocks.append(m_genesisSet[useNet])
 
 
+    def loopNewPeer(self):
+        #this loop is not nice, because new blcok should proagate faster when a new peer is found,
+        # but due to import issues in python, the link between peer and blocks is disrupted
+        # so this is a workaround
+        while m_cfg['shutdown'] is False:
+            #TODO if active peers is zero, poll from sendingPeer
+            #TODO clear one by one, not all in one go
+            m_cfg['newPeer'].clear()
+            sleep(1)
+
+
     def resetChain(self):
         m_cfg['statusChain'] = True
+        m_cfg['statusChain'] = False
         try:
             self.resetChainNow()
         except Exception:
@@ -139,12 +152,20 @@ class blockchain:
         # TODO add all leftover transactions
 
 
-    def getMissingBlocksFromPeer(self, base, peer):
+    def getMissingBlocksFromPeer(self, peer):
+        print("Work on missing block"+peer)
+        if peer[-1] != "/":
+            peer = peer + "/"
+        base = "blocks/"
+        print("Work on missing block"+peer)
         m_BufferMinerCandidates.clear()
         m_candidateBlockBalance.clear()
         while True:
             url = base + str(len(m_Blocks))
-            res, stat = c_peer.sendGETToPeer(url)
+            try:
+                res, stat = c_peer.sendGETToPeerToAnyone(peer,url)
+            except Exception:
+                return ""
             if stat == 200:
                 m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
                 if len(m) == 0:
@@ -182,17 +203,13 @@ class blockchain:
                     keepBlock = m_Blocks[len(m_Blocks)-1] #keep for potential roll back!
                     del m_Blocks[len(m_Blocks)-1]
 
-            base = blockInfo['nodeUrl']
-            url = base
-            if base[-1] != "/":
-                  base = base + "/"
-            base = base + "blocks/"
+            url = blockInfo['nodeUrl']
             shareToPeers = len(m_Blocks)    # start point
             #TODO keep POST lock now active with a separate flag!!!
             #TODO make sure that threading does not create issues later
             #but as of now it is better to ack first the notification and then
             #start assking for blocks, as there could be more than one
-            threadx = Thread(target=self.getMissingBlocksFromPeer, args=(base, url))
+            threadx = Thread(target=self.getMissingBlocksFromPeer, args=(url,))
             threadx.start()
             return setOK("Thank you for the notification.")
         else:

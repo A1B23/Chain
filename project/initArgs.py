@@ -1,5 +1,5 @@
 from project.nspec.blockchain.modelBC import m_genesisSet
-from project.utils import genNodeID
+from project.utils import genNodeID, isBCNode, isWallet, isMiner
 from project.classes import c_blockchainNode
 from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
@@ -20,19 +20,21 @@ def finalise(peer, port, type):
     useVis = m_cfg['canTrack']
     #temporarily switch off any delay to allow peer initialisation to go ahead without delay
     m_cfg['canTrack'] = False
-    c_peer.setPeersAs(peer, port)
+    c_peer.registerPotentialPeer(peer, port)
     thread = Thread(target=c_peer.checkEveryXSecs)
     thread.start()
     while m_cfg['statusPeer'] == True:
         sleep(1)
-    if type == "BCNode":
+    if isBCNode() is True:
         c_blockchainNode.c_blockchainHandler.resetChain()
+        threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewPeer)
+        threadp.start()
         #thread = Thread(target=initPendingTX)
         #thread.start()
         initPendingTX()
-    elif type == "Miner":
+    elif isMiner() is True:
         initMiner()
-    elif type == "Wallet":
+    elif isWallet() is True:
         #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
         m_db['db'] = sqlite3.connect(m_db['DATABASE'])
 
@@ -49,6 +51,7 @@ def after_request(response):
 
 
 def main(type):
+    m_info['type'] = type
     m_cfg['type'] = type
     parser = ArgumentParser()
     host, port, peer = init(parser)
@@ -59,13 +62,13 @@ def main(type):
 
 def init(parser):
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
-    parser.add_argument('-hip', '--host', default="127.0.0.6", help='hostname/IP')
-    parser.add_argument('-con', '--connect', default="2,5", help='list of 127.0.0.x peers to send messages')
+    parser.add_argument('-hip', '--host', default="127.0.0.2", help='hostname/IP')
+    parser.add_argument('-con', '--connect', default="4", help='list of 127.0.0.x peers to send messages')
     parser.add_argument('-cID', '--chainID', default="", help='identify net by genesis blockHash')
     parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: NAPCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
     parser.add_argument('-maP', '--maxPeers', default=1, type=int, help='max peer communication, if more peers are known')
-    parser.add_argument('-trk', '--canTrack', default="N", help='use delay option to hold GET/POST until visualisation is updated')
+    parser.add_argument('-trk', '--canTrack', default="Y", help='use delay option to hold GET/POST until visualisation is updated')
     parser.add_argument('-mod', '--mode', default="Y", help='modus of miner to work, e.g. y=await user to trigger mining')
     parser.add_argument('-deb', '--asDebug', default="N", help='activate the debug GUI for the node instead of the user GUI')
 
@@ -103,7 +106,7 @@ def init(parser):
     if args.asDebug == "Y":
         m_cfg['debug'] = True
         print("Debug GUI activated")
-        m_cfg['type'] = "*"+m_cfg['type']
+        m_info['type'] = "*"+m_info['type']
 
     #if we want to have navkov as peer for testing blocks enable next line can soon be removed
     #c_peer.setPeersAs("https://stormy-everglades-34766.herokuapp.com",80)

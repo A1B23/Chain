@@ -5,6 +5,7 @@ import datetime
 import hashlib
 from flask import jsonify
 from project.models import m_cfg, defNodeID
+from project.models import m_info
 
 #Call this for debuggin print to screen which needs to be removed at the end
 def d(mes):
@@ -50,25 +51,25 @@ def checkType(asSet, type):
     return (asSet == type) or (asSet == "*"+type)
 
 def isMiner():
-    return checkType(m_cfg['type'], "Miner")
+    return checkType(m_info['type'], "Miner")
 
 
 def isWallet():
-    return checkType(m_cfg['type'], "Wallet")
+    return checkType(m_info['type'], "Wallet")
 
 
 def isBCNode():
-    return checkType(m_cfg['type'], "BCNode")
+    return checkType(m_info['type'], "BCNode")
 
 def isABCNode(ref):
     return checkType(ref, "BCNode")
 
 def isFaucet():
-    return checkType(m_cfg['type'],"Faucet")
+    return checkType(m_info['type'],"Faucet")
 
 
 def isExplorer():
-    return checkType(m_cfg['type'], "Explorer")
+    return checkType(m_info['type'], "Explorer")
 
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):

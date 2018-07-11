@@ -79,6 +79,37 @@ function drawNode(typ, dom, node, cols) {
     return false;
 }
 
+function drawFor(typ,dom,type, drawFrom) {
+    for (var peer in nodes[typ][dom][type]) {
+        if (nodes[typ][dom][type].hasOwnProperty(peer)) {
+            var drawTo = getXY(peer);
+            if (Object.keys(drawTo).length > 0) {
+                ctx.strokeStyle = 'green';
+                if (nodes[typ][dom]['ping'] == false) {
+                    ctx.strokeStyle = 'orange';
+                }
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(drawFrom.x, drawFrom.y);
+                ctx.lineTo(drawTo.x, drawTo.y);
+                ctx.stroke();
+                ctx.closePath();
+                arrow(drawFrom, drawTo);
+            }
+            else {
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(drawFrom.x, drawFrom.y);
+                ctx.lineTo(0, 0);
+                ctx.stroke();
+                ctx.closePath();
+            }
+
+        }
+    }
+}
+
 function drawLines() {
     //nodes[typ][dom] = { "ping": true, "ring": ring, "cfg": jstext };
     for (var typ in nodes) {
@@ -86,34 +117,8 @@ function drawLines() {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
                     var drawFrom = getXY(dom);
-                    for (var peer in nodes[typ][dom]['peers']) {
-                        if (nodes[typ][dom]['peers'].hasOwnProperty(peer)) {
-                            var drawTo = getXY(peer);
-                            if (Object.keys(drawTo).length > 0) {
-                                ctx.strokeStyle = 'green';
-                                if (nodes[typ][dom]['ping'] == false) {
-                                    ctx.strokeStyle = 'orange';
-                                }
-                                ctx.lineWidth = 2;
-                                ctx.beginPath();
-                                ctx.moveTo(drawFrom.x, drawFrom.y);
-                                ctx.lineTo(drawTo.x, drawTo.y);
-                                ctx.stroke();
-                                ctx.closePath();
-                                arrow(drawFrom, drawTo);
-                            }
-                            else {
-                                ctx.strokeStyle = 'red';
-                                ctx.lineWidth = 2;
-                                ctx.beginPath();
-                                ctx.moveTo(drawFrom.x, drawFrom.y);
-                                ctx.lineTo(0, 0);
-                                ctx.stroke();
-                                ctx.closePath();
-                            }
-
-                        }
-                    }
+                    drawFor(typ,dom,'activePeers', drawFrom);
+                    drawFor(typ,dom,'shareToPeers', drawFrom);
                 }
             }
         }
@@ -169,6 +174,18 @@ function arrow(from, to) {
     drawArrow(from.x, from.y, mx, my, 1);
 }
 
+function calcSlope(typ,dom,type, drawFrom) {
+    for (var peer in nodes[typ][dom][type]) {
+        if (nodes[typ][dom][type].hasOwnProperty(peer)) {
+            var drawTo = getXY(peer);
+            if (Object.keys(drawTo).length > 0) {
+                var slope = (drawTo.y - drawFrom.y) / (drawTo.x - drawFrom.x);
+                nodes[typ][dom]['draw'][peer] = { 'slope': slope };
+            }
+        }
+    }
+}
+
 function calcCoords() {
     var sradx = Math.trunc((getWidth() * .45) / (rings.length * 1));
     var srady = Math.trunc((getHeight() * .45) / (rings.length * 1));
@@ -201,15 +218,8 @@ function calcCoords() {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
                     var drawFrom = getXY(dom);
-                    for (var peer in nodes[typ][dom]['peers']) {
-                        if (nodes[typ][dom]['peers'].hasOwnProperty(peer)) {
-                            var drawTo = getXY(peer);
-                            if (Object.keys(drawTo).length > 0) {
-                                var slope = (drawTo.y - drawFrom.y) / (drawTo.x - drawFrom.x);
-                                nodes[typ][dom]['draw'][peer] = { 'slope': slope };
-                            }
-                        }
-                    }
+                    calcSlope(typ, dom, 'activePeers', drawFrom);
+                    calcSlope(typ, dom, 'shareToPeers', drawFrom);
                 }
             }
         }

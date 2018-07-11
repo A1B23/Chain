@@ -63,7 +63,7 @@ class chainInterface:
         # identify your url and then proceed
         #linkInfo is a json object containing the information from the URL
         response = {
-            'NodeType': m_cfg['type'],
+            'NodeType': m_info['type'],
             'info': "This API is not yet implemented....",
             'requestedUrl': url,
             'linkInfo': linkInfo
@@ -86,7 +86,7 @@ class chainInterface:
 
         #json contains the json object submitted during the POST
         response = {
-            'NodeType': m_cfg['type'],
+            'NodeType': m_info['type'],
             'info': "This API is not yet implemented...."
         }
         ## put your logic here and create the reply as next line

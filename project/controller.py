@@ -1,6 +1,5 @@
 from project import app, render_template
 from flask import request, jsonify
-#from project.nspec.blockchain.modelBC import
 from project.utils import setOK, errMsg, isBCNode, isWallet
 import json, requests
 from project.InterfaceLocking import mainInterface
@@ -10,6 +9,7 @@ from copy import deepcopy
 from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
 from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates
 import re
+from threading import Thread
 
 c_MainIntf = mainInterface()
 
@@ -66,7 +66,8 @@ def visualCfg():
 
 @app.route('/cfg', methods=["GET"])
 def get_cfg():
-    return jsonify(m_cfg), 200
+    print(str(m_cfg))
+    return setOK(m_cfg)
 
 ### TODO remove after debugging
 @app.route('/load/<file>', methods=["GET"])
@@ -188,9 +189,16 @@ def peers_connect():
     linkInfo = {}
     try:
         values = request.get_json()
+        repl = c_peer.peersConnect(request.path, linkInfo, values, request)
+        what, code = repl
+        if what.status_code == 200:
+            url = values['peerUrl']
+            threadx = Thread(target=c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(url,))
+            threadx.start()
+        return repl
     except Exception:
         return errMsg("JSON not decodeable", 400)
-    return c_peer.peersConnect(request.path, linkInfo, values, request)
+
 
 #GET /mining/get-mining-job/{miner-address}
 @app.route('/mining/get-mining-job/<minerAddress>', methods=["GET"])
@@ -234,7 +242,7 @@ def index():
         return render_template("TabWallet" + addOn + ".html")
 
     response = {
-        'NodeType': m_cfg['type'],
+        'NodeType': m_info['type'],
         'info': "Requested URL/API is not available"
      }
     return jsonify(response), 400
@@ -315,7 +323,7 @@ def getWalletTx(type, wallet, user):
 ################## the following two are only for testing while developing peer module
 @app.route("/listNodes", methods=["GET"])
 def listNodes():
-    return jsonify(m_cfg['peers']), 200
+    return jsonify(m_cfg['activePeers']), 200
 
 @app.route("/clrNode", methods=['POST'])
 def clrNode():

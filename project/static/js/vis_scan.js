@@ -69,12 +69,12 @@ function scanFor(ipIn, typIn, ringIn) {
                     if (found == false) {
                         rings[ring].push(dom);
                     }
-                    if (avail.hasOwnProperty(dom)) {
-                        nodes[typ][dom]['ping'] = true;
-                    } else {
-                        nodes[typ][dom] = { "ping": true, "ring": ring, "cfg": jstext, "peers": jstext['peers'], 'doCollect':true};
-                    }
-
+                    //if (avail.hasOwnProperty(dom)) {
+                    //    nodes[typ][dom]["ping"] = true;
+                    //} else {
+                        nodes[typ][dom] = { "ping": true , "ring": ring, "cfg": jstext, "activePeers": jstext['activePeers'], "shareToPeers": jstext['shareToPeers'], 'doCollect':true};
+                    //}
+ 
                     if (!text.startsWith("[]")) {
                         addLog("\n" + text, false);
                     } else {

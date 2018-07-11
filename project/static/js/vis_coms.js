@@ -183,7 +183,12 @@ function updateCom() {
             } else {
                 //console.log("No to Dom for " + com + " "+item);
                 //console.log(from);
-                comNodes[com]['delta'] = { 'x': from.x, 'y': from.y, 'size': 10 };
+                // TODO instead of this we should see how to draw to the node by using nodes destinations????
+                if (item.iter % 2 == 0) {
+                    comNodes[com]['delta'] = { 'x': from.x + item.iter/4, 'y': from.y, 'size': 10 };
+                } else {
+                    comNodes[com]['delta'] = { 'x': from.x - item.iter/4, 'y': from.y, 'size': 10 };
+                }
             }
         }
         if (collect) {

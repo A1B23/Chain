@@ -14,18 +14,19 @@ from copy import deepcopy
 
 def miner_get(url):
     try:
-        response, code = c_peer.sendGETToPeer(url)
+        response = c_peer.sendGETToPeers(url)
         return response
     except Exception:
         return {'peerError': "No data received from peer"}
 
 
 def getCandidate():
-    for peer in m_cfg['peers']:
-        resp = miner_get(peer + "/mining/get-mining-job/" + cfg['address'])
+    try:
+        resp = miner_get("/mining/get-mining-job/" + cfg['address'])
+        resp, code = resp[0][0]
         return resp
-    print(" no peer listed...")
-    return ""
+    except Exception:
+        return {'peerError': True}
 
 
 def getEstimatedTimeStamp(diff):
@@ -68,6 +69,8 @@ def pull():
         print("asking")
         resp_text = getCandidate()
         if "peerError" in resp_text:
+            print("Peer error, sleep")
+            sleep(3)
             return
         if isDataValid(resp_text) is False:
             # no point to waste time and effort on this invalid/incomplete candidate
@@ -97,7 +100,7 @@ def pull():
 
 
 def pullCandidate():
-    while True:
+    while m_cfg['shutdown'] is False:
         try:
             pull()
             sleep(int(newCandidate['difficulty']/2)+1)
@@ -109,7 +112,7 @@ def doMine():
     # miners continue to try to mine
     # request some block for mining to the networks(Node)
     # then try to find a hashing code and nonce value to meet with the difficulty
-    while True:
+    while m_cfg['shutdown'] is False:
         while cfg['findNonce'] is False:
             sleep(1)
             cfg['waitAck'] = True
@@ -132,7 +135,10 @@ def doMine():
             show = 0
             minedBlockHash = "N/A"
             while (foundSolution is False) and (cfg['findNonce'] is True):
-                candidate['nonce'] = (candidate['nonce'] + 1) % cfg['maxNonce']  # increment modulus max
+                candidate['nonce'] = candidate['nonce'] + 1
+                if candidate['nonce'] >= cfg['maxNonce']:
+                    candidate['nonce'] = 0
+                    print("wrap around encountered")
                 count = count + 1
                 show = show + 1
                 if show > 20000:
@@ -160,10 +166,17 @@ def doMine():
                     "blockHash": minedBlockHash
                 }
 
-                for peer in m_cfg['peers']:
+                sent = False
+                for peer in m_cfg['activePeers']:
                     resp = c_peer.doPOST(url=peer + "/mining/submit-mined-block", json=ndata)
+                    sent = True
                     break
-                if resp.status_code == 200:
+                if sent is False:
+                    for peer in m_cfg['shareToPeers']:
+                        resp = c_peer.doPOST(url=peer + "/mining/submit-mined-block", json=ndata)
+                        sent = True
+                        break
+                if (sent is True) and (resp.status_code == 200):
                     print("MINING SUCCESS (" + str(count) + " tries): " + resp.text)
                 else:
                     print("MINING REPLY: ", resp.text)

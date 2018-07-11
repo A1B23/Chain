@@ -1,7 +1,7 @@
 from project.utils import isBCNode, isWallet, checkRequiredFields
 from project.nspec.blockchain.interface import chainInterface
 from project.nspec.wallet.interface import walletInterface
-from project.models import m_permittedPOST, m_permittedGET, m_cfg, m_simpleLock, m_isPOST, m_peerSkip
+from project.models import m_permittedPOST, m_permittedGET, m_cfg, m_simpleLock, m_isPOST, m_peerSkip, m_info
 from time import sleep
 import re
 from flask import jsonify
@@ -35,7 +35,7 @@ class mainInterface:
     # A delay in response for the pending queries is acceptable, packets always get lost in internet :-)
     def nodeSpecificGET(self, url, linkInfo):
         ret = {
-            'NodeType': m_cfg['type'],
+            'NodeType': m_info['type'],
             'info': "This URL/API is not available/broken"
         }
         try:
@@ -67,7 +67,7 @@ class mainInterface:
 
     def nodeSpecificPOST(self,url, linkInfo, json,request):
         ret = {
-            'NodeType': m_cfg['type'],
+            'NodeType': m_info['type'],
             'info': "This URL/API is not available/broken"
         }
 

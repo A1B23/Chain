@@ -154,8 +154,9 @@ def receivedNewTransaction(trans, fromPeer, share):
 def initPendingTX():
     if (firstTime[0] == True):
         firstTime[0] = False
-        for peer in m_cfg['peers']:
-            if (m_cfg['peers'][peer]['active'] == True):
+        #TODO do the same with sendingPeers
+        for peer in m_cfg['activePeers']:
+            if (m_cfg['activePeers'][peer]['active'] == True):
                 txList, ret = c_peer.sendGETToPeer(peer+"/transactions/pending")
                 for tx in txList:
                     receivedNewTransaction(tx, "", False)

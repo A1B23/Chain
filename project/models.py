@@ -10,7 +10,6 @@ defHash = "f24d66fe6fd6856484c72a223507f7f048c17d8ca152e02809a6bbb0b7b33335"
 defFaucet = "1000000000000000000000000000000000000001"
 defGenesisDate = "2018-06-06T00:00:00.000Z"
 
-
 re_addr = re.compile("^[0-9a-f]{"+str(len(defAdr))+"}$")
 re_pubKey = re.compile("^[0-9a-f]{"+str(len(defPub))+"}$")
 
@@ -22,7 +21,9 @@ m_visualCFG = {"active": False, "pattern": []}
 m_peerInfo = {
     "numberFail": 0,
     "active": False,
-    "nodeId": "Pending..."
+    "nodeId": "Pending...",
+    "wrongType": 0,
+    "source": "startup"
 }
 
 m_TemplateSingleBalance = {
@@ -33,11 +34,15 @@ m_TemplateSingleBalance = {
 
 
 m_cfg = {
-    "type": "TBD",
-    "peers": {},
+    "activePeers": {},    # number of bilateral working peers
+    "shareToPeers": {},    # number of bilateral working peers
+    "peerOption": {}, #uses peerInfo
+    "peerAvoid": [],
     "maxPeers": -1,
     "minPeers": -1,
     "peerDrop": 5, # how often can a peer not reply when checked
+    "maxWrong": 3, # how many wrong type replies do we accept before we drop and move to avoid
+    "newPeer": [],
     "peersCheckDelay": 20, # TODO how many second to wait to check all peers again
     # 0 means all commands accepted, POST blocks against get
     # 1 means we are reloading the entire blocks at startup, so until this is finished, no reply
@@ -45,7 +50,9 @@ m_cfg = {
     "statusChain": False,
     "statusPeer": True,
     "canTrack": False,
-    "debug": False
+    "debug": False,
+    "shutdown": False,
+    "type": "TBD",
 }
 
 m_info = {
@@ -58,7 +65,8 @@ m_info = {
     "blocksCount": 0,
     "cumulativeDifficulty": 0,
     "confirmedTransactions": 0,
-    "pendingTransactions": 0
+    "pendingTransactions": 0,
+    "type": "TBD",
 }
 
 

@@ -1,10 +1,6 @@
-from project import app, render_template
-from flask import Flask, jsonify, request
 from project.utils import *
-import json
-from project.pclass import c_peer
 from project.classes import c_walletInterface
-from project.models import m_info, m_peerInfo
+from project.models import m_info
 from project.nspec.wallet.modelW import m_db
 
 # put your distribution according to url
@@ -48,7 +44,7 @@ class walletInterface:
         # identify your url and then proceed
         #linkInfo is a json object containing the information from the URL
         response = {
-            'NodeType': m_cfg['type'],
+            'NodeType': m_info['type'],
             'info': "This API is not yet implemented....",
             'requestedUrl': url,
             'linkInfo': linkInfo
@@ -73,7 +69,7 @@ class walletInterface:
 
         #json contains the json object submitted during the POST
         response = {
-            'NodeType': m_cfg['type'],
+            'NodeType': m_info['type'],
             'info': "This API is not (yet) implemented...."
         }
         ## put your logic here and create the reply as next line
