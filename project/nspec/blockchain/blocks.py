@@ -5,7 +5,7 @@ from time import sleep
 from project.models import useNet, m_info, m_cfg, defAdr
 from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_candidateBlockBalance, m_static_emptyBlock
-from project.nspec.blockchain.modelBC import m_stats
+from project.nspec.blockchain.modelBC import m_stats, m_peerToBlock
 from project.utils import checkRequiredFields, isSameChain, setOK, errMsg
 from project.pclass import c_peer
 from copy import deepcopy
@@ -55,14 +55,15 @@ class blockchain:
             m_Blocks.append(m_genesisSet[useNet])
 
 
-    def loopNewPeer(self):
+    def loopNewBlock(self):
         #this loop is not nice, because new blcok should proagate faster when a new peer is found,
         # but due to import issues in python, the link between peer and blocks is disrupted
         # so this is a workaround
         while m_cfg['shutdown'] is False:
-            #TODO if active peers is zero, poll from sendingPeer
-            #TODO clear one by one, not all in one go
-            m_cfg['newPeer'].clear()
+            if "addBlock" in m_peerToBlock:
+                peer = m_peerToBlock['addBlock']
+                del m_peerToBlock['addBlock']
+                self.getMissingBlocksFromPeer(peer)
             sleep(1)
 
 
@@ -153,7 +154,6 @@ class blockchain:
 
 
     def getMissingBlocksFromPeer(self, peer):
-        print("Work on missing block"+peer)
         if peer[-1] != "/":
             peer = peer + "/"
         base = "blocks/"
@@ -163,24 +163,28 @@ class blockchain:
         while True:
             url = base + str(len(m_Blocks))
             try:
-                res, stat = c_peer.sendGETToPeerToAnyone(peer,url)
+                res, stat = c_peer.sendGETToPeerToAnyone(peer, url)
             except Exception:
                 return ""
+            print("block came in " + str(stat) + " "+str(res))
             if stat == 200:
+                print("block came in")
                 m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
                 if len(m) == 0:
+                    print("fields ok")
                     err = self.verifyThenAddBlock(res)
+                    print("block add '"+err+"'")
                     if len(err) > 0:
-                        # TODO roll back por what?
+                        # TODO roll back por what? No, nothing was added which was not valid
                         return err
                     # inform all our peers about the block
                     c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res, peer)
             else:
-                # TODO must roll back or not?????
+                # TODO must roll back or not????? No, nothing was added which was not valid
                 return "No valid information, disconnect..."
             if len(m_Blocks) > res['index']:
                 break
-        # TODO cleear up pending transactions
+        # TODO clear up pending transactions
         # clear the separate flag for block other GETS
         return ""
 
@@ -250,8 +254,5 @@ class blockchain:
     def getJSONBlockByNumber(self, blockNr):
         blk = self.getBlockByNumber(blockNr)
         if len(blk) > 0:
-            return jsonify(blk), 200
-        response = {
-            'errorMsg': 'BlockNumber not valid or not existent: '+str(blockNr)
-        }
-        return jsonify(response), 400
+            return setOK(blk)
+        return errMsg('BlockNumber not valid or not existent: '+str(blockNr), 400)

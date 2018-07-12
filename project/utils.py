@@ -4,7 +4,7 @@ import json
 import datetime
 import hashlib
 from flask import jsonify
-from project.models import m_cfg, defNodeID
+from project.models import defNodeID
 from project.models import m_info
 
 #Call this for debuggin print to screen which needs to be removed at the end

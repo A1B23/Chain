@@ -1,6 +1,7 @@
 from project.utils import checkRequiredFields, isABCNode, setOK, errMsg
 from threading import Thread
 from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
+from project.nspec.blockchain.modelBC import m_Blocks, m_peerToBlock
 from copy import deepcopy
 from time import sleep
 import random
@@ -61,16 +62,16 @@ class peers:
     def doGET(self, url):
         parsed_uri = urlparse(url)
         domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
-        if domain + "cfg" == url:
-            peerOffer = {
-                "peerUrl": m_info['nodeUrl']
-            }
-            self.asynchPOST("peers/connect", peerOffer, " ")
+        # if domain + "cfg" == url:
+        #     peerOffer = {
+        #         "peerUrl": m_info['nodeUrl']
+        #     }
+        #     self.asynchPOST("peers/connect", peerOffer, " ")
         self.visualDelay(self.makeDelay(url, {}, False))
         return requests.get(url=url, headers={'accept': 'application/json'})
 
     def asPost(self, type, url, json, cnt):
-        for peer in m_cfg[type]:
+        for peer in self.randomOrderFor(m_cfg[type]):
             #if (peer == skipPeer):
             #    continue
             if m_cfg[type][peer]['active'] is True:
@@ -93,7 +94,7 @@ class peers:
         cnt = self.asPost('activePeers', url, json, 0)
         if cnt < m_cfg['minPeers']:
             self.asPost('shareToPeers', url, json, cnt)
-        print("Succeed to send asynch to: "+str(cnt))
+        #print("Succeed to send asynch to: "+str(cnt))
 
 
     def sendAsynchPOSTToPeers(self,url,json,skipPeer):
@@ -114,10 +115,10 @@ class peers:
     def postPeers(self, list, url, json, cnt):
         response = []
         # TODO taken ranofm if more than minPeers
-        for peer in m_cfg[list]:
+        for peer in self.randomOrderFor(m_cfg[list]):
             if m_cfg[list][peer]['active'] is True:
                 try:
-                    print("Peer: Share new info with " + url)
+                    #print("Peer: Share new info with " + url)
                     ret = self.doPOST(url=peer + url, json=json)
                     response.append(ret)
                     cnt = cnt + 1
@@ -138,41 +139,68 @@ class peers:
             response.append(self.postPeers('shareToPeers', url, json, len(response)))
         return response
 
+    def randomOrderFor(self, dict):
+        dest = [*dict]
+        random.shuffle(dest)
+        return dest
 
-    def sendGETToPeerToAnyone(self,peer,url):
+    def sendGETToPeerToAnyone(self, peer, url):
+        #note peer comes with slash at the end, peerx does not have, url does not have
+        #this rountine mostly handls incoming requst from unknown nodes
+        #so we try to get informatin first from known nodes, but we may
+        #see later if we want to connect to the newbie
+        if peer in m_cfg['activePeers']:
+            try:
+                resp = self.sendGETToPeer(peer+url)
+                txt, code = resp
+                if code == 200:
+                    return resp
+            except Exception:
+                i=0
+
+        for peerx in self.randomOrderFor(m_cfg['activePeers']):
+            try:
+                resp = self.sendGETToPeer(peerx+"/"+url)
+                txt, code = resp
+                if code == 200:
+                    return resp
+            except Exception:
+                i=0
+
+        for peerx in self.randomOrderFor(m_cfg['shareToPeers']):
+            try:
+                resp = self.sendGETToPeer(peerx+"/"+url)
+                txt, code = resp
+                if code == 200:
+                    return resp
+            except Exception:
+                i=0
+
         try:
-            print("try peers first "+peer + url)
-            return self.sendGETToPeer(peer+url)
+            resp = self.sendGETToPeer(peer + url)
+            txt, code = resp
+            if code == 200:
+                peer = peer[0:-1]
+                #have not seen this peer before, so we may connect later
+                if peer not in m_cfg['peerOption']:
+                    m_cfg['peerOption'][peer] = deepcopy(m_peerInfo)
+                    m_cfg['peerOption'][peer]['source'] = peer
+            return resp
         except Exception:
-            print("try acitve ")
-            for peerx in m_cfg['activePeers']:
-                try:
-                    print("try acitve " + peerx + url)
-                    if peer != peerx:
-                        return self.sendGETToPeer(peerx+url)
-                except Exception:
-                    i=0
-            print("try shatre ")
-            for peerx in m_cfg['shareToPeer']:
-                try:
-                    print("try share " + peerx + url)
-                    if peer != peerx:
-                        return self.sendGETToPeer(peerx+url)
-                except Exception:
-                    i=0
-            print("oops none???")
+            return ("{'noDelivery':True}", 400)
+
 
     def sendGETToPeer(self, url):
         #This routine must not have try/except as except is signal to caller
         rep = self.doGET(url=url)
         dat = json.loads(rep.text)
         x = rep.status_code
-        #self.addPeer(url, False)
         return dat, x
+
 
     def getPeers(self, type, url, cnt):
         response = []
-        for peer in m_cfg[type]:
+        for peer in self.randomOrderFor(m_cfg[type]):
             if m_cfg[type][peer]['active'] is True:
                 try:
                     response.append(self.sendGETToPeer(url=peer+url))
@@ -200,41 +228,41 @@ class peers:
                 response.append(self.getPeers('shareToPeers', url, len(resp)))
         return response
 
-    def deActivate(self, peer):
-        if m_cfg['peers'][peer]['numberFail'] > m_cfg['peerDrop']:
-            print("Peer " + peer + " not responding " + str(m_cfg['peers'][peer]['numberFail']) + " times, de-activated...")
-            m_cfg['peers'][peer]['active'] = False
-            return True
-        return False
+    # def deActivate(self, peer):
+    #     if m_cfg['peers'][peer]['numberFail'] > m_cfg['peerDrop']:
+    #         print("Peer " + peer + " not responding " + str(m_cfg['peers'][peer]['numberFail']) + " times, de-activated...")
+    #         m_cfg['peers'][peer]['active'] = False
+    #         return True
+    #     return False
 
-    def discoverPeers(self, needed):
-        findPeer = []
-        for peer in m_cfg['peers']:
-            if m_cfg['peers'][peer]['active'] is True:
-                try:
-                    s1 = self.doGET(peer + "/peers")
-                except Exception:
-                    m_cfg['peers'][peer]['active'] = False
-                    continue
-                reply = json.loads(s1.text)
-                for nodeId in reply:
-                    found = False
-                    for peer2 in m_cfg['peers']:
-                        if nodeId == m_cfg['peers'][peer2]['nodeId']:
-                            found = True
-                            break
-                    if found is False:
-                        findPeer.append(reply[nodeId])
-                        needed = needed - 1
-                        break
-
-                if needed <= 0:
-                    break   # do not just take all peers from one peer
-                    # to avoid peer aggregation, rather try another peer
-                    # to see if that one connects to another, even if it
-                    # means the lower boundary is off for a few more rounds
-        for peer in findPeer:
-            self.addPeer(peer, True)
+    # def discoverPeers(self, needed):
+    #     findPeer = []
+    #     for peer in m_cfg['peers']:
+    #         if m_cfg['peers'][peer]['active'] is True:
+    #             try:
+    #                 s1 = self.doGET(peer + "/peers")
+    #             except Exception:
+    #                 m_cfg['peers'][peer]['active'] = False
+    #                 continue
+    #             reply = json.loads(s1.text)
+    #             for nodeId in reply:
+    #                 found = False
+    #                 for peer2 in m_cfg['peers']:
+    #                     if nodeId == m_cfg['peers'][peer2]['nodeId']:
+    #                         found = True
+    #                         break
+    #                 if found is False:
+    #                     findPeer.append(reply[nodeId])
+    #                     needed = needed - 1
+    #                     break
+    #
+    #             if needed <= 0:
+    #                 break   # do not just take all peers from one peer
+    #                 # to avoid peer aggregation, rather try another peer
+    #                 # to see if that one connects to another, even if it
+    #                 # means the lower boundary is off for a few more rounds
+    #     for peer in findPeer:
+    #         self.addPeer(peer, True)
 
     def ensureBCNode(self, type):
         # peers can actually only be BCNode, all else make no sense
@@ -333,18 +361,21 @@ class peers:
                 m_info['peers'] = len(m_cfg['peers'])
                 return {'wrongChain': True}
 
-            if nodeId != "startup":
-                if nodeId != reply['nodeId']:
-                    return {'wrongID': True}
+            # if nodeId != "startup":
+            #     if nodeId != reply['nodeId']:
+            #         #TODO do we want to keep this srtict link?? wallet restart???
+            #         return {'wrongID': True}
             if not self.ensureBCNode(reply['type']):
                 return {'wrongType': True}
+            if reply['blocksCount'] > len(m_Blocks):
+                m_peerToBlock['addBlock'] = peer
             return reply
         except Exception:
             return {'fail': True}
 
     def checkAvailability(self, type, ref):
         remOption = []
-        for peer in m_cfg[type]:
+        for peer in self.randomOrderFor(m_cfg[type]):
             if peer in m_cfg['peerAvoid']:
                 remOption.append(peer)
                 continue
@@ -418,6 +449,7 @@ class peers:
         return False
 
     def upgradeShareToActive(self):
+        #TODO ask for the per list and if we are peer of the other, upgrade to activePeers
         return
 
     def ensurePeerNumber(self, isActive, ref):
@@ -448,11 +480,7 @@ class peers:
             while m_cfg['statusPeer']:
                 sleep(1)
             m_cfg['statusPeer'] = True
-            #TODO test
-            #if m_info['nodeUrl'] == "http://127.0.0.2:5555":
             self.ensurePeerNumber(True, "minPeers")
-            #else:
-            #    m_cfg['statusPeer'] = False
             sleep(m_cfg['peersCheckDelay']) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
 

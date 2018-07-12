@@ -66,7 +66,6 @@ def visualCfg():
 
 @app.route('/cfg', methods=["GET"])
 def get_cfg():
-    print(str(m_cfg))
     return setOK(m_cfg)
 
 ### TODO remove after debugging

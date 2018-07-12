@@ -8,6 +8,7 @@ m_pendingTX = {}
 m_BufferMinerCandidates = {}
 minBlockReward = 50000
 maxSameBlockPerMiner = 5
+m_peerToBlock = {}
 
 
 m_stats = {

@@ -59,7 +59,7 @@ set asDebug=N
 
 set nodeIPnum=6
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-rem start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2,5 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --asDebug %asDebug%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2,5 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --asDebug %asDebug%"
 
 rem ###################### Miner hard coded parameters 
 set typeDir=Miner
@@ -76,7 +76,7 @@ set nodeIPnum=34
 start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% -mod %mode% --asDebug %asDebug%"
 
 rem ##################### test new node added
-rem pause
+pause
 set typeDir=Blockchain
 set nodeIPnum=5
 set minPeers=2

@@ -27,7 +27,7 @@ def finalise(peer, port, type):
         sleep(1)
     if isBCNode() is True:
         c_blockchainNode.c_blockchainHandler.resetChain()
-        threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewPeer)
+        threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewBlock)
         threadp.start()
         #thread = Thread(target=initPendingTX)
         #thread.start()
