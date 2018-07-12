@@ -8,7 +8,7 @@ from project.utils import checkRequiredFields
 from project.models import defHash, m_cfg
 from project.nspec.miner.modelM import *
 from project.pclass import c_peer
-from project.nspec.wallet.transactions import get_public_address_from_privateKey, generate_private_key
+from project.classes import c_walletInterface
 from copy import deepcopy
 
 
@@ -39,26 +39,25 @@ def getEstimatedTimeStamp(diff):
 
 
 def isDataValid(resp_text):
-    # TODO update the meanoign of Err1 etc.... or remove
     m, l, f = checkRequiredFields(resp_text, m_candidateMiner, [], True)
     if (len(m) > 0) or (l != 0):
-        print("Err1")
+        print("required fields not matched")
         return False
 
     if (resp_text['difficulty'] > len(cfg['zero_string'])) or (resp_text['difficulty'] < 0):
-        print("Err1")
+        print("Difficulty not possible")
         return False
 
     if (resp_text['rewardAddress'] != cfg['address']) or (resp_text['index'] <= 0):
-        print("Err2")
+        print("Wrong reward address")
         return False
 
     if (len(defHash) != len(resp_text['blockDataHash']) or (resp_text['expectedReward']< minBlockReward)):
-        print("Err3")
+        print("Wrong Hash or too low expectedRewards")
         return False
 
     if resp_text['transactionsIncluded'] <= 0:
-        print("Err4")
+        print("No transaction at all")
         return False
 
     return True
@@ -127,6 +126,7 @@ def doMine():
         candidate = deepcopy(newCandidate)
         cfg['waitAck'] = False
         print("Start Nonce "+str(candidate['nonce']))
+        target = cfg['zero_string'][:candidate['difficulty']]
         try:
             # Request and wait a response from the N/W
             foundSolution = False
@@ -146,12 +146,12 @@ def doMine():
                     show = 0
 
                 if count >= cfg['maxNonce']:
-                    print("Max loop reached")
+                    print("Max loop reached, end attmempts")
                     break
                 #this does not use the make minershash as it is optimised for fixDat to be faster
                 minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
 
-                if minedBlockHash[:candidate['difficulty']] == cfg['zero_string'][:candidate['difficulty']]:
+                if minedBlockHash[:candidate['difficulty']] == target:
                     foundSolution = True
 
             cfg['findNonce'] = False
@@ -179,7 +179,7 @@ def doMine():
                 if (sent is True) and (resp.status_code == 200):
                     print("MINING SUCCESS (" + str(count) + " tries): " + resp.text)
                 else:
-                    print("MINING REPLY: ", resp.text)
+                    print("MINING FAIL: ", resp.text)
             else:
                 print("No solution found or new block came in")
         except Exception:
@@ -187,12 +187,17 @@ def doMine():
             print("Exception occurred... clear and refresh candidate")
 
 
-def initMiner():
+def initMiner(IP):
     random.seed(a=getFutureTimeStamp(0))
     cfg['pulling'] = True
-    #TODO this must revert to wallet, else every time a  miner comes back up it looses all its money as keys are gone!!!!
-    cfg['privKey'] = generate_private_key()
-    cfg['address'] = get_public_address_from_privateKey(cfg['privKey'])
+    #TODO make minerWallet name configurable so that they don't overwrite
+    wallet = 'minerWallet' + IP[-1]
+    if c_walletInterface.hasWallet(wallet) is False:
+        c_walletInterface.addKeysToWalletBasic({'name':wallet,'user':wallet+'AsUser','numKeys':1,'keyNames':['minerKey']},wallet)
+    repl = c_walletInterface.getDataFor(['name','minerKey'],wallet,"",wallet+'AsUser')
+    #cfg['privKey'] = generate_private_key()
+    #cfg['address'] = get_public_address_from_privateKey(cfg['privKey'])
+    cfg['address'] = repl[4]
     thread = Thread(target=pullCandidate)
     thread.start()
     thread2 = Thread(target=doMine)

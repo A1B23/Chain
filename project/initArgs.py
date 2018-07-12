@@ -14,7 +14,7 @@ import sqlite3
 from project.nspec.wallet.modelW import m_db
 
 
-def finalise(peer, port, type):
+def finalise(host, peer, port, type):
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
     useVis = m_cfg['canTrack']
@@ -33,7 +33,7 @@ def finalise(peer, port, type):
         #thread.start()
         initPendingTX()
     elif isMiner() is True:
-        initMiner()
+        initMiner(host)
     elif isWallet() is True:
         #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
         m_db['db'] = sqlite3.connect(m_db['DATABASE'])
@@ -55,7 +55,7 @@ def main(type):
     m_cfg['type'] = type
     parser = ArgumentParser()
     host, port, peer = init(parser)
-    thread = Thread(target=finalise, args=(peer, port, type))
+    thread = Thread(target=finalise, args=(host,peer, port, type))
     thread.start()
     app.run(host=host, port=port, threaded=True)
 

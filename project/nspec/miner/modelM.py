@@ -7,6 +7,5 @@ cfg = {
     'waitAck': False,
     'done': True,
     'lastHash': "",
-    'privKey': "",
     'address': ""
 }

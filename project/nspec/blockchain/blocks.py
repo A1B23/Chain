@@ -56,7 +56,7 @@ class blockchain:
 
 
     def loopNewBlock(self):
-        #this loop is not nice, because new blcok should proagate faster when a new peer is found,
+        #this loop is not nice, because new block should proagate faster when a new peer is found,
         # but due to import issues in python, the link between peer and blocks is disrupted
         # so this is a workaround
         while m_cfg['shutdown'] is False:

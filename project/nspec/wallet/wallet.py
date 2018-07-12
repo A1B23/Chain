@@ -57,22 +57,28 @@ class wallet:
         return self.addKeysToWallet(json, wal)
 
     def addKeysToWallet(self, json, wal):
+        mes,code = self.addKeysToWalletBasic(json,wal)
+        if code == 200:
+            return setOK(mes)
+        return errMsg(mes, code)
+
+    def addKeysToWalletBasic(self, json, wal):
         try:
             with closing(sqlite3.connect(m_db['DATABASE'])) as con:
                 pattern = re.compile(regexWallet)
                 if (not pattern.match(wal)):
-                    return errMsg("Invalid wallet name, use a-z, aA-Z and numbers only.", 400)
+                    return "Invalid wallet name, use a-z, aA-Z and numbers only.", 400
 
                 if (not pattern.match(json['user'])):
-                    return errMsg("Invalid wallet name, use a-z, aA-Z and numbers only.", 400)
+                    return "Invalid wallet name, use a-z, aA-Z and numbers only.", 400
 
                 if (json['numKeys'] <= 0) or (json['numKeys'] > 5):
-                    return errMsg("Invalid number of keys provided.", 400)
+                    return "Invalid number of keys provided.", 400
                 cur = con.cursor()
                 keys = []
                 s = set(json['keyNames'])
                 if (len(s) != len(json['keyNames'])):
-                    return errMsg("Invalid name list for keys, contains duplicates", 400)
+                    return "Invalid name list for keys, contains duplicates", 400
                 for idx in range(0, json['numKeys']):
                     name = ""   #empty names are resolved to address
                     if (len(json['keyNames'])>idx):
@@ -81,9 +87,9 @@ class wallet:
 
                 cur.executemany("INSERT INTO Wallet (WName,privKey,pubKey,address,KName,ChkSum,User) VALUES(?, ?, ?, ?,?,?,?)", keys)
                 con.commit()
-                return setOK(str(len(s))+" keys generated for wallet " + wal)
+                return str(len(s))+" keys generated for wallet " + wal, 200
         except Exception:
-            return errMsg("Creating Wallet " + wal + " failed.", 400)
+            return "Creating Wallet " + wal + " failed.", 400
 
     def listAllWallets(self, user):
         return self.doSelect("SELECT DISTINCT WName from Wallet WHERE User='"+user+"'")
