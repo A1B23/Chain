@@ -135,7 +135,7 @@ class peers:
         if url[0] != "/":
             url = "/"+url
         response.append(self.postPeers('activePeers', url, json, 0))
-        if len(response) < m_cfg['minPeers']:
+        if (len(response) < m_cfg['minPeers']) or (len(response[0]) == 0):
             response.append(self.postPeers('shareToPeers', url, json, len(response)))
         return response
 

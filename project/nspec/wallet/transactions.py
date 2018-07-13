@@ -11,7 +11,7 @@ def ripemd160(msg: str) -> str:
   hash_bytes = hashlib.new('ripemd160', msg.encode("utf8")).digest()
   return hash_bytes.hex()
 
-def sha256(msg: str) -> int:
+def helper_sha256(msg: str) -> int:
   msg2 = msg.encode("utf8")
   hash_bytes = hashlib.sha256(msg2).digest()
   return int.from_bytes(hash_bytes, byteorder="big")

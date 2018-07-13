@@ -99,6 +99,8 @@ def pull():
 
 
 def pullCandidate():
+    thread = Thread(target=doMine)
+    thread.start()
     while m_cfg['shutdown'] is False:
         try:
             pull()
@@ -190,18 +192,17 @@ def doMine():
 def initMiner(IP):
     random.seed(a=getFutureTimeStamp(0))
     cfg['pulling'] = True
-    #TODO make minerWallet name configurable so that they don't overwrite
-    wallet = 'minerWallet' + IP[-1]
+    #TODO make minerWallet name configurable so that they don't overwrite each other when run locally
+    wallet = 'minerWallet' + (IP[-2:].replace(".", "x"))
     if c_walletInterface.hasWallet(wallet) is False:
-        c_walletInterface.addKeysToWalletBasic({'name':wallet,'user':wallet+'AsUser','numKeys':1,'keyNames':['minerKey']},wallet)
-    repl = c_walletInterface.getDataFor(['name','minerKey'],wallet,"",wallet+'AsUser')
+        c_walletInterface.addKeysToWalletBasic({'name': wallet, 'user': wallet+'AsUser', 'numKeys': 1, 'keyNames': ['minerKey']}, wallet)
+    repl = c_walletInterface.getDataFor(['name', 'minerKey'], wallet, "", wallet+'AsUser')
     #cfg['privKey'] = generate_private_key()
     #cfg['address'] = get_public_address_from_privateKey(cfg['privKey'])
     cfg['address'] = repl[4]
     thread = Thread(target=pullCandidate)
     thread.start()
-    thread2 = Thread(target=doMine)
-    thread2.start()
+
 
     #test = "df8f114897188bcc68b97ebe2b673d3c92de986024abe565df0a4f8702c1742b|2018-02-11T20:31:32.397Z|1453826"
     #res = hashlib.sha256(test.encode("utf8")).hexdigest()

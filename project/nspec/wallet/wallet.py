@@ -1,9 +1,8 @@
 from project.nspec.wallet.transactions import generate_private_key, private_key_hex_to_int, private_key_to_public_key
-from project.nspec.wallet.transactions import get_pub_key_compressed, public_key_compressed_to_address
+from project.nspec.wallet.transactions import get_pub_key_compressed, public_key_compressed_to_address,helper_sha256
 from project.pclass import c_peer
 from project.models import m_transaction_order
 from pycoin.ecdsa import generator_secp256k1, sign
-from hashlib import sha256
 from project.utils import setOK, errMsg, putDataInOrder
 import sqlite3
 from project.nspec.wallet.modelW import m_db, regexWallet
@@ -243,7 +242,7 @@ class wallet:
                        "dateCreated": timestamp, "data": msg, "senderPubKey": pub_key_compressed}
 
         # Hash and sign
-        tran_hash = sha256(putDataInOrder(m_transaction_order, transaction))
+        tran_hash = helper_sha256(putDataInOrder(m_transaction_order, transaction))
         tran_signature = sign(generator_secp256k1, private_key_hex_to_int(priv_key_hex), tran_hash)
         tran_signature_str = (str(hex(tran_signature[0]))[2:], str(hex(tran_signature[1]))[2:])
 
