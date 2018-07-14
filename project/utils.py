@@ -53,6 +53,8 @@ def checkType(asSet, type):
 def isMiner():
     return checkType(m_info['type'], "Miner")
 
+def isGenesis():
+    return checkType(m_info['type'], "Genesis")
 
 def isWallet():
     return checkType(m_info['type'], "Wallet")

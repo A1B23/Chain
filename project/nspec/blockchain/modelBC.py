@@ -13,7 +13,7 @@ m_peerToBlock = {}
 
 m_stats = {
     "m_minFee": 10,
-    "m_cumulativeDifficulty":0
+    "m_cumulativeDifficulty": 0
 }
 
 m_coinBase = {
@@ -53,7 +53,7 @@ m_staticTransactionRef = {
     "senderPubKey": defPub,
     "transactionDataHash": "needtocalculatethehashhere",
     "senderSignature": [defSig, defSig],
-    "minedInBlockIndex": 1,
+    "minedInBlockIndex": 0,
     "transferSuccessful": True,
 }
 
@@ -101,7 +101,7 @@ m_candidateBlock = {
     "difficulty": 5,
     "minedBy": defAdr,
     # changes with new faucet address
-    "blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
+    "blockDataHash": defHash,
     ## next three need to be added after miner got his block
     # also need to comparet he blockDataHash being the same!!!!
     #"nonce":0,
@@ -118,7 +118,19 @@ m_informsPeerNewBlock = {
 
 m_genesisSet = [
     #Academy net
-    {"index":0,"transactions":[{"from":"0000000000000000000000000000000000000000","to":"f3a1e69b6176052fcc4a3248f1c5a91dea308ca9","value":1000000000000,"fee":0,"dateCreated":"2018-01-01T00:00:00.000Z","data":"genesis tx","senderPubKey":"00000000000000000000000000000000000000000000000000000000000000000","transactionDataHash":"8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2","senderSignature":["0000000000000000000000000000000000000000000000000000000000000000","0000000000000000000000000000000000000000000000000000000000000000"],"minedInBlockIndex":0,"transferSuccessful":True}],"difficulty":0,"minedBy":"0000000000000000000000000000000000000000","blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc","nonce":0,"dateCreated":"2018-01-01T00:00:00.000Z","blockHash":"c6da93eb4249cb5ff4f9da36e2a7f8d0d61999221ed6910180948153e71cc47f"
+    {"index":0,"transactions":[{"from":"0000000000000000000000000000000000000000",
+                                "to":"f3a1e69b6176052fcc4a3248f1c5a91dea308ca9",
+                                "value":1000000000000,"fee":0,"dateCreated":"2018-01-01T00:00:00.000Z",
+                                "data":"genesis tx",
+                                "senderPubKey":"00000000000000000000000000000000000000000000000000000000000000000",
+                                "transactionDataHash":"8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2",
+                                "senderSignature":["0000000000000000000000000000000000000000000000000000000000000000",
+                                                   "0000000000000000000000000000000000000000000000000000000000000000"],
+                                "minedInBlockIndex":0,"transferSuccessful":True}],
+                    "difficulty":0,"minedBy":"0000000000000000000000000000000000000000",
+                    "blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
+                    "nonce":0,"dateCreated":"2018-01-01T00:00:00.000Z",
+                    "blockHash":"c6da93eb4249cb5ff4f9da36e2a7f8d0d61999221ed6910180948153e71cc47f"
     },
     #NAPCoin
     {

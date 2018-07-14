@@ -1,6 +1,7 @@
-from project.utils import isBCNode, isWallet, checkRequiredFields
+from project.utils import isBCNode, isWallet, isGenesis, checkRequiredFields
 from project.nspec.blockchain.interface import chainInterface
 from project.nspec.wallet.interface import walletInterface
+from project.nspec.genesis.interface import genesisInterface
 from project.models import m_permittedPOST, m_permittedGET, m_cfg, m_simpleLock, m_isPOST, m_peerSkip, m_info
 from time import sleep
 import re
@@ -9,6 +10,7 @@ from flask import jsonify
 class mainInterface:
     c_blockInterface = chainInterface()
     c_walletInterface = walletInterface()
+    c_genesisInterface = genesisInterface()
 
     def delay(self,url,type):
         #sleep a seconds or a loop etc
@@ -57,6 +59,8 @@ class mainInterface:
                 ret = self.c_blockInterface.nodeSpecificGETNow(url, linkInfo)
             elif (isWallet()):
                 ret = self.c_walletInterface.nodeSpecificGETNow(url, linkInfo)
+            elif (isGenesis()):
+                ret = self.c_genesisInterface.nodeSpecificGETNow(url, linkInfo)
         except Exception:
             print("Oops, GET exception happened ....")
 
@@ -104,6 +108,8 @@ class mainInterface:
                 ret = self.c_blockInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
             elif (isWallet()):
                 ret = self.c_walletInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
+            elif (isGenesis()):
+                ret = self.c_genesisInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
             #sleep is for test only to see POST locking works!!!
             #sleep(10)
         except Exception:

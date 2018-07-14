@@ -1,6 +1,6 @@
 from project import app, render_template
 from flask import request, jsonify
-from project.utils import setOK, errMsg, isBCNode, isWallet
+from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis
 import json, requests
 from project.InterfaceLocking import mainInterface
 from project.classes import c_blockchainNode
@@ -88,6 +88,7 @@ def get_info():
 #GET /debug
 @app.route('/debug', methods=["GET"])
 def debug():
+    #TODO update by type
     response = []
     response.append(m_cfg)
     response.append(m_info)
@@ -99,6 +100,7 @@ def debug():
 #GET /debug/reset-chain
 @app.route('/debug/reset-chain', methods=["GET"])
 def debug_resetChain():
+    #TODO updat eby type
     ## this is a very special case, as it is not GET but actually a POST issue
     m_isPOST.append("Reset Chain")
     while (len(m_isPOST)>1):
@@ -239,6 +241,8 @@ def index():
         return render_template("indexBC" + addOn + ".html")
     if (isWallet()):
         return render_template("TabWallet" + addOn + ".html")
+    if (isGenesis()):
+        return render_template("TabGenesis" + addOn + ".html")
 
     response = {
         'NodeType': m_info['type'],
@@ -317,6 +321,68 @@ def getAllTX(type, user):
 def getWalletTx(type, wallet, user):
     linkInfo = {"wallet": wallet, "user": user, "type": type}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
+
+################## Geneis specific routes
+@app.route('/setID', methods=['POST'])
+def gen_setID():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/viewGX', methods=['GET'])
+def gen_viewGX():
+    linkInfo = {}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
+@app.route('/genFaucet', methods=['POST'])
+def gen_genFaucet():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/useTX', methods=['POST'])
+def gen_useTX():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/genTX', methods=['POST'])
+def gen_genTX():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/genGX', methods=['POST'])
+def gen_genGX():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
+@app.route('/updGX', methods=['POST'])
+def gen_updGX():
+    linkInfo = {}
+    try:
+        values = request.get_json()
+    except Exception:
+        return errMsg("JSON not decodeable", 400)
+    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
+
 
 
 ################## the following two are only for testing while developing peer module

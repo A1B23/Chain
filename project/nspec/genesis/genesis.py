@@ -6,12 +6,100 @@ from pycoin.ecdsa import generator_secp256k1, sign
 from project.utils import setOK, errMsg, putDataInOrder, getTime
 import sqlite3
 from project.nspec.wallet.modelW import m_db, regexWallet
+from project.nspec.blockchain.modelBC import m_staticTransactionRef, m_static_emptyBlock
 from contextlib import closing
 import re
+import datetime
 from project.nspec.blockchain.verify import verifyAddr
+from project.nspec.genesis.modelG import m_data, m_dataInit
+from copy import deepcopy
+import project
 
 
-class wallet:
+class genesis:
+
+    def initGenesis(self):
+        m_data.clear()
+        m_data.update(deepcopy(m_dataInit))
+        return
+
+    def setID(self, json):
+        if m_data['chainID'] != "":
+            errMsg("Current chainID set: "+m_data['chainID'], 400)
+
+        m_data.clear()
+        m_data.update(deepcopy(m_dataInit))
+        m_data['chainID'] = json['chainID']
+        return setOK("chain ID set to: "+json['chainID'])
+
+
+    def genFaucet(self, json):
+        if m_data['chainID'] == "":
+            return errMsg("Missing chainID ", 400)
+        if json['chainID'] != m_data['chainID']:
+            return errMsg("Current chainID not matching: " + m_data['chainID'], 400)
+
+        m_data['TXList'].append(json)
+        return setOK(str(len(m_data['TXList'])) + " TXs registered. Most recent type: Faucet")
+
+
+    def useTX(self, json):
+        return errMsg("Not yet", 400)
+
+    def genTX(self, json):
+        return errMsg("Not yet", 400)
+
+    def genGX(self, json):
+        if m_data['chainID'] == "":
+            return errMsg("Missing chainID ", 400)
+        if json['chainID'] != m_data['chainID']:
+            return errMsg("Current chainID not matching: " + m_data['chainID'], 400)
+        for jtx in json['TXList']:
+            if jtx['chainID'] != m_data['chainID']:
+                return errMsg("One of the TX has invalid chainID: " + jtx['chainID'], 400)
+
+        gen = deepcopy(m_static_emptyBlock)
+        gen['transactions'].clear()
+        for json in m_data['TXList']:
+            if json['type'] == "genFaucet":
+                newTX = deepcopy(m_staticTransactionRef)
+                wallet = 'faucet' + m_data['chainID']
+                project.nspec.wallet.addKeysToWalletBasic(
+                    {'name': wallet, 'user': wallet + 'AsUser', 'numKeys': 1, 'keyNames': ['faucetKey']}, wallet)
+                repl = project.nspec.wallet.getDataFor(['name', 'faucetKey'], wallet, "", wallet + 'AsUser')
+                newTX["to"] = repl[4]
+                newTX["value"] = json['initVal']
+                # TODO store the maxDomation an dthe password in DB!!!
+                newTX["fee"] = 0
+                newTX["dateCreated"] = getTime()
+                newTX["data"] = "Genesis Faucet"
+                newTX["transactionDataHash"] = "needed"
+                gen['transactions'].append(newTX)
+            elif json['type'] == "useTX":
+                gen['transactions'].append(newTX)
+            elif json['type'] == "genTX":
+                gen['transactions'].append(newTX)
+        gen["blockDataHash"] = "needed"
+        gen["dateCreated"] = getTime()
+        gen["blockHash"] = "needed"
+        return errMsg("Not yet", 400)
+
+    def updGX(self, json):
+        if m_data['chainID'] == "":
+            return errMsg("Missing chainID ", 400)
+        if json['chainID'] != m_data['chainID']:
+            return errMsg("Current chainID not matching: " + m_data['chainID'], 400)
+        for jtx in json['TXList']:
+            if jtx['chainID'] != m_data['chainID']:
+                return errMsg("One of the TX has invalid chainID: " + jtx['chainID'], 400)
+        m_data.clear()
+        m_data.update(json)
+        return setOK("Data updated without much verification")
+
+    def viewGX(self):
+        return setOK(m_data)
+
+
     def createKey(self, wal, name, user):
         # (wal,"prK","pK","@","*","000")
         prk = generate_private_key()
@@ -235,7 +323,8 @@ class wallet:
 
 
     def signTx(self, priv_key_hex, receiver_addr, msg, value,fee, pub_addr, pub_key_compressed):
-        timestamp = getTime()
+        timestamp = datetime.datetime.now().isoformat()
+        timestamp = timestamp + "Z"
         transaction = {"from": pub_addr, "to": receiver_addr, "value": value, "fee": fee,
                        "dateCreated": timestamp, "data": msg, "senderPubKey": pub_key_compressed}
 

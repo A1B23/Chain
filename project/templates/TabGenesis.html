@@ -1,0 +1,374 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial;
+        }
+
+        /* Style the tab */
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+
+        /* Style the buttons inside the tab */
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+        }
+
+        .subtab button {
+            background-color: #ddd;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+
+        /* Change background color of buttons on hover */
+        .tab button:hover {
+            background-color: #ddd;
+        }
+
+        /* Create an active/current tablink class */
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .subtab button.active {
+            background-color: #808080;
+        }
+
+        /* Style the tab content */
+        .tabcontent {
+            display: none;
+            padding: 6px 12px;
+            -webkit-animation: fadeEffect 1s;
+            animation: fadeEffect 1s;
+        }
+
+        /* Fade in tabs */
+        @-webkit-keyframes fadeEffect {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeEffect {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .alert {
+            padding: 20px;
+            background-color: #f1f1f1;
+            color: white;
+        }
+
+        .closebtn {
+            margin-right: 15px;
+            color: white;
+            font-weight: bold;
+            float: left;
+            font-size: 22px;
+            line-height: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .closebtn:hover {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/GET_POST.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="../static/js/jquery-3.3.1.min.js"></script>
+    <script src="../static/js/GET_POST.js"></script>
+
+    ChainID: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">Set</button>
+    <br />Current State: <span id="state">No Data set</span>
+
+    <div class="tab maintab">
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Faucet')">Generate faucet TX</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'genTX')">Generate genesis TX</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','useTX')">Include signed TX</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','genGX')">Generate</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
+
+        <br />
+        <br />
+        <div class="alert">
+            <span class="closebtn" onclick="closeAlert();">&times;</span>
+            <span id='alertText'></span>
+        </div>
+    </div>
+
+    <div id="Faucet" class="tabcontent maintab">
+        <table>
+            <tr><td>Initial Value</td><td> <input type="text" id="initVal" value="1000000000" size="20"></td></tr>
+            <tr><td>Max donation <br />per request</td><td> <input type="text" id="maxVal" value="1000" size="8"></td></tr>
+            <tr>
+                <td>Priviledged <br />access code</td>
+                <td>
+                    <input type="text" id="privVal" value="" size="12"><br />
+                    Leave empty for public access
+                </td>
+            </tr>
+        </table>
+        <button class="keys" onclick="addFaucet()">Submit</button>
+    </div>
+
+    <div id="genTX" class="tabcontent maintab">
+        <table>
+            <tr><td>Receiver's Address</td><td> <input type="text" id="gaddr" value="" size="20"></td></tr>
+            <tr><td>Value</td><td> <input type="text" id="gVal" value="" size="12"></td></tr>
+            <tr><td>Comment</td><td> <input type="text" id="gCom" value="" size="20"></td></tr>
+        </table>
+        <button class="keys" onclick="genTX()">Submit</button>
+    </div>
+
+    <div id="useTX" class="tabcontent maintab">
+        <table>
+            <tr>
+                <td>Provide or complete <br /> full JSON for TX</td>
+                <td>
+                    <textarea rows="16" cols="120">
+{
+    "from":"0000000000000000000000000000000000000000",
+    "to":"f3a1e69b6176052fcc4a3248f1c5a91dea308ca9",
+    "value":1000000000000,
+    "fee":0,
+    "dateCreated":"2018-01-01T00:00:00.000Z",
+    "data":"genesis tx",
+    "senderPubKey":"00000000000000000000000000000000000000000000000000000000000000000",
+    "transactionDataHash":"8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2",
+    "senderSignature":["0000000000000000000000000000000000000000000000000000000000000000",
+                       "0000000000000000000000000000000000000000000000000000000000000000"],
+    "minedInBlockIndex":0,
+    "transferSuccessful":True
+}
+                </textarea>
+                </td>
+            </tr>
+        </table>
+        <button class="keys" onclick="useTX()">Submit</button>
+    </div>
+
+
+    <div id="genGX" class="tabcontent maintab">
+        Click 'Submit' to generate the Genesis Block for the current data provided. <br />
+        The result will be shown below, and <br />
+        a Genesis Block file (name starting with the chainID) will be created.<br />
+        <br />
+        <button class="keys" onclick="viewGX()">View</button> 
+        <button class="keys" onclick="updGX()">Update</button><br />
+        <textarea id="genBlock" rows="16" cols="120"></textarea><br />
+        <button class="keys" onclick="genGX()">Submit</button><br />
+
+    </div>
+
+    <div id="Info" class="tabcontent maintab">
+        <h3>PDPC_Coin Genesis Block Generator</h3>
+        <p>
+
+        </p>
+    </div>
+
+
+    <script>
+        /*
+        * State Management
+        */
+
+        user = "";
+        function updateStateInfo() {
+            $("#state").text("ChainID: " + user);
+        }
+
+        function initState() {
+            //state = { "wallet": "", "key": "" };
+            //$("#wallets").val("");
+            //$('#selWallet').val("__clr");
+            //$('#walletName').val("");
+            $("#genBlock").val("");
+            //$("#quickSelWallet").prop("checked", false);
+            //$("#quickSelWallet").attr("checked", false);
+            updateStateInfo();
+        }
+        $(".alert").css("display", "none");
+        initState();
+
+
+        function h(message) {
+            return "<u>" + message + "</u>";
+        }
+
+
+        function logUser(event) {
+            if ($("#login").text() == "Set") {
+                user = $("#userName").val().trim();
+                // TODO see that it does not yet exist
+                if (user.length > 0) {
+                    $('#login').text('x');
+                    data = {
+                        "chainID": user
+                    }
+                    handlePOST("setID", data);
+                }
+            } else {
+                doAlert("Cannot create two genesis blocks at same time, reload page, but you will loose data so far provided...")
+            }
+        }
+
+        function handlePOST(url, data) {
+            var repl = doPOSTSynch(url, null, data);
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
+                doAlert(json['message']);
+            } else {
+                doAlert(json['errorMsg']);
+            }
+        }
+
+        function addFaucet() {
+            var type = "genFaucet"; 
+            data = {
+                "type": type, "chainID": user,
+                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": +$("#privVal").val()
+            }
+            handlePOST(type,data);
+        }
+
+        function useTX() {
+            var type = "useTX";
+            data = {
+                "type": type, "chainID": user,
+                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": +$("#privVal").val()
+            }
+            handlePOST(type, data);
+        }
+
+        function genTX() {
+            var type = "genTX";
+            data = {
+                "type": type, "chainID": user,
+                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": +$("#privVal").val()
+            }
+            handlePOST(type, data);
+        }
+
+
+        function genGX() {
+            var type = "genGX";
+            data = {
+                "type": type, "chainID": user
+            }
+            handlePOST(type, data);
+        }
+
+        function updGX() {
+            data = JSON.parse($("#genBlock").val())
+            handlePOST("updGX", data);
+        }
+
+        function viewGX() {
+            var repl = doGETSynch("viewGX");
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
+                $("#genBlock").val(JSON.stringify(json,null,2));
+            } else {
+                doAlert(json['errorMsg']);
+            }
+        }
+
+
+        function toClipBoard(id) {
+            var text = $("#" + id).val()
+            if (text != null) {
+                var dummy = document.createElement("input");
+                document.body.appendChild(dummy);
+                dummy.setAttribute('value', text);
+                dummy.select();
+                document.execCommand("copy");
+                document.body.removeChild(dummy);
+                doAlert("Copied text to clipboard: '" + text + "' len=" + text.length, 10);
+            } else {
+                doAlert("No selection for copying...", 0);
+            }
+        }
+
+        function doAlert(message, level) {
+            var tim = 5000;
+            if (level == 0) {
+                $(".alert").css("background-color", "red");
+            } else if (level == 1) {
+                $(".alert").css("background-color", "orange");
+                tim = 3000;
+            } else if (level == 8) {
+                $(".alert").css("background-color", "green");
+                tim = 4000;
+            } else if (level == 9) {
+                $(".alert").css("background-color", "green");
+                tim = 2000;
+            } else {
+                $(".alert").css("background-color", "grey");
+                tim = 2000;
+            }
+            $("#alertText").html("  " + message);
+            $(".alert").css("display", "block");
+            setTimeout(function () {
+                closeAlert();
+            }, tim);
+        }
+
+        function closeAlert() {
+            $(".alert").css("display", "none");
+            $(".alert").css("background-color", "white");
+        }
+
+
+        /*
+        * Tab Manager
+        */
+        function openTab(evt, tabs, tabName) {
+            if (tabName != "Info") {
+                if (user === "") {
+                    doAlert("No ChainID set, please set ID first", 0);
+                    return;
+                }
+            }
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent " + tabs);
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks " + tabs);
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 from project.nspec.blockchain.modelBC import m_genesisSet
-from project.utils import genNodeID, isBCNode, isWallet, isMiner
-from project.classes import c_blockchainNode
+from project.utils import genNodeID, isBCNode, isWallet, isMiner, isGenesis
+from project.classes import c_blockchainNode, c_genesisInterface
 from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
 from project import app
@@ -37,6 +37,10 @@ def finalise(host, peer, port, type):
     elif isWallet() is True:
         #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
         m_db['db'] = sqlite3.connect(m_db['DATABASE'])
+    elif isGenesis() is True:
+        c_genesisInterface.initGenesis()
+
+
 
     m_cfg['canTrack'] = useVis
 
