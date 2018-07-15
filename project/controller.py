@@ -27,7 +27,7 @@ def visualGet():
         return jsonify(dat), 200
     except Exception:
         print("visualGet Failed")
-    return errMsg("Request failed", 400)
+    return errMsg("Request failed")
 
 @app.route('/visualRelease/<int:id>', methods=["GET"])
 def visualRelease(id):
@@ -43,10 +43,10 @@ def visualRelease(id):
             if rel['asynchPOST'] is True:
                 requests.post(url=rel['url'], json=rel['json'], headers={'accept': 'application/json'})
             return jsonify(rel), 200
-        return errMsg("Unexpected Release for "+str(id), 400)
+        return errMsg("Unexpected Release for "+str(id))
     except Exception:
         print("visualRelease Failed")
-    return errMsg("Request failed", 400)
+    return errMsg("Request failed")
 
 @app.route('/visualCfg', methods=["POST"])
 def visualCfg():
@@ -61,7 +61,7 @@ def visualCfg():
         m_Delay.clear()
         return setOK("Tracking switched off")
     except Exception:
-        return errMsg("JSON not decodeable or missing item", 400)
+        return errMsg("JSON not decodeable or missing item")
 
 
 @app.route('/cfg', methods=["GET"])
@@ -135,7 +135,7 @@ def transactions_send():
     try:
         values = request.get_json()
     except Exception:
-        return errMsg("JSON not decodeable", 400)
+        return errMsg("JSON not decodeable")
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 
@@ -151,7 +151,7 @@ def peers_notifyNewBlock():
     try:
         values = request.get_json()
     except Exception:
-        return errMsg("JSON not decodeable", 400)
+        return errMsg("JSON not decodeable")
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 @app.route('/peers', methods=["GET"])
@@ -173,7 +173,7 @@ def peers_connect():
             threadx.start()
         return repl
     except Exception:
-        return errMsg("JSON not decodeable", 400)
+        return errMsg("JSON not decodeable")
 
 
 @app.route('/mining/get-mining-job/<minerAddress>', methods=["GET"])
@@ -187,7 +187,7 @@ def mining_submitBlock():
     try:
         values = request.get_json()
     except Exception:
-        return errMsg("JSON not decodable", 400)
+        return errMsg("JSON not decodable")
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 @app.route('/debug/mine/<minerAddress>/<int:difficulty>', methods=["GET"])
@@ -232,7 +232,7 @@ def wallet_POST():
     try:
         values = request.get_json()
     except Exception:
-        return errMsg("JSON not decodeable", 400)
+        return errMsg("JSON not decodeable")
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 
@@ -299,7 +299,7 @@ def genesis_POST():
     try:
         values = request.get_json()
     except Exception:
-        return errMsg("JSON not decodeable", 400)
+        return errMsg("JSON not decodeable")
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 

@@ -148,7 +148,7 @@ def receivedNewTransaction(trans, fromPeer, share):
             c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn, fromPeer)
             return jsonify(response), 201 #201 as per slide 38
         return #nothing returmed, nothing sent
-    return errMsg(colErr, 400)
+    return errMsg(colErr)
 
 
 def initPendingTX():

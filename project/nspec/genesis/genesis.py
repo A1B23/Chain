@@ -19,10 +19,10 @@ class genesis:
 
     def setID(self, data):
         if m_data['chainRef'] != "":
-            errMsg("Current chainRef set: "+m_data['chainRef'], 400)
+            return errMsg("Current chainRef set: "+m_data['chainRef'])
 
         if project.classes.c_walletInterface.hasWallet('genesis' + data['chainRef']) is True:
-            return errMsg("Wallet reference already exists", 400)
+            return errMsg("Wallet reference already exists")
 
         m_data.clear()
         m_data.update(deepcopy(m_dataInit))
@@ -52,7 +52,7 @@ class genesis:
     def genFaucet(self, data):
         ret = self.checkTX(data)
         if len(ret) > 0:
-            return errMsg(ret, 400)
+            return errMsg(ret)
 
         m_data['TXList'].append(data)
         return setOK(str(len(m_data['TXList'])) + " TXs registered. Most recent type: Faucet")
@@ -61,7 +61,7 @@ class genesis:
     def useTX(self, data):
         ret = self.checkTX(data)
         if len(ret) > 0:
-            return errMsg(ret, 400)
+            return errMsg(ret)
 
         m_data['TXList'].append(data)
         return setOK(str(len(m_data['TXList'])) + " TXs registered. Most recent type: Given TX")
@@ -69,7 +69,7 @@ class genesis:
     def genTX(self, data):
         ret = self.checkTX(data)
         if len(ret) > 0:
-            return errMsg(ret, 400)
+            return errMsg(ret)
         m_data['TXList'].append(data)
         return setOK(str(len(m_data['TXList'])) + " TXs registered. Most recent type: creating TX")
 
@@ -91,14 +91,14 @@ class genesis:
     def genGX(self, data):
         try:
             if m_data['chainRef'] == "":
-                return errMsg("Missing chainRef ", 400)
+                return errMsg("Missing chainRef ")
             if data['chainRef'] != m_data['chainRef']:
-                return errMsg("Current chainRef not matching: " + m_data['chainRef'], 400)
+                return errMsg("Current chainRef not matching: " + m_data['chainRef'])
             for jtx in m_data['TXList']:
                 if jtx['chainRef'] != m_data['chainRef']:
-                    return errMsg("One of the TX has invalid chainRef: " + jtx['chainRef'], 400)
+                    return errMsg("One of the TX has invalid chainRef: " + jtx['chainRef'])
             if project.classes.c_walletInterface.hasWallet('genesis' + data['chainRef']) is True:
-                return errMsg("Genesis/faucet/wallet reference already exists", 400)
+                return errMsg("Genesis/faucet/wallet reference already exists")
 
             gen = deepcopy(m_static_emptyBlock)
             del gen['prevBlockHash']
@@ -125,7 +125,7 @@ class genesis:
             gen["blockHash"] = makeMinerHash(gen)
             ret = verifyBlockAndAllTX(gen, True)
             if len(ret) > 0:
-                return errMsg(ret, 400)
+                return errMsg(ret)
             ret = updateConfirmedBalance(gen['transactions'])
             fin = {"balances": ret, "genesis": gen}
             fnam = "Genesis_"+m_data['chainRef']+".json"
@@ -134,16 +134,16 @@ class genesis:
             return setOK(fin)
         except Exception:
             #TODO clear database
-            return errMsg("Some data failure detected", 400)
+            return errMsg("Some data failure detected")
 
     def updGX(self, data):
         if m_data['chainRef'] == "":
-            return errMsg("Missing chainRef ", 400)
+            return errMsg("Missing chainRef ")
         if data['chainRef'] != m_data['chainRef']:
-            return errMsg("Current chainRef not matching: " + m_data['chainRef'], 400)
+            return errMsg("Current chainRef not matching: " + m_data['chainRef'])
         for jtx in data['TXList']:
             if jtx['chainRef'] != m_data['chainRef']:
-                return errMsg("One of the TX has invalid chainRef: " + jtx['chainRef'], 400)
+                return errMsg("One of the TX has invalid chainRef: " + jtx['chainRef'])
         m_data.clear()
         m_data.update(data)
         return setOK("Data updated without major verifications")

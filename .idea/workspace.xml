@@ -3,19 +3,14 @@
   <component name="ChangeListManager">
     <list default="true" id="cebf9d2d-a62e-42e7-96a7-c7c6c47f10f3" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/InterfaceLocking.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/InterfaceLocking.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/initArgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/initArgs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/balance.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/balance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/blocknode.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/blocknode.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/blocks.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/blocks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/modelBC.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/modelBC.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/transact.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/transact.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/verify.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/verify.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/nspec/genesis/genesis.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/genesis/genesis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/genesis/modelG.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/genesis/modelG.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/peers.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/peers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/templates/TabGenesis.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/TabGenesis.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -96,8 +91,8 @@
       <file leaf-file-name="blocks.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="105">
-              <caret line="54" column="56" selection-start-line="54" selection-start-column="56" selection-end-line="54" selection-end-column="56" />
+            <state relative-caret-position="401">
+              <caret line="256" column="77" selection-start-line="256" selection-start-column="76" selection-end-line="256" selection-end-column="77" />
               <folding>
                 <element signature="e#0#63#0" expanded="true" />
               </folding>
@@ -144,7 +139,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>createWallet</find>
       <find>cfg['privKey']</find>
       <find>initMiner</find>
       <find>failed due</find>
@@ -174,6 +168,7 @@
       <find />
       <find>NAPCoin</find>
       <find>verifyBlockAndAllTX</find>
+      <find>errMsg</find>
     </findStrings>
     <replaceStrings>
       <replace>setOK</replace>
@@ -689,14 +684,20 @@
       <option name="project" value="LOCAL" />
       <updated>1531560693493</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Genesis generation completed, hardened chain init in main, set PDPCCoin">
+      <created>1531625498331</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1531625498332</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2513661" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2513661" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.329582" />
@@ -706,7 +707,7 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.46391752" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.46391752" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -757,7 +758,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="Major correction on hash generation, several correction on candidate &#10;block generation, and fixed miner loop issue" />
     <MESSAGE value="Bug fixes in miner and peers, added peer activation when it appears and &#10;communication is required instead of waiting for timed detection" />
     <MESSAGE value="Included Miner in Framework, enhanced visualiser, streamlined main()" />
     <MESSAGE value="Wallet database, plus wallet creation and wallet basic selection, basic visualisation movement" />
@@ -782,7 +782,8 @@
     <MESSAGE value="Miner linked to wallet to have always same address even after restart" />
     <MESSAGE value="minor bugfix wallet (include sha256), and coms with 1 peers" />
     <MESSAGE value="Complete structure and initial functionality for GenesisBlock" />
-    <option name="LAST_COMMIT_MESSAGE" value="Complete structure and initial functionality for GenesisBlock" />
+    <MESSAGE value="Genesis generation completed, hardened chain init in main, set PDPCCoin" />
+    <option name="LAST_COMMIT_MESSAGE" value="Genesis generation completed, hardened chain init in main, set PDPCCoin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -821,11 +822,6 @@
           <url>file://$PROJECT_DIR$/project/nspec/wallet/wallet.py</url>
           <line>223</line>
           <option name="timeStamp" value="743" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py</url>
-          <line>54</line>
-          <option name="timeStamp" value="789" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -1243,8 +1239,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="54" column="56" selection-start-line="54" selection-start-column="56" selection-end-line="54" selection-end-column="56" />
+        <state relative-caret-position="401">
+          <caret line="256" column="77" selection-start-line="256" selection-start-column="76" selection-end-line="256" selection-end-column="77" />
           <folding>
             <element signature="e#0#63#0" expanded="true" />
           </folding>

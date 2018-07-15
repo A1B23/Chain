@@ -21,7 +21,7 @@ class transactions:
           "transactions": []
         }
         if (len(address) != len(defAdr)):
-            errMsg("Inavlid Address Len",400)
+            errMsg("Inavlid Address Len")
         response = self.getPendTXByAddress(address)
         # if a given hash is found already, no other exists, else keep searching
         #there is no pending, so return all
@@ -66,7 +66,7 @@ class transactions:
 
     def getPendingTX(self,hash):
         if ((hash != "") and (len(hash) != len(defHash))):
-            return errMsg("Invalid Hash Len",400)
+            return errMsg("Invalid Hash Len")
         return setOK(self.getPendTXByHash(hash))
 
 
@@ -88,7 +88,7 @@ class transactions:
 
     def getTXForHash(self,hash):
         if (len(hash) != len(defHash)):
-            return errMsg("Invalid Hash Len", 400)
+            return errMsg("Invalid Hash Len")
         response = self.getPendTXByHash(hash)
         # if a given hash is found already, no other exists, else keep searching
         if (len(hash) == 0) or (len(response) == 0):

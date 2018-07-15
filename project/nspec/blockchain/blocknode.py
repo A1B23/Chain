@@ -53,7 +53,7 @@ class blockChainNode:
                 ret = self.c_blockchainHandler.verifyThenAddBlock(block)
                 if (len(ret) > 0):
                     # TODO revert if loading failed!?!?!
-                    return errMsg(ret, 400)
+                    return errMsg(ret)
 
         m_pendingTX.clear()
         m_pendingTX.update(sysIn['m_pendingTX'])
@@ -114,7 +114,7 @@ class blockChainNode:
     def minerFoundSolution(self, minerSolution):
         colErr = checkSameFields(minerSolution, m_minerFoundNonce, True)
         if colErr != "":
-            return errMsg(colErr, 400)
+            return errMsg(colErr)
 
         #miner does not say who he is, so need to find the match in blockDataHash
         #which includes the correct address
@@ -134,12 +134,12 @@ class blockChainNode:
             sol = minerSolution['blockHash']
             dif = known['difficulty']
             if (len(sol) < dif) or (sol[:dif] != ("0" * dif)):
-                return errMsg("Submitted block hash does not fulfill difficulty ", 400)
+                return errMsg("Submitted block hash does not fulfill difficulty ")
 
             # calculate hash based on nonce and then compare
             blockHash = makeMinerHash(minerSolution)
             if (blockHash != minerSolution['blockHash']):
-                return errMsg("Incorrect block hash", 400)
+                return errMsg("Incorrect block hash")
 
 
             # TODO timestamp must be bigger than when the candidate was sent, nut
@@ -176,7 +176,7 @@ class blockChainNode:
         if len(minerAddress) > 0:
             return setOK("Block accepted, reward paid: "+str(known['expectedReward'])+" microcoins")
 
-        return errMsg(colErr, 400)
+        return errMsg(colErr)
 
 
 

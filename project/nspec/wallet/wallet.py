@@ -26,13 +26,13 @@ class wallet:
     def createWallet(self, json):
         wal = json['name']
         if (self.hasWallet(wal)):
-            return errMsg("Creating Wallet '" + wal + "' failed.", 400)
+            return errMsg("Creating Wallet '" + wal + "' failed.")
         return self.addKeysToWallet(json, wal)
 
     def createKeys(self, json):
         wal = json['name']
         if (not self.hasWallet(wal)):
-            return errMsg("Wallet '" + wal + "' not found.", 400)
+            return errMsg("Wallet '" + wal + "' not found.")
         cmd = "SELECT DISTINCT KName from Wallet WHERE User='"+json['user']+"' AND WName='"+wal+"' AND ("
         knames = ""
         pattern = re.compile(regexWallet)
@@ -41,7 +41,7 @@ class wallet:
                 if (len(knames)>0):
                     knames = knames + " OR "
                 if (not pattern.match(json['keyNames'][idx])):
-                    return errMsg("Invalid key name, use a-z, aA-Z and numbers only.", 400)
+                    return errMsg("Invalid key name, use a-z, aA-Z and numbers only.")
                 knames = knames + "KName='" + json['keyNames'][idx] + "'"
         if (len(knames)>0):
             cmd = cmd + knames + ")"
@@ -50,7 +50,7 @@ class wallet:
                 cmd = "Duplicate name(s):"
                 for nam in rpl:
                     cmd = cmd + nam + ","
-                return errMsg(cmd + " no key(s) generated", 400)
+                return errMsg(cmd + " no key(s) generated")
 
         return self.addKeysToWallet(json, wal)
 
@@ -124,7 +124,7 @@ class wallet:
                 return setOK(respText)
             else:
                 return errMsg(respText['errorMsg'], respCode)
-        return errMsg("Invalid parameters provided", 400)
+        return errMsg("Invalid parameters provided")
 
 
     def getAllKeys(self, params):
@@ -133,7 +133,7 @@ class wallet:
             wal = params['wallet']
             pattern = re.compile(regexWallet)
             if (not pattern.match(wal)):
-                return errMsg("Invalid wallet name.", 400)
+                return errMsg("Invalid wallet name.")
 
             cmd = "SELECT"
             sel = False
@@ -159,7 +159,7 @@ class wallet:
             return setOK({"keyList": self.doSelect(cmd)})
 
         except Exception:
-            return errMsg("Collecting keys for wallet " + wal + " failed.", 400)
+            return errMsg("Collecting keys for wallet " + wal + " failed.")
 
 
     def getDataFor(self, keyRef, wallet, limit, user):
@@ -190,9 +190,9 @@ class wallet:
             user = params['user']
             pattern = re.compile(regexWallet)
             if (not pattern.match(fromWallet)):
-                return errMsg("Invalid source wallet name", 400)
+                return errMsg("Invalid source wallet name")
             if (not self.hasWallet(fromWallet)):
-                return errMsg("Invalid source wallet name", 400)
+                return errMsg("Invalid source wallet name")
             #TODO use PW to encrypt/decrypt keys!!!!
             pw = params['walletPW'].strip()
             msg = params['msg'].strip()
@@ -206,9 +206,9 @@ class wallet:
                     recAddress = public_key_compressed_to_address(finalAddress[1])
             else:
                 if (not pattern.match(toWallet)):
-                    return errMsg("Invalid destination wallet name", 400)
+                    return errMsg("Invalid destination wallet name")
                 if (not self.hasWallet(toWallet)):
-                    return errMsg("Invalid destination wallet name", 400)
+                    return errMsg("Invalid destination wallet name")
                 keys = self.getDataFor(finalAddress, toWallet, "address", user)
                 recAddress = keys[0]
             keys = self.getDataFor(keyref, fromWallet, "", user)
@@ -220,18 +220,18 @@ class wallet:
                 senderAddr = keys[4]
                 colErr = verifyAddr(senderAddr, senderPK) + verifyAddr(recAddress)
                 if len(colErr) > 0:
-                    return errMsg(colErr, 400)
+                    return errMsg(colErr)
                 signedTX, TxExpectedHash = self.signTx(privKey, recAddress, msg, value, fee, senderAddr, senderPK)
                 #TODO do we want to verify the TX hash somehow after we received the reply from node?
                 resps = c_peer.sendPOSTToPeers("transactions/send", signedTX)
                 if len(resps) == 0:
-                    return errMsg("No peer reachable, please retry again or check peer settings...", 400)
+                    return errMsg("No peer reachable, please retry again or check peer settings...")
                 #TODO should we compare all replies??? Not really??? Just take first one?
                 resp = resps[0].json()
                 return setOK(resp)
-            return errMsg("Payment/transfer failed due to parameter for keys", 400)
+            return errMsg("Payment/transfer failed due to parameter for keys")
         except Exception:
-            return errMsg("Payment/transfer failed due to parameter error", 400)
+            return errMsg("Payment/transfer failed due to parameter error")
 
 
     def signTx(self, priv_key_hex, receiver_addr, msg, value,fee, pub_addr, pub_key_compressed):

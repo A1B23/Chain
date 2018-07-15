@@ -29,8 +29,11 @@ class blockchain:
         return jsonify(response), 200
 
     def initChain(self):
-        # TODO the genesis block TX is still missing in balances, which shows how many coins went to faucet!!!!
         m_Blocks.clear()
+        m_balHistory.clear()
+        m_pendingTX.clear()
+        m_AllBalances.clear()
+        m_BufferMinerCandidates.clear()
 
         m_info['chainId'] = m_genesisSet[useNet]['blockHash']
         m_info['currentDifficulty'] = m_genesisSet[useNet]['difficulty']
@@ -38,16 +41,14 @@ class blockchain:
         m_info['cumulativeDifficulty'] = m_info['currentDifficulty']
         m_info['confirmedTransactions'] = len(m_genesisSet[useNet]['transactions'])
         m_info['pendingTransactions'] = 0
-        m_balHistory.clear()
 
-        m_pendingTX.clear()
-        m_AllBalances.clear()
-        m_BufferMinerCandidates.clear()
-        addNewRealBalance(defAdr, 0)
+        #addNewRealBalance(defAdr, 0)
         err = verifyBlockAndAllTX(m_genesisSet[useNet], True)
         if len(err) > 0:
             print("Ooops, it appears that the genesis Block is not correct, please fix...  "+err)
             sys.exit(-1)
+
+        #the genesis block TX shows how many coins went to faucet and to donors
         err = confirmUpdateBalances(m_genesisSet[useNet]['transactions'], 0)
         if len(err) > 0:
             print("Ooops, it appears that the genesis Block is not correct, please fix... " + err)
@@ -191,16 +192,16 @@ class blockchain:
         m, l, f = checkRequiredFields(blockInfo, m_informsPeerNewBlock, [], False)
         if (len(m) == 0) and (l == 0):
             if blockInfo['blocksCount'] < len(m_Blocks):
-                return errMsg("Chain shorter than current, current is:" +str(len(m_Blocks)), 400)
+                return errMsg("Chain shorter than current, current is:" +str(len(m_Blocks)))
             if blockInfo['blocksCount'] == len(m_Blocks):
                 if blockInfo['cumulativeDifficulty'] < m_stats['m_cumulativeDifficulty']:
-                    return errMsg("Chain difficulty lower current, current is:" + str(m_stats['m_cumulativeDifficulty']), 400)
+                    return errMsg("Chain difficulty lower current, current is:" + str(m_stats['m_cumulativeDifficulty']))
                 elif blockInfo['cumulativeDifficulty'] == m_stats['m_cumulativeDifficulty']:
                     # Note: we ignore timestamp and use the other criterioa to settle
                     # TODO first compare the length of TX, longer wins
                     # TODO else compare the value involved
                     # if still not then just let the future decideor what to resolve direct conflict?
-                    return errMsg("Chain difficulty equal current, current is:" + str(m_stats['m_cumulativeDifficulty']), 400)
+                    return errMsg("Chain difficulty equal current, current is:" + str(m_stats['m_cumulativeDifficulty']))
                 else:
                     keepBlock = m_Blocks[len(m_Blocks)-1] #keep for potential roll back!
                     del m_Blocks[len(m_Blocks)-1]
@@ -215,7 +216,7 @@ class blockchain:
             threadx.start()
             return setOK("Thank you for the notification.")
         else:
-            return errMsg("Invalid block structure", 400)
+            return errMsg("Invalid block structure")
 
 
     def verifyThenAddBlock(self, block):
@@ -253,4 +254,4 @@ class blockchain:
         blk = self.getBlockByNumber(blockNr)
         if len(blk) > 0:
             return setOK(blk)
-        return errMsg('BlockNumber not valid or not existent: '+str(blockNr), 400)
+        return errMsg('BlockNumber not valid or not existent: '+str(blockNr))

@@ -492,11 +492,11 @@ class peers:
         try:
             values = request.get_json()
         except Exception:
-            return errMsg("JSON not decodeable", 400)
+            return errMsg("JSON not decodeable")
         #check = json.loads(values)
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)
         if len(m) > 0:
-            return errMsg("Missing field 'peerUrl': " + str(values), 400)
+            return errMsg("Missing field 'peerUrl': " + str(values))
         newNode = values['peerUrl']
         peers = m_cfg['peers']
         for k in peers:
@@ -505,9 +505,9 @@ class peers:
         if self.addPeer(newNode, False):
             if self.checkPeerAliveAndValid(newNode) is False:
                 del m_cfg['peers'][newNode]
-                return errMsg("Invalid or not connected peer/chain: " + newNode, 400)
+                return errMsg("Invalid or not connected peer/chain: " + newNode)
             return setOK({'message': 'Connected to peer: '+newNode})
-        return errMsg("Invalid peer/chain/recursion: " + newNode, 400)
+        return errMsg("Invalid peer/chain/recursion: " + newNode)
 
     def listPeers(self):
         response = {}

@@ -108,7 +108,7 @@ def checkSameFields(check, myReference, sameLen):
     return colErr
 
 
-def errMsg(msg, code):
+def errMsg(msg, code=400):
     return jsonify({"errorMsg": msg}), code
 
 
