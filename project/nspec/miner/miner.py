@@ -52,8 +52,12 @@ def isDataValid(resp_text):
         print("Wrong reward address")
         return False
 
-    if (len(defHash) != len(resp_text['blockDataHash']) or (resp_text['expectedReward']< minBlockReward)):
-        print("Wrong Hash or too low expectedRewards")
+    if len(defHash) != len(resp_text['blockDataHash']):
+        print("Wrong Hash length in blockDataHash"+resp_text['blockDataHash'])
+        return False
+
+    if resp_text['expectedReward'] < minBlockReward:
+        print("Wrong Hash or too low expectedRewards: " + str(resp_text['expectedReward']))
         return False
 
     if resp_text['transactionsIncluded'] <= 0:

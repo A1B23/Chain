@@ -17,7 +17,7 @@ class transactions:
     def getTXForAddress(self ,address):
         #TODO move to models
         reply = {
-          "address": "44fe0696beb6e24541cc0e8728276c9ec3af2a75",
+          "address": "undefined",
           "transactions": []
         }
         if (len(address) != len(defAdr)):

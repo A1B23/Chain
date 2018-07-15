@@ -3,7 +3,7 @@ from project.nspec.blockchain.modelBC import m_stats, m_completeBlock, m_Blocks,
 from project.nspec.blockchain.modelBC import m_transaction, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.pclass import c_peer
 from project.nspec.wallet.transactions import get_public_address_from_publicKey
-from project.models import re_addr, re_pubKey, defAdr, defPub, m_transaction_order, m_cfg, m_info
+from project.models import re_addr, re_pubKey, defAdr, defPub, defSig,m_transaction_order, m_cfg, m_info
 from copy import deepcopy
 from flask import jsonify
 
@@ -25,7 +25,17 @@ def verifyBasicTX(trans, isCoinBase, ref):
     if colErr == "":  # final checks
         if (len(trans['senderSignature']) != 2):
             colErr = colErr + " Invalid number of elements in 'senderSignature' field"
-        #TODO check senderSigLengths
+        else:
+            if (len(trans['senderSignature'][0]) != len(trans['senderSignature'][0])) or\
+                    (len(trans['senderSignature'][0]) != len(defSig)):
+                    colErr = colErr + " Invalid 'senderSignature' length"
+            else:
+                if isCoinBase is True:
+                    if (trans['senderSignature'][0] != defSig) or (trans['senderSignature'][1] != defSig):
+                        colErr = colErr + "Invalid senderSignature"
+                else:
+                    if (trans['senderSignature'][0] == defSig) or (trans['senderSignature'][1] == defSig):
+                        colErr = colErr + "Invalid senderSignature"
     if not isinstance(trans['fee'], int):
         colErr = colErr + "Fees must be integer, you sent: " + str(trans['fee'])
     else:
@@ -38,9 +48,9 @@ def verifyBasicTX(trans, isCoinBase, ref):
     if not isinstance(trans['value'], int):
         colErr = colErr + "Value must be integer, you sent: " + str(trans['value'])
     else:
-        #TODO confirm that 0 value transactions are allowed per slides
+        # slide 39 confirm that 0 value transactions are allowed
         if (trans['value'] < 0):
-            colErr = colErr + "Minimun value 0 micro-coins, you sent: " + str(trans['value'])
+            colErr = colErr + "Minimum value 0 micro-coins, you sent: " + str(trans['value'])
     if isCoinBase is True:
         # TODO complete other coinbase checks
         colErr = colErr + verifyPubKey(trans['senderPubKey'], True)
@@ -84,7 +94,8 @@ def verifyPubKey(pubKey, isCoinBase):
 
 
 def verifyBlockAndAllTX(block, isGenesis):
-    m, l, f = checkRequiredFields(block, m_completeBlock, [],False)
+    #make sure block has all fields an dthe corrcet chanId
+    m, l, f = checkRequiredFields(block, m_completeBlock, ['chainId'], False)
     if (block['index']==0):
         #special case for genesis bloc
         if (len(m) != 1) or (m[0] != "prevBlockHash"):
@@ -103,13 +114,13 @@ def verifyBlockAndAllTX(block, isGenesis):
     #TODO check the blocks time is greater than the last one
     # check the index of the block is correct, skip else and abort
     if (block['index'] == len(m_Blocks)):
-        isCoinBase = True
+        isCoinBase = True   #Setting otrue here ensures that there is at least a conbase there and not skipped
         for trans in block['transactions']:
             ret = verifyBasicTX(trans, isCoinBase, m_staticTransactionRef)
             #TODO add TX to block has!
             if (len(ret)>0):
                 return ret
-            isCoinBase = isGenesis
+            isCoinBase = isGenesis  #geneis block verification only has coinbase like entries
     return ""
 
 def receivedNewTransaction(trans, fromPeer, share):
@@ -134,7 +145,7 @@ def receivedNewTransaction(trans, fromPeer, share):
 
         #Puts the transaction in the "pending transactions" pool
         m_pendingTX.update({trans['transactionDataHash']:deepcopy(trans)})
-        trans["transferSuccessful"]= True
+        trans["transferSuccessful"] = True
         trans["minedInBlockIndex"] = len(m_Blocks)
         m_candidateBlock['transactions'].append(deepcopy(trans))
         m_info['pendingTransactions'] = len(m_pendingTX)

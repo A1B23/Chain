@@ -1,6 +1,5 @@
-from project.nspec.blockchain.modelBC import m_AllBalances, m_candidateBlockBalance, m_staticBalanceInfo, \
-    m_pendingTX, m_TemplateSingleBalance
-from project.models import defAdr
+from project.nspec.blockchain.modelBC import m_AllBalances, m_staticBalanceInfo, m_pendingTX
+from project.models import defAdr, m_TemplateSingleBalance
 from project.utils import setOK, errMsg
 from copy import deepcopy
 
@@ -16,7 +15,7 @@ def createNewBalance(blockNo):
     return newInfo
 
 
-def updateConfirmedBalance(txList):
+def updateConfirmedBalance(txList, isGenesis):
     tempBalance = {}
     for tx in txList:
         afrom, ato, value, total, txhash = tx['from'], tx['to'], tx['value'], (tx['value']+tx['fee']), tx['transactionDataHash']
@@ -24,38 +23,24 @@ def updateConfirmedBalance(txList):
         # or after receiving confirmed block
         if not afrom in tempBalance:
             if not afrom in m_AllBalances:
-                #TODO remove later, now only for testing we allow any address
-                addNewRealBalance(afrom,0)
-                m_AllBalances[afrom]['curBalance'] = 1000
-                #TODO after test finished, bring in the return again1!!!
-                #if (isNewTx == True):
-                #   tx["transferSuccessful"] = False
-                #return False
-
+                if isGenesis is False:
+                    #TODO this needs to be tested after we removde free coins for all
+                   txList[tx]["transferSuccessful"] = False
+                   if isGenesis is True:
+                        return {}
+                   continue #TODO continue or error??
+                if afrom != defAdr:
+                    return {}
+                addNewRealBalance(afrom, 0)
             tempBalance.update({afrom: m_AllBalances[afrom]['curBalance']})
 
         #special case for coinbase needed
         if (afrom != defAdr) and (tempBalance[afrom] < total):
-            # if (isNewTx == True):
-            #     tx["transferSuccessful"] = False
-            # elif (tx["transferSuccessful"] == True):
-            return {} #inidcate invalid block, as all TX are supposed to be ok at this stage
+            return {} #indicate invalid block, as all TX are supposed to be ok at this stage
 
         tempBalance[afrom] = tempBalance[afrom] - total #reduce by value + fee
 
-        # pend = 0
-        # if (txhash in m_pendingTX):
-        #     # If this is from a block, we reduce pending amount
-        #     pend = value
-        #
-        # if (isNewTx == True):
-        #     # As this is new TX outside block, it adds pending amount to recipients instead of reducing
-        #     pend = -pend
-
         if not ato in m_AllBalances:
-            # if (isNewTx):
-            #     addNewRealBalance(ato, -1)
-            # else:
             addNewRealBalance(ato, tx['minedInBlockIndex'])
             #whatever the default, make sure to set 0
             m_AllBalances[ato]['curBalance'] = 0
@@ -67,20 +52,20 @@ def updateConfirmedBalance(txList):
         # m_candidateBlockBalance[ato][1] = m_candidateBlockBalance[ato][1] - pend
     return tempBalance
 
-def confirmUpdateBalances(txList, blockIndex):
+def confirmUpdateBalances(txList, isGenesis):
     # m_candidateBlockBalance.clear()
-    err = confirmUpdateBalancesNow(txList, blockIndex)
+    err = confirmUpdateBalancesNow(txList, isGenesis)
     # m_candidateBlockBalance.clear()
     return err
 
 
-def confirmUpdateBalancesNow(txList, blockIndex):
+def confirmUpdateBalancesNow(txList, isGenesis):
     #TODO remove block index
     # entering here we know the structure of the TX are all ok, so settle only balances
     # first we update the buffer info, and only if all pass
     # then update the actual balances involved
     # theoretically if it is our own block, all should be correct, but we check anyway
-    updBalance = updateConfirmedBalance(txList)
+    updBalance = updateConfirmedBalance(txList,isGenesis)
     if len(updBalance) == 0:
         return "Block rejected, invalid TX detected in: " + tx['transactionDataHash']
 

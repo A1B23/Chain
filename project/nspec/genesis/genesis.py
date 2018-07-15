@@ -126,7 +126,7 @@ class genesis:
             ret = verifyBlockAndAllTX(gen, True)
             if len(ret) > 0:
                 return errMsg(ret)
-            ret = updateConfirmedBalance(gen['transactions'])
+            ret = updateConfirmedBalance(gen['transactions'], True)
             fin = {"balances": ret, "genesis": gen}
             fnam = "Genesis_"+m_data['chainRef']+".json"
             with open(fnam, 'w') as outfile:

@@ -1,7 +1,7 @@
 from project.nspec.blockchain.verify import verifyBlockAndAllTX
-from project.nspec.blockchain.balance import m_AllBalances, addNewRealBalance, confirmUpdateBalances
+from project.nspec.blockchain.balance import m_AllBalances, confirmUpdateBalances
 from threading import Thread
-from project.models import useNet, m_info, m_cfg, defAdr
+from project.models import useNet, m_info, m_cfg
 from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_candidateBlockBalance, m_static_emptyBlock
 from project.nspec.blockchain.modelBC import m_stats #, m_peerToBlock
@@ -49,7 +49,7 @@ class blockchain:
             sys.exit(-1)
 
         #the genesis block TX shows how many coins went to faucet and to donors
-        err = confirmUpdateBalances(m_genesisSet[useNet]['transactions'], 0)
+        err = confirmUpdateBalances(m_genesisSet[useNet]['transactions'], True)
         if len(err) > 0:
             print("Ooops, it appears that the genesis Block is not correct, please fix... " + err)
             sys.exit(-1)
@@ -226,7 +226,7 @@ class blockchain:
             return err
 
         #structures are all corrcet so now check balances and update them
-        err = confirmUpdateBalances(block['transactions'], block['index'])
+        err = confirmUpdateBalances(block['transactions'], False)
         if len(err) > 0:
             return err
         # clear all transactions involved in the block

@@ -1,4 +1,4 @@
-from project.nspec.blockchain.modelBC import m_genesisSet
+from project.nspec.blockchain.modelBC import m_genesisSet, m_completeBlock
 from project.utils import genNodeID, isBCNode, isWallet, isMiner, isGenesis
 from project.classes import c_blockchainNode, c_genesisInterface
 from project.nspec.blockchain.verify import initPendingTX
@@ -12,6 +12,7 @@ import sys
 from project.nspec.miner.miner import initMiner
 import sqlite3
 from project.nspec.wallet.modelW import m_db
+from copy import deepcopy
 
 
 def finalise(host, peer, port, type):
@@ -21,12 +22,9 @@ def finalise(host, peer, port, type):
     #temporarily switch off any delay to allow peer initialisation to go ahead without delay
     m_cfg['canTrack'] = False
     c_peer.registerPotentialPeer(peer, port)
-    thread = Thread(target=c_peer.checkEveryXSecs)
-    thread.start()
-    while m_cfg['statusPeer'] == True:
-        sleep(1)
+
     if isBCNode() is True:
-        c_blockchainNode.c_blockchainHandler.resetChain()
+        c_blockchainNode.c_blockchainHandler.initChain()
         #threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewBlock)
         #threadp.start()
         #thread = Thread(target=initPendingTX)
@@ -40,7 +38,10 @@ def finalise(host, peer, port, type):
     elif isGenesis() is True:
         c_genesisInterface.initGenesis()
 
-
+    thread = Thread(target=c_peer.checkEveryXSecs)
+    thread.start()
+    while m_cfg['statusPeer'] == True:
+        sleep(1)
 
     m_cfg['canTrack'] = useVis
 
@@ -59,15 +60,15 @@ def main(type):
     m_cfg['type'] = type
     parser = ArgumentParser()
     host, port, peer = init(parser)
-    thread = Thread(target=finalise, args=(host,peer, port, type))
+    thread = Thread(target=finalise, args=(host, peer, port, type))
     thread.start()
     app.run(host=host, port=port, threaded=True)
 
 
 def init(parser):
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
-    parser.add_argument('-hip', '--host', default="127.0.0.52", help='hostname/IP')
-    parser.add_argument('-con', '--connect', default="2", help='list of 127.0.0.x peers to send messages')
+    parser.add_argument('-hip', '--host', default="127.0.0.2", help='hostname/IP')
+    parser.add_argument('-con', '--connect', default="4,5", help='list of 127.0.0.x peers to send messages')
     parser.add_argument('-cID', '--chainID', default="", help='identify net by genesis blockHash')
     parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: NAPCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
@@ -110,6 +111,10 @@ def init(parser):
         m_info['about'] = "PDPCCoin"
     if useNet == 2:
         m_info['about'] = "NAPCoin"
+
+    m_completeBlock.clear()
+    m_completeBlock.update(deepcopy(m_genesisSet[useNet])) # this is for refernce and ensures corrcet chainId!
+    m_completeBlock.update({"prevBlockHash": 0})
 
     if args.canTrack == "Y":
         m_cfg['canTrack'] = True

@@ -1,4 +1,4 @@
-from project.utils import checkRequiredFields, isABCNode, setOK, errMsg
+from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode
 from threading import Thread
 from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
 from project.nspec.blockchain.modelBC import m_Blocks #, m_peerToBlock
@@ -353,7 +353,7 @@ class peers:
             #TODO if we got peer recommended, check that is it the same nodeId
             s1 = self.doGET(peer + "/info")
             reply = json.loads(s1.text)
-            m, l, f = checkRequiredFields(reply, m_info, ["chainRef", "about"], False)
+            m, l, f = checkRequiredFields(reply, m_info, ["chainId", "about"], False)
             if (len(f) > 0) or (len(m) > 0):  # we skip to check any additional fields, is that OK
                 print("Peer " + peer + " reply not accepted, considered not alive")
                 # as it is invalid peer, don't try again
@@ -368,10 +368,11 @@ class peers:
             #         return {'wrongID': True}
             if not self.ensureBCNode(reply['type']):
                 return {'wrongType': True}
-            if reply['blocksCount'] > len(m_Blocks):
-                #m_peerToBlock['addBlock'] = peer
-                threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer(), args=(peer,))
-                threadp.start()
+            if isBCNode():
+                if reply['blocksCount'] > len(m_Blocks):
+                    #m_peerToBlock['addBlock'] = peer
+                    threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer(), args=(peer,))
+                    threadp.start()
             return reply
         except Exception:
             return {'fail': True}

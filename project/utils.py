@@ -171,8 +171,9 @@ def makeBlockDataHash(TXBlock, isGenesis):
                 forHash = forHash + "],"
             else:
                 #genesis block skips a few fields, others must have
-                if (isGenesis is False) or (txs in TXBlock):
-                    forHash = forHash + addItems(txs, TXBlock[txs])
+                if (isGenesis is False):
+                    if (txs in TXBlock):
+                        forHash = forHash + addItems(txs, TXBlock[txs])
 
         ret = sha256StrToHex(forHash[:-1] + "}")
         return ret
