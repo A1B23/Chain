@@ -8,7 +8,7 @@ m_pendingTX = {}
 m_BufferMinerCandidates = {}
 minBlockReward = 50000
 maxSameBlockPerMiner = 5
-m_peerToBlock = {}
+#m_peerToBlock = {}
 
 
 m_stats = {
@@ -54,11 +54,11 @@ m_staticTransactionRef = {
     "transactionDataHash": "needtocalculatethehashhere",
     "senderSignature": [defSig, defSig],
     "minedInBlockIndex": 0,
-    "transferSuccessful": True,
+    "transferSuccessful": True
 }
 
 m_staticBalanceInfo = {
-    "curBalance": -1,
+    "curBalance": 0,
     "createdInBlock": -1,
     "confirm": []
 }
@@ -132,7 +132,67 @@ m_genesisSet = [
                     "nonce":0,"dateCreated":"2018-01-01T00:00:00.000Z",
                     "blockHash":"c6da93eb4249cb5ff4f9da36e2a7f8d0d61999221ed6910180948153e71cc47f"
     },
-    #NAPCoin
+    #new PDPCCoin generated with 2 faucet and two sponsors
+{
+    "blockDataHash": "f1bbf9dc627a813c1ee02dcbd2f094a9d7e59aec4cda4bb2a2b85bd917756770",
+    "blockHash": "a74bab3e391e07dca560847f261285635be36fab40716053b0ea4067be69ae27",
+    "dateCreated": "2018-07-15T10:59:40.720Z",
+    "difficulty": 0,
+    "index": 0,
+    "minedBy": "0000000000000000000000000000000000000000",
+    "nonce": 0,
+    "transactions": [
+      {
+        "data": "Genesis Faucet: PDPC faucet 1",
+        "dateCreated": "2018-07-15T10:59:40.532Z",
+        "fee": 0,
+        "from": "0000000000000000000000000000000000000000",
+        "minedInBlockIndex": 0,
+        "senderPubKey": "00000000000000000000000000000000000000000000000000000000000000000",
+        "senderSignature": [
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "to": "f8a32f5bc22d7557c23e498c59b76d7f68d1bff7",
+        "transactionDataHash": "fb5bd02314b50a5e78e8c4a4debb521c502262566e87576a3e2832bc3ac5227e",
+        "transferSuccessful": True,
+        "value": 1000000000
+      },
+      {
+        "data": "Genesis Faucet: PDPC faucet 2",
+        "dateCreated": "2018-07-15T10:59:40.720Z",
+        "fee": 0,
+        "from": "0000000000000000000000000000000000000000",
+        "minedInBlockIndex": 0,
+        "senderPubKey": "00000000000000000000000000000000000000000000000000000000000000000",
+        "senderSignature": [
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "to": "6d8b355740dd9ae894251eb67a78a60ec5c7c9b3",
+        "transactionDataHash": "a64f4a9b1f267525b00ad4477c6c551a2cb5929962465dea7c546a17e4ef8704",
+        "transferSuccessful": True,
+        "value": 1000000
+      },
+      {
+        "data": "Genesis TX: Lucky draw winner if ever found",
+        "dateCreated": "2018-07-15T10:59:40.720Z",
+        "fee": 0,
+        "from": "0000000000000000000000000000000000000000",
+        "minedInBlockIndex": 0,
+        "senderPubKey": "00000000000000000000000000000000000000000000000000000000000000000",
+        "senderSignature": [
+          "0000000000000000000000000000000000000000000000000000000000000000",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "to": "13a1e69b6176052fcc4a1248f1c5a91dea308ca9",
+        "transactionDataHash": "1fe10e3a7418257fc59b00f81f382859e8ffccd4cacd394e7f25e02c5fd827aa",
+        "transferSuccessful": True,
+        "value": 1112
+      }
+    ]
+  },
+    #OldNAPCoin
     {
         "index":0,
         "transactions": [{

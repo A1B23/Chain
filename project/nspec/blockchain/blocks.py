@@ -1,14 +1,14 @@
 from project.nspec.blockchain.verify import verifyBlockAndAllTX
 from project.nspec.blockchain.balance import m_AllBalances, addNewRealBalance, confirmUpdateBalances
 from threading import Thread
-from time import sleep
 from project.models import useNet, m_info, m_cfg, defAdr
 from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_candidateBlockBalance, m_static_emptyBlock
-from project.nspec.blockchain.modelBC import m_stats, m_peerToBlock
+from project.nspec.blockchain.modelBC import m_stats #, m_peerToBlock
 from project.utils import checkRequiredFields, isSameChain, setOK, errMsg
 from project.pclass import c_peer
 from copy import deepcopy
+import sys
 
 from flask import jsonify
 
@@ -31,10 +31,6 @@ class blockchain:
     def initChain(self):
         # TODO the genesis block TX is still missing in balances, which shows how many coins went to faucet!!!!
         m_Blocks.clear()
-        if useNet == 0:
-            m_info['about'] = "SoftUniChain/0.9-csharp"
-        if useNet == 1:
-            m_info['about'] = "NAPCoin"
 
         m_info['chainId'] = m_genesisSet[useNet]['blockHash']
         m_info['currentDifficulty'] = m_genesisSet[useNet]['difficulty']
@@ -48,23 +44,25 @@ class blockchain:
         m_AllBalances.clear()
         m_BufferMinerCandidates.clear()
         addNewRealBalance(defAdr, 0)
-        err = self.verifyThenAddBlock(m_genesisSet[useNet])
+        err = verifyBlockAndAllTX(m_genesisSet[useNet], True)
         if len(err) > 0:
-            #TODO make sure this does not happen
-            print("Ooops, it appears that the genesis Block is not correct, please fix... for test we continue despite "+err)
-            m_Blocks.append(m_genesisSet[useNet])
-
-
-    def loopNewBlock(self):
-        #this loop is not nice, because new block should proagate faster when a new peer is found,
-        # but due to import issues in python, the link between peer and blocks is disrupted
-        # so this is a workaround
-        while m_cfg['shutdown'] is False:
-            if "addBlock" in m_peerToBlock:
-                peer = m_peerToBlock['addBlock']
-                del m_peerToBlock['addBlock']
-                self.getMissingBlocksFromPeer(peer)
-            sleep(1)
+            print("Ooops, it appears that the genesis Block is not correct, please fix...  "+err)
+            sys.exit(-1)
+        err = confirmUpdateBalances(m_genesisSet[useNet]['transactions'], 0)
+        if len(err) > 0:
+            print("Ooops, it appears that the genesis Block is not correct, please fix... " + err)
+            sys.exit(-1)
+        m_Blocks.append(deepcopy(m_genesisSet[useNet]))
+    # def loopNewBlock(self):
+    #     #this loop is not nice, because new block should proagate faster when a new peer is found,
+    #     # but due to import issues in python, the link between peer and blocks is disrupted
+    #     # so this is a workaround
+    #     while m_cfg['shutdown'] is False:
+    #         if "addBlock" in m_peerToBlock:
+    #             peer = m_peerToBlock['addBlock']
+    #             del m_peerToBlock['addBlock']
+    #             self.getMissingBlocksFromPeer(peer)
+    #         sleep(1)
 
 
     def resetChain(self):
@@ -222,7 +220,7 @@ class blockchain:
 
     def verifyThenAddBlock(self, block):
         #check structure of block and TX, but not yet the balances
-        err = verifyBlockAndAllTX(block)
+        err = verifyBlockAndAllTX(block, False)
         if len(err) > 0:
             return err
 

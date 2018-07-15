@@ -4,8 +4,7 @@ import json
 import datetime
 import hashlib
 from flask import jsonify
-from project.models import defNodeID
-from project.models import m_info
+from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash
 
 #Call this for debuggin print to screen which needs to be removed at the end
 def d(mes):
@@ -34,7 +33,7 @@ def getFutureTimeStamp(addedTime):
 
 def getTime():
     timestamp = datetime.datetime.now().isoformat()
-    timestamp = timestamp + "Z"
+    timestamp = timestamp[:timestamp.index(".")+4] + "Z"
     return timestamp
 
 
@@ -122,6 +121,7 @@ def setOK(data):
 def isSameChain(detail):
     return True
     #TODO adjust this return (detail['about'] == m_info['about']) and (detail['chainId'] == m_info['chainId'])
+    #carefule of difference between chainref and chainID
 
 
 def addItem(element):
@@ -156,6 +156,28 @@ def putDataInOrder(order, data):
 def makeMinerHash(candidate):
     data = candidate['blockDataHash'] + "|" + candidate['dateCreated'] + "|" + str(candidate['nonce'])
     return hashlib.sha256(data.encode("utf8")).hexdigest()
+
+def makeBlockDataHash(TXBlock, isGenesis):
+    # now the block is done, hash it for miner
+    # need to calculate now the hash for this specific miner based candidateBlock
+    # the hash for the miner has to be in specific order of data
+    forHash = "{"
+    try:
+        for txs in m_candidateMiner_order:
+            if txs == 'transactions':
+                forHash = forHash + '"' + txs + '":['
+                for tx in TXBlock['transactions']:
+                    forHash = forHash + putDataInOrder(m_txorderForBlockHash, tx)
+                forHash = forHash + "],"
+            else:
+                #genesis block skips a few fields, others must have
+                if (isGenesis is False) or (txs in TXBlock):
+                    forHash = forHash + addItems(txs, TXBlock[txs])
+
+        ret = sha256StrToHex(forHash[:-1] + "}")
+        return ret
+    except Exception:
+        return "fail to create block data hash"
 
 
 

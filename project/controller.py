@@ -3,7 +3,7 @@ from flask import request, jsonify
 from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis
 import json, requests
 from project.InterfaceLocking import mainInterface
-from project.classes import c_blockchainNode
+import project.classes
 from project.pclass import c_peer
 from copy import deepcopy
 from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
@@ -79,13 +79,11 @@ def saveSys(file):
     linkInfo = {"file": file}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /info
 @app.route('/info', methods=["GET"])
 def get_info():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /debug
 @app.route('/debug', methods=["GET"])
 def debug():
     #TODO update by type
@@ -106,35 +104,25 @@ def debug_resetChain():
     while (len(m_isPOST)>1):
         if (c_MainIntf.delay("reset-chain",999) == False):
             break   #for some reason we decide to ignore the lock
-    ret = c_blockchainNode.c_blockchainHandler.resetChainReply()
+    ret = project.classes.c_blockchainNode.c_blockchainHandler.resetChainReply()
     m_isPOST.clear()
     return ret
 
-#GET /blocks
+
 @app.route('/blocks', methods=["GET"])
-def blocks():
+@app.route('/transactions/pending', methods=["GET"])
+@app.route('/transactions/confirmed', methods=["GET"])
+@app.route('/balances', methods=["GET"])
+def transactions_GET():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /blocks/{number}
 @app.route('/blocks/<int:number>', methods=["GET"])
 def blocks_getByNumber(number):
     linkInfo = {"blockNumber": number}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /transactions/pending
-@app.route('/transactions/pending', methods=["GET"])
-def transactions_pending():
-    linkInfo = {}
-    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /transactions/confirmed
-@app.route('/transactions/confirmed', methods=["GET"])
-def transactions_confirmed():
-    linkInfo = {}
-    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
-
-#GET /transactions/{TXHash}
 @app.route('/transactions/<TXHash>', methods=["GET"])
 def transactions_hash(TXHash):
     linkInfo = {"TXHash": TXHash}
@@ -150,25 +138,13 @@ def transactions_send():
         return errMsg("JSON not decodeable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-#GET /balances
-@app.route('/balances', methods=["GET"])
-def balances():
-    linkInfo = {}
-    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /address/{address}/transactions
 @app.route('/address/<address>/transactions', methods=["GET"])
-def address_transaction(address):
+@app.route('/address/<address>/balance', methods=["GET"])
+def address_bal_TX(address):
     linkInfo = {"address": address}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#GET /address/{address}/balance
-@app.route('/address/<address>/balance, methods=["GET"]')
-def address_balance(address):
-    linkInfo = {"address": address}
-    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
-
-#POST /peers/notify-new-block
 @app.route('/peers/notify-new-block', methods=['POST'])
 def peers_notifyNewBlock():
     linkInfo = {}
@@ -178,12 +154,11 @@ def peers_notifyNewBlock():
         return errMsg("JSON not decodeable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-#GET /peers
 @app.route('/peers', methods=["GET"])
 def peers():
     return c_peer.listPeers()
 
-#POST /peers/connect
+
 @app.route('/peers/connect', methods=['POST'])
 # this is invoked by user to tell me that the other node exists at IP
 def peers_connect():
@@ -194,20 +169,18 @@ def peers_connect():
         what, code = repl
         if what.status_code == 200:
             url = values['peerUrl']
-            threadx = Thread(target=c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(url,))
+            threadx = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(url,))
             threadx.start()
         return repl
     except Exception:
         return errMsg("JSON not decodeable", 400)
 
 
-#GET /mining/get-mining-job/{miner-address}
 @app.route('/mining/get-mining-job/<minerAddress>', methods=["GET"])
 def mining_getMiningJob(minerAddress):
     linkInfo = {"minerAddress": minerAddress}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
-#POST /mining/submit-mined-block
 @app.route('/mining/submit-mined-block', methods=['POST'])
 def mining_submitBlock():
     linkInfo = {}
@@ -217,7 +190,6 @@ def mining_submitBlock():
         return errMsg("JSON not decodable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-#GET /debug/mine/{minerAddress}/{difficulty}
 @app.route('/debug/mine/<minerAddress>/<int:difficulty>', methods=["GET"])
 def debug_mining(minerAddress, difficulty):
     linkInfo = {"address": minerAddress, "difficulty": difficulty}
@@ -242,6 +214,7 @@ def index():
     if (isWallet()):
         return render_template("TabWallet" + addOn + ".html")
     if (isGenesis()):
+        project.classes.c_genesisInterface.initGenesis()
         return render_template("TabGenesis" + addOn + ".html")
 
     response = {
@@ -252,16 +225,9 @@ def index():
 
 ################## Wallet specific routes
 @app.route('/wallet/create', methods=['POST'])
-def wallet_create():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
-
 @app.route('/wallet/createKey', methods=['POST'])
-def wallet_createKey():
+@app.route('/wallet/transfer', methods=['POST'])
+def wallet_POST():
     linkInfo = {}
     try:
         values = request.get_json()
@@ -269,14 +235,6 @@ def wallet_createKey():
         return errMsg("JSON not decodeable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-@app.route('/wallet/transfer', methods=['POST'])
-def wallet_transfer():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 @app.route('/wallet/list/wallet/<user>', methods=["GET"])
 def getWallets(user):
@@ -324,14 +282,6 @@ def getWalletTx(type, wallet, user):
 
 
 ################## Geneis specific routes
-@app.route('/setID', methods=['POST'])
-def gen_setID():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
 @app.route('/viewGX', methods=['GET'])
 def gen_viewGX():
@@ -339,50 +289,18 @@ def gen_viewGX():
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 @app.route('/genFaucet', methods=['POST'])
-def gen_genFaucet():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
-
 @app.route('/useTX', methods=['POST'])
-def gen_useTX():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
-
-@app.route('/genTX', methods=['POST'])
-def gen_genTX():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
-
 @app.route('/genGX', methods=['POST'])
-def gen_genGX():
-    linkInfo = {}
-    try:
-        values = request.get_json()
-    except Exception:
-        return errMsg("JSON not decodeable", 400)
-    return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
-
 @app.route('/updGX', methods=['POST'])
-def gen_updGX():
+@app.route('/genTX', methods=['POST'])
+@app.route('/setID', methods=['POST'])
+def genesis_POST():
     linkInfo = {}
     try:
         values = request.get_json()
     except Exception:
         return errMsg("JSON not decodeable", 400)
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
-
 
 
 ################## the following two are only for testing while developing peer module

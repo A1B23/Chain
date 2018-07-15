@@ -1,10 +1,10 @@
 m_data = {
-    'chainID': "",
+    'chainRef': "",
     'TXList': []
 }
 
 m_dataInit = {
-    'chainID': "",
+    'chainRef': "",
     'TXList': []
 }
 regexWallet = "^[A-Z0-9a-z]+$"

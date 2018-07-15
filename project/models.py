@@ -56,9 +56,9 @@ m_cfg = {
 }
 
 m_info = {
-    "about": "NAPCoin",
-    "nodeId": "1a22d39b2f",
-    "chainId": 1, #indx into the coinbase set 0: Academy 1: NapCoin
+    "about": "not yet",
+    "nodeId": "not yet",
+    "chainId": -1, # is set during init to th e genesis block hash
     "nodeUrl": "m",
     "peers": 0,
     "currentDifficulty": 5,

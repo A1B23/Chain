@@ -27,8 +27,8 @@ def finalise(host, peer, port, type):
         sleep(1)
     if isBCNode() is True:
         c_blockchainNode.c_blockchainHandler.resetChain()
-        threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewBlock)
-        threadp.start()
+        #threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewBlock)
+        #threadp.start()
         #thread = Thread(target=initPendingTX)
         #thread.start()
         initPendingTX()
@@ -103,6 +103,14 @@ def init(parser):
     m_cfg['minPeers'] = args.minPeers
     m_cfg['maxPeers'] = args.maxPeers
     m_cfg['mode'] = args.mode
+
+    if useNet == 0:
+        m_info['about'] = "SoftUniChain/0.9-csharp"
+    if useNet == 1:
+        m_info['about'] = "PDPCCoin"
+    if useNet == 2:
+        m_info['about'] = "NAPCoin"
+
     if args.canTrack == "Y":
         m_cfg['canTrack'] = True
         print("Animation delay activated")

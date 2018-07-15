@@ -7,10 +7,15 @@ from time import sleep
 import re
 from flask import jsonify
 
+
+
 class mainInterface:
     c_blockInterface = chainInterface()
     c_walletInterface = walletInterface()
     c_genesisInterface = genesisInterface()
+
+    def getw(self):
+        return self.c_walletInterface
 
     def delay(self,url,type):
         #sleep a seconds or a loop etc

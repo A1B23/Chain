@@ -16,7 +16,7 @@ def createNewBalance(blockNo):
     return newInfo
 
 
-def updateConfirmedBalance(txList, isNewTx):
+def updateConfirmedBalance(txList):
     tempBalance = {}
     for tx in txList:
         afrom, ato, value, total, txhash = tx['from'], tx['to'], tx['value'], (tx['value']+tx['fee']), tx['transactionDataHash']
@@ -75,11 +75,12 @@ def confirmUpdateBalances(txList, blockIndex):
 
 
 def confirmUpdateBalancesNow(txList, blockIndex):
+    #TODO remove block index
     # entering here we know the structure of the TX are all ok, so settle only balances
     # first we update the buffer info, and only if all pass
     # then update the actual balances involved
     # theoretically if it is our own block, all should be correct, but we check anyway
-    updBalance = updateConfirmedBalance(txList, False)
+    updBalance = updateConfirmedBalance(txList)
     if len(updBalance) == 0:
         return "Block rejected, invalid TX detected in: " + tx['transactionDataHash']
 

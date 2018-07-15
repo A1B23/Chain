@@ -83,7 +83,7 @@ def verifyPubKey(pubKey, isCoinBase):
     return ""
 
 
-def verifyBlockAndAllTX(block):
+def verifyBlockAndAllTX(block, isGenesis):
     m, l, f = checkRequiredFields(block, m_completeBlock, [],False)
     if (block['index']==0):
         #special case for genesis bloc
@@ -109,7 +109,7 @@ def verifyBlockAndAllTX(block):
             #TODO add TX to block has!
             if (len(ret)>0):
                 return ret
-            isCoinBase = False
+            isCoinBase = isGenesis
     return ""
 
 def receivedNewTransaction(trans, fromPeer, share):

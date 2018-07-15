@@ -102,14 +102,12 @@
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/GET_POST.js"></script>
 
-    ChainID: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">Set</button>
-    <br />Current State: <span id="state">No Data set</span>
+    ChainRef: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">Set</button>
 
     <div class="tab maintab">
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Faucet')">Generate faucet TX</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'genTX')">Generate genesis TX</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','useTX')">Include signed TX</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','genGX')">Generate</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Faucet')">Set faucet TX</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'genTX')">Set approved TX</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','genGX')">Genesis Block/Data</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
 
         <br />
@@ -121,6 +119,7 @@
     </div>
 
     <div id="Faucet" class="tabcontent maintab">
+        This will create faucet addresses with 'free' value. Do not use for production environment, only test environment
         <table>
             <tr><td>Initial Value</td><td> <input type="text" id="initVal" value="1000000000" size="20"></td></tr>
             <tr><td>Max donation <br />per request</td><td> <input type="text" id="maxVal" value="1000" size="8"></td></tr>
@@ -131,64 +130,56 @@
                     Leave empty for public access
                 </td>
             </tr>
+            <tr><td>Short comment</td><td> <input type="text" id="fcom" value="" size="40"></td></tr>
+
         </table>
         <button class="keys" onclick="addFaucet()">Submit</button>
     </div>
 
     <div id="genTX" class="tabcontent maintab">
         <table>
-            <tr><td>Receiver's Address</td><td> <input type="text" id="gaddr" value="" size="20"></td></tr>
+            <tr><td>Receiver's Address</td><td> <input type="text" id="gAddr" value="" size="20"></td></tr>
             <tr><td>Value</td><td> <input type="text" id="gVal" value="" size="12"></td></tr>
             <tr><td>Comment</td><td> <input type="text" id="gCom" value="" size="20"></td></tr>
         </table>
         <button class="keys" onclick="genTX()">Submit</button>
     </div>
 
-    <div id="useTX" class="tabcontent maintab">
-        <table>
-            <tr>
-                <td>Provide or complete <br /> full JSON for TX</td>
-                <td>
-                    <textarea rows="16" cols="120">
-{
-    "from":"0000000000000000000000000000000000000000",
-    "to":"f3a1e69b6176052fcc4a3248f1c5a91dea308ca9",
-    "value":1000000000000,
-    "fee":0,
-    "dateCreated":"2018-01-01T00:00:00.000Z",
-    "data":"genesis tx",
-    "senderPubKey":"00000000000000000000000000000000000000000000000000000000000000000",
-    "transactionDataHash":"8a684cb8491ee419e7d46a0fd2438cad82d1278c340b5d01974e7beb6b72ecc2",
-    "senderSignature":["0000000000000000000000000000000000000000000000000000000000000000",
-                       "0000000000000000000000000000000000000000000000000000000000000000"],
-    "minedInBlockIndex":0,
-    "transferSuccessful":True
-}
-                </textarea>
-                </td>
-            </tr>
-        </table>
-        <button class="keys" onclick="useTX()">Submit</button>
-    </div>
-
-
     <div id="genGX" class="tabcontent maintab">
-        Click 'Submit' to generate the Genesis Block for the current data provided. <br />
-        The result will be shown below, and <br />
-        a Genesis Block file (name starting with the chainID) will be created.<br />
         <br />
-        <button class="keys" onclick="viewGX()">View</button> 
-        <button class="keys" onclick="updGX()">Update</button><br />
-        <textarea id="genBlock" rows="16" cols="120"></textarea><br />
+        <button class="keys" onclick="viewGX()">View Raw Data</button>
+        <button class="keys" onclick="updGX()">Update Raw data</button>
+        <button class="keys" onclick="toClipBoard('genBlock')">ClipBoard Raw data</button><br />
+        <textarea id="genBlock" rows="22" cols="80"></textarea><br />
         <button class="keys" onclick="genGX()">Submit</button><br />
 
     </div>
 
     <div id="Info" class="tabcontent maintab">
         <h3>PDPC_Coin Genesis Block Generator</h3>
-        <p>
-
-        </p>
+        The geneis block generator allows to include any number of faucets and initial TXs.<br />
+        <i>
+            The name/ID for the new blockchain must be provided, before any of the following actions are enabled.
+        </i>
+        <ul>
+            <li>
+                <b>Set Faucet</b><br />
+                Provide the details of new faucets. Multiple faucets are possible. Leave empty for production system
+            </li>
+            <li>
+                <b>Set approved TX</b><br />
+                Provide the details of sponsors, initial token owners etc.
+            </li>
+            <li>
+                <b>GenesisBlock</b><br />
+                Click 'Submit' to generate the Genesis Block for the current data provided.
+                The result will be shown below, and a Genesis Block file (name starting with the chainRef) will be created.<br />
+                You can also get and change the raw data, which was individually provided in the different tabs,
+                before generating the genesis block.<br />
+                The raw data can be copied to clipboard for saving.<br />
+                The genesis block itself is generated as a file.
+            </li>
+        </ul>
     </div>
 
 
@@ -198,79 +189,59 @@
         */
 
         user = "";
-        function updateStateInfo() {
-            $("#state").text("ChainID: " + user);
-        }
 
         function initState() {
-            //state = { "wallet": "", "key": "" };
-            //$("#wallets").val("");
-            //$('#selWallet').val("__clr");
-            //$('#walletName').val("");
             $("#genBlock").val("");
-            //$("#quickSelWallet").prop("checked", false);
-            //$("#quickSelWallet").attr("checked", false);
-            updateStateInfo();
         }
+
         $(".alert").css("display", "none");
+
         initState();
-
-
-        function h(message) {
-            return "<u>" + message + "</u>";
-        }
-
-
-        function logUser(event) {
-            if ($("#login").text() == "Set") {
-                user = $("#userName").val().trim();
-                // TODO see that it does not yet exist
-                if (user.length > 0) {
-                    $('#login').text('x');
-                    data = {
-                        "chainID": user
-                    }
-                    handlePOST("setID", data);
-                }
-            } else {
-                doAlert("Cannot create two genesis blocks at same time, reload page, but you will loose data so far provided...")
-            }
-        }
 
         function handlePOST(url, data) {
             var repl = doPOSTSynch(url, null, data);
             var json = repl[0];
             var code = repl[1];
             if (code == 200) {
-                doAlert(json['message']);
+                doAlert(json['message'], 8);
             } else {
-                doAlert(json['errorMsg']);
+                doAlert(json['errorMsg'], 0);
+            }
+            return [code, json]
+        }
+
+        function logUser(event) {
+            if ($("#login").text() == "Set") {
+                user = $("#userName").val().trim();
+                if (user.length > 0) {
+                    data = {
+                        "chainRef": user
+                    }
+                    ret = handlePOST("setID", data);
+                    if (ret[0] == 200) {
+                        $("#login").text("x")
+                    }
+                }
+            } else {
+                doAlert("Cannot create two genesis blocks at same time, reload page, but you will loose data so far provided...",0)
             }
         }
+
 
         function addFaucet() {
             var type = "genFaucet"; 
             data = {
-                "type": type, "chainID": user,
-                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": +$("#privVal").val()
+                "type": type, "chainRef": user,
+                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": $("#privVal").val(), "comment": $("#fcom").val()
             }
             handlePOST(type,data);
-        }
-
-        function useTX() {
-            var type = "useTX";
-            data = {
-                "type": type, "chainID": user,
-                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": +$("#privVal").val()
-            }
-            handlePOST(type, data);
         }
 
         function genTX() {
             var type = "genTX";
             data = {
-                "type": type, "chainID": user,
-                "initVal": +$("#initVal").val(), "maxVal": +$("#maxVal").val(), "privVal": +$("#privVal").val()
+                "type": type, "chainRef": user,
+                "initVal": +$("#gVal").val(), "address": $("#gAddr").val(), "comment": $("#gCom").val()
             }
             handlePOST(type, data);
         }
@@ -279,9 +250,17 @@
         function genGX() {
             var type = "genGX";
             data = {
-                "type": type, "chainID": user
+                "type": type, "chainRef": user
             }
-            handlePOST(type, data);
+            var repl = doPOSTSynch(type, null, data);
+            var json = repl[0];
+            var code = repl[1];
+            if (code == 200) {
+                doAlert("Genesis Block and balances created",8);
+                $("#genBlock").val(JSON.stringify(json, null, 2));
+            } else {
+                doAlert(json['errorMsg'],0);
+            }
         }
 
         function updGX() {
@@ -296,7 +275,7 @@
             if (code == 200) {
                 $("#genBlock").val(JSON.stringify(json,null,2));
             } else {
-                doAlert(json['errorMsg']);
+                doAlert(json['errorMsg'],0);
             }
         }
 
@@ -310,7 +289,7 @@
                 dummy.select();
                 document.execCommand("copy");
                 document.body.removeChild(dummy);
-                doAlert("Copied text to clipboard: '" + text + "' len=" + text.length, 10);
+                doAlert("Copied text to clipboard, len=" + text.length, 10);
             } else {
                 doAlert("No selection for copying...", 0);
             }
@@ -352,7 +331,7 @@
         function openTab(evt, tabs, tabName) {
             if (tabName != "Info") {
                 if (user === "") {
-                    doAlert("No ChainID set, please set ID first", 0);
+                    doAlert("No ChainRef set, please set ID first", 0);
                     return;
                 }
             }
