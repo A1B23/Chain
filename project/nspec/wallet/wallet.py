@@ -250,13 +250,16 @@ class wallet:
         return transaction, hex(tran_hash)[2:]
 
     def getAllBalance(self, params):
-        user = params['user']
-        bal = bal = deepcopy(m_balanceData)
-        for key in self.doSelect("SELECT address FROM Wallet WHERE User='" + user + "'"):
-            val, respCode = self.collectKeyBalance(key)
-            if (respCode == 200):
-                self.sumBalance(bal, val)
-        return setOK(bal)
+        try:
+            user = params['user']
+            bal = deepcopy(m_balanceData)
+            for key in self.doSelect("SELECT address FROM Wallet WHERE User='" + user + "'"):
+                val, respCode = self.collectKeyBalance(key)
+                if (respCode == 200):
+                    self.sumBalance(bal, val)
+            return setOK(bal)
+        except Exception:
+            return errMsg("Seems to have peer issues....")
 
     def sumBalance(self, bal, val):
         bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
@@ -265,40 +268,51 @@ class wallet:
 
 
     def getWalletBalance(self, params):
-        wal = params['wallet']
-        user = params['user']
-        bal = deepcopy(m_balanceData)
-        for key in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
-            val, respCode = self.collectKeyBalance(key)
-            if (respCode == 200):
-                self.sumBalance(bal, val)
-        return setOK(bal)
+        try:
+            wal = params['wallet']
+            user = params['user']
+            bal = deepcopy(m_balanceData)
+            for key in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
+                val, respCode = self.collectKeyBalance(key)
+                if (respCode == 200):
+                    self.sumBalance(bal, val)
+            return setOK(bal)
+        except Exception:
+            return errMsg("Seems to have peer issues....")
 
     def getWalletKeyBalance(self, params):
-        wal = params['wallet']
-        user = params['user']
-        bal = {}
-        for addr in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
-            val, respCode = self.collectKeyBalance(addr)
-            if (respCode == 200):
-                bal2 = deepcopy(m_balanceData)
-                bal2['confirmedBalance'] = val['confirmedBalance']
-                bal2['pendingBalance'] = val['pendingBalance']
-                bal2['safeBalance'] = val['safeBalance']
-                bal[addr] = bal2
-        return setOK(bal)
+        try:
+            wal = params['wallet']
+            user = params['user']
+            bal = {}
+            for addr in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
+                val, respCode = self.collectKeyBalance(addr)
+                if (respCode == 200):
+                    bal2 = deepcopy(m_balanceData)
+                    bal2['confirmedBalance'] = val['confirmedBalance']
+                    bal2['pendingBalance'] = val['pendingBalance']
+                    bal2['safeBalance'] = val['safeBalance']
+                    bal[addr] = bal2
+            return setOK(bal)
+        except Exception:
+            return errMsg("Seems to have peer issues....")
 
     def getAllTX(self, params):
-        user = params['user']
-        type = int(params['type'])
-        return self.filterTX(type, self.doSelect("SELECT address, KName, pubKey FROM Wallet WHERE User='" + user + "'"))
-
+        try:
+            user = params['user']
+            type = int(params['type'])
+            return self.filterTX(type, self.doSelect("SELECT address, KName, pubKey FROM Wallet WHERE User='" + user + "'"))
+        except Exception:
+            return errMsg("Seems to have peer issues....")
 
     def getWalletTX(self, params):
-        wal = params['wallet']
-        user = params['user']
-        type = int(params['type'])
-        return self.filterTX(type, self.doSelect("SELECT address, KName, pubKey FROM Wallet WHERE User='" + user + "' AND WName='"+wal+"'"))
+        try:
+            wal = params['wallet']
+            user = params['user']
+            type = int(params['type'])
+            return self.filterTX(type, self.doSelect("SELECT address, KName, pubKey FROM Wallet WHERE User='" + user + "' AND WName='"+wal+"'"))
+        except Exception:
+            return errMsg("Seems to have peer issues....")
 
     def filterTX(self, type, l):
         tx = []

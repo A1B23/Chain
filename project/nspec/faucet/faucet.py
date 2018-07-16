@@ -1,19 +1,10 @@
-from project.nspec.wallet.transactions import generate_private_key, private_key_hex_to_int, private_key_to_public_key
-from project.nspec.wallet.transactions import get_pub_key_compressed, public_key_compressed_to_address,helper_sha256
-from project.pclass import c_peer
-from project.models import m_transaction_order
-from pycoin.ecdsa import generator_secp256k1, sign
-from project.utils import setOK, errMsg, putDataInOrder, getTime
-import sqlite3
-from project.nspec.wallet.modelW import m_db, regexWallet
-from contextlib import closing
+from project.utils import setOK, errMsg
+from project.nspec.wallet.modelW import regexWallet
 import re
-from project.nspec.blockchain.verify import verifyAddr
-
+import project.classes
 
 
 class faucet:
-
     def getAllKeys(self, params):
         wal = 'unidentified'
         try:
@@ -43,7 +34,7 @@ class faucet:
                     cmd = cmd[0:-1]
 
             cmd = cmd + " FROM Wallet WHERE WName='" + wal + "'"
-            ret = self.doSelect(cmd)
+            ret = project.classes.c_walletInterface.doSelect(cmd)
             repl = []
             for k in ret:
                 if k.startswith("addr"):
@@ -58,4 +49,29 @@ class faucet:
 
         except Exception:
             return errMsg("Collecting keys for wallet " + wal + " failed.")
+
+    def checkLimit(self, json):
+        try:
+            fee = json['fee']
+            if fee != 10:   #miminum permitted so
+                return "Invalid fee"
+            total = fee + json['amount']
+            addrN = json['source'][0]
+            if addrN != "address":
+                return "Invalid address reference"
+            addr = json['source'][1]
+            src = json['walletSrc']
+            for k in project.classes.c_walletInterface.doSelect("SELECT address FROM Wallet WHERE WName='" + src + "' AND User='" + src + "'"):
+                if k == addr:
+                    return "Invalid address reference" #no payment to faucet itself, which just drains the funds
+
+            maxTotal = project.classes.c_walletInterface.doSelect("SELECT KName FROM Wallet WHERE WName='" + src + "' AND User='" + src + "' AND address='"+addr+"'")
+            if json['walletPW'] != maxTotal[0].split("#")[2]:
+                 return "Invalid address reference"
+            if (fee >= total) or (total > maxTotal[0].split("#")[1]):
+                return "Sum outside permitted range for individual request"
+            return ""
+        except Exception:
+            return "Invalid JSON object"
+
 

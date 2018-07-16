@@ -107,11 +107,10 @@
     <div class="tab maintab">
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Select Faucet</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Request Coins</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
-
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
         <br />
         <br />
         <div class="alert">
@@ -170,10 +169,11 @@
             <option value="0">offline0</option>
             <option value="1">offline1</option>
         </select>        <button onclick="JavaScript:toClipBoard('selPayKeyA')" style="color: white; background-color: #808080">Copy</button>
-        <br />        <div id="payPw">        </div><br />
+        <br />        
+        <div id="payPw"></div>
+        <br />
         Maximum donation from this faucet: <span id="smax">0</span><br />
         <input type="number" id="payAmount" value="100" min="100" size="20" max="100"> Payment amount<br />
-        <input type="number" id="payFees" value="20" size="20" min="20"> Payment fees<br />
         <input type="text" id="payMes" value="" size="20"> (Optional) Provide any messsage to recipient<br />
 
         <br /><br />
@@ -457,34 +457,7 @@
             return dat;
         }
 
-        function createWallet() {
-            var name = $("#walletName").val();
-            var xxsel = document.getElementById("quickSelWallet").checked;
-            closeWallet();
-            if (name.length > 0) {
-                var dat = getKeyInput(name, "")
-                if (dat.length == 0) {
-                    return
-                }
-                var repl = doPOSTSynch("wallet/create", null, dat);
-                var json = repl[0];
-                var code = repl[1];
-                if (code == 200) {
-                    if (xxsel === true) {
-                        // careful json changes here!!
-                        prepareSelectWallet();
-                        useWallet(name, true);
-                    }
-                    doAlert("Creation of wallet " + h(name) + " succeded.", 9)
-                }
-                else {
-                    doAlert("Creation not successful, Node said: " + h(json.message), 0)
-                }
-            } else {
-                doAlert("Missing " + h("Wallet name") + ", one is required for Create Key", 0);
-            }
-        }
-
+ 
         function closeWallet() {
             initState();
         }
@@ -548,31 +521,10 @@
                 doAlert("Faucet selected: " + h(name), 9);
             } else {
                 if (alertEmpty) {
-                    doAlert("Wallet selection cleared", 9);
+                    doAlert("Faucet selection cleared", 9);
                 }
             }
             updateStateInfo();
-        }
-
-        /*
-         * Keys section
-         */
-
-        function createKeys() {
-            var dat = getKeyInput(state.wallet, "k")
-            if (dat.length == 0) {
-                return
-            }
-
-            var repl = doPOSTSynch("wallet/createKey", null, dat);
-            var json = repl[0];
-            var code = repl[1];
-            if (code == 200) {
-                doAlert(json.message, 9)
-            }
-            else {
-                doAlert("Creation not successful, Node said: " + h(json.message), 0)
-            }
         }
 
         /*
@@ -601,19 +553,8 @@
             submitPay(params);
         }
 
-        function payOwn() {
-            var params = {};
-            params['receiver'] = getSingleSel("2");
-            params['walletDest'] = state.wallet;
-            if (params['receiver'].length == 0) {
-                doAlert("Only one wallet reference to be provided!", 0);
-                return;
-            }
-            submitPay(params);
-        }
-
         function submitPay(params) {
-            params['fee'] = +$("#payFees").val().trim();
+            params['fee'] = 10; // minimum allowed and fixed to stress faucet as little as possible
             params['amount'] = +$("#payAmount").val().trim();
             params['source'] = ['address', state['keyVal']];
             params['walletSrc'] = state.wallet;
@@ -643,42 +584,24 @@
         }
 
         function prepareSelection() {
-            //var sel = $('#selPayKey').find(":selected").text();
-            //var valp = $('#selPayKeyP').find(":selected").val();
             var vala = $('#selPayKeyA').find(":selected").val();
-            //var valn = $('#selPayKeyN').find(":selected").val();
             var repl = doGETSynch("wallet/list/keys/sayny/" + state.wallet + "/" + user);
             var json = repl[0];
             var code = repl[1];
             if (code == 200) {
-                var pk = []
                 var ad = []
                 var na = []
                 for (var kk = 0; kk < json.keyList.length; kk++) {
                     var kx = json.keyList[kk]
                     var kxx = kx.split(":")
-                    if (kxx[0] === "pubkey") {
-                        pk.push(kxx[1])
-                    }
                     if (kxx[0] === "addr") {
                         ad.push(kxx[1])
-                    }
-                    if (kxx[0] === "name") {
+                    } else {
                         na.push(kxx[1])
                     }
                 }
-                //populateSelOptions('selPayKeyP', pk);
-                //$('#selPayKeyP').val(valp);
                 populateSelOptions('selPayKeyA', ad,na);
                 $('#selPayKeyA').val(vala);
-                //populateSelOptions('selPayKeyN', na);
-                //$('#selPayKeyN').val(valn);
-                //populateSelOptions('selPayKeyP2', pk);
-                //$('#selPayKeyP2').val(valp);
-                //populateSelOptions('selPayKeyA2', ad);
-                //$('#selPayKeyA2').val(vala);
-                //populateSelOptions('selPayKeyN2', na);
-                //$('#selPayKeyN2').val(valn);
             } else {
                 doAlert("population of data failed " + JSON.stringify(json));
             }
