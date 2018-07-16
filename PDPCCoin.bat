@@ -75,6 +75,16 @@ start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath%
 set nodeIPnum=34
 start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% -mod %mode% --asDebug %asDebug%"
 
+rem ###################### Faucet parameters 
+set typeDir=Faucet
+rem we keep the sam address as blockchain above!
+set col=4A
+set minPeers=1
+set maxPeers=1
+set nodeIPnum=92
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runFaucet.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --asDebug %asDebug%"
+
+
 rem ##################### test new node added
 rem pause
 set typeDir=Blockchain

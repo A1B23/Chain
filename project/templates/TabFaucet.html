@@ -108,7 +108,6 @@
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Select Faucet</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Request Coins</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Keys')">Keys</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
@@ -132,37 +131,6 @@
 
         <button class="keys" onclick="JavaScript:selectWallet()">Select</button><br />
 
-    </div>
-
-    <div id="Keys" class="tabcontent maintab">
-        <div class="tab subtab keyTab">
-            <button class="tablinks keyTab" onclick="openTab(event, 'keyTab', 'createKeys')">Create Keys</button>
-            <button class="tablinks walletTab" onclick="openTab(event, 'keyTab','importKey')">Import Key</button>
-            <button class="tablinks walletTab" onclick="openTab(event, 'keyTab','exportKey')">Export Key</button>
-            <button class="tablinks keyTab" onclick="openTab(event, 'keyTab','infokey')">Info</button>
-        </div>
-        <div id="createKeys" class="tabcontent keyTab">
-            How many keys to be created (min 1):<br />
-            <select id="numKeysk" class="options">
-                <option value=1 selected>1</option>
-                <option value=2>2</option>
-                <option value=3>3</option>
-            </select><br />
-            Optional: Provide your own names for the keys (else they will be named with address)<br />
-            <input type="text" id="key1Namek" value="" size="20"><br />
-            <input type="text" id="key2Namek" value="" size="20"><br />
-            <input type="text" id="key3Namek" value="" size="20"><br />
-            <button class="keys" onclick="createKeys()">Submit</button>
-        </div>
-        <div id="infokey" class="tabcontent keyTab">
-            A wallet <b>must</b> be selected in order to make payment/transfer or to create/import/export keys.
-        </div>
-        <div id="exportKey" class="tabcontent keyTab">
-            This function/feature is not yet implemented...
-        </div>
-        <div id="importKey" class="tabcontent keyTab">
-            This function/feature is not yet implemented...
-        </div>
     </div>
 
     <div id="Peers" class="tabcontent maintab">
@@ -196,19 +164,16 @@
     </div>
 
     <div id="Payment" class="tabcontent maintab">
-        Select an addresses to use from this faucet:<br /> 
+        Select an addresses to use from this faucet:<br />
         <select id="selPayKeyA" class="options">
             <option value="__clr"></option>
             <option value="0">offline0</option>
             <option value="1">offline1</option>
         </select>        <button onclick="JavaScript:toClipBoard('selPayKeyA')" style="color: white; background-color: #808080">Copy</button>
-        <br /><br />
+        <br />        <div id="payPw">        </div><br />
         Maximum donation from this faucet: <span id="smax">0</span><br />
         <input type="number" id="payAmount" value="100" min="100" size="20" max="100"> Payment amount<br />
         <input type="number" id="payFees" value="20" size="20" min="20"> Payment fees<br />
-        <div id="payPw">
-        <input type="text" id="payPwVal" value="" size="20"> Provide faucet keyword
-        </div>
         <input type="text" id="payMes" value="" size="20"> (Optional) Provide any messsage to recipient<br />
 
         <br /><br />
@@ -234,12 +199,12 @@
 
     <div id="Balance" class="tabcontent maintab">
         <div class="tab subtab baltab">
-            <button class="tablinks baltab" onclick="openTab(event, 'baltab', 'walletBal')">Wallet Balance</button>
+            <button class="tablinks baltab" onclick="openTab(event, 'baltab', 'walletBal')">Faucet Balance</button>
             <button class="tablinks baltab" onclick="openTab(event, 'baltab','totalBal')">Total Balance</button>
             <button class="tablinks baltab" onclick="openTab(event, 'baltab','infob')">Info</button>
         </div>
         <div id="walletBal" class="tabcontent baltab">
-            Choose name of Wallet to be used:<br />
+            Choose Faucet to be used:<br />
             <select id="balWallet" class="options">
                 <option value="__clr"></option>
                 <option value="0">offline0</option>
@@ -255,24 +220,22 @@
             <span id="balAllResult"></span>
         </div>
         <div id="infob" class="tabcontent baltab">
-            With this feature you can check the balance for an entire Wallet<br />
-            You can check for a single wallet, or check for all wallets at the same time<br />
+            With this feature you can check the balance for the Faucet<br />
+            You can check for a single faucet, or check for all faucets at the same time<br />
             For can also check the balanmce for individual keys (same as during payment)
         </div>
     </div>
     <div id="TxView" class="tabcontent maintab">
-        <input type="radio" name="type" value="0" /> address
-        <input type="radio" name="type" value="2" /> Key Name/address
-        <input type="radio" name="type" value="4" /> public Key/address
+        <input type="radio" name="type" value="0" selected/> address
         <div class="tab subtab txtab">
-            <button class="tablinks txtab" onclick="openTab(event, 'txtab', 'walletpTX')">Wallet pending TxList</button>
+            <button class="tablinks txtab" onclick="openTab(event, 'txtab', 'walletpTX')">Faucet pending TxList</button>
             <button class="tablinks txtab" onclick="openTab(event, 'txtab','totalpTX')">Total pending TxList</button>
-            <button class="tablinks txtab" onclick="openTab(event, 'txtab', 'walletTX')">Wallet completed TxList</button>
+            <button class="tablinks txtab" onclick="openTab(event, 'txtab', 'walletTX')">Faucet completed TxList</button>
             <button class="tablinks txtab" onclick="openTab(event, 'txtab','totalTX')">Total completed TxList</button>
             <button class="tablinks txtab" onclick="openTab(event, 'txtab','infotx')">Info</button>
         </div>
         <div id="walletTX" class="tabcontent txtab">
-            Choose name of Wallet to be used:<br />
+            Choose name of Faucet to be used:<br />
             <select id="txWallet" class="options">
                 <option value="__clr"></option>
                 <option value="0">offline0</option>
@@ -283,11 +246,11 @@
             <span id="txResult"></span>
         </div>
         <div id="totalTX" class="tabcontent txtab">
-            <button class="keys" onclick="JavaScript:getTXWallets(0)">Refresh completed Tx for all my Wallets</button><br />
+            <button class="keys" onclick="JavaScript:getTXWallets(0)">Refresh completed Tx for all faucets</button><br />
             <span id="txAllResult"></span>
         </div>
         <div id="walletpTX" class="tabcontent txtab">
-            Choose name of Wallet to be used:<br />
+            Choose name of Faucet to be used:<br />
             <select id="txpWallet" class="options">
                 <option value="__clr"></option>
                 <option value="0">offline0</option>
@@ -298,21 +261,21 @@
             <span id="txpResult"></span>
         </div>
         <div id="totalpTX" class="tabcontent txtab">
-            <button class="keys" onclick="JavaScript:getTXWallets(1)">Refresh pending Tx for all my Wallets</button><br />
+            <button class="keys" onclick="JavaScript:getTXWallets(1)">Refresh pending Tx for all Faucets</button><br />
             <span id="txpAllResult"></span>
         </div>
         <div id="infotx" class="tabcontent txtab">
-            With this feature you can check the pending transactions for an entire Wallet<br />
-            You can check for a single wallet, or check for all wallets at the same time<br />
+            With this feature you can check the pending transactions for the entire Faucet<br />
+            You can check for a single faucett, or check for all facuets at the same time<br />
         </div>
     </div>
 
     <div id="Info" class="tabcontent maintab">
         <h3>PDPC_Coin Faucet</h3>
         <p>
-            PDPC_Coin Faucet can suppoert multile fuacet types, some are open for use, others are protected by a code.
+            PDPC_Coin Faucet can support multiple faucets, some are open for use, others are protected by a code.
         </p>
-        <button class="keys" onclick="JavaScript:getInfo()">Refresh Wallet Node info</button><br />
+        <button class="keys" onclick="JavaScript:getInfo()">Refresh Faucet Node info</button><br />
         <span id="infoResult"></span>
     </div>
 
@@ -331,11 +294,11 @@
         $('#selPayKeyA').on('change', function () {
             state['keyPar'] = this.value;
             state['keyVal'] = $(this).find("option:selected").text();
-            //if (state['keyPar'].indexOf("no") > 0) {
-            //    $("#payPw").hide();
-            //} else {
-            //    $("#payPw").show();
-            //}
+            if (state['keyPar'].indexOf("no") > 0) {
+                $("#payPw").text("");
+            } else {
+                $("#payPw").text("Requires security code");
+            }
             nmax = +state['keyPar'].split("#")[1];
             $("#payAmount").attr("max",nmax);
             $("#smax").text(nmax);
@@ -657,6 +620,10 @@
             params['walletPW'] = ""
             if (state['keyPar'].indexOf("yes") > 0) {
                 params['walletPW'] = prompt("Please enter the faucet protection code to use the selected address", "Faucet Code");
+                if (params['walletPW'] == null) {
+                    doAlert("TX request aborted");
+                    return;
+                }
             }
             params['msg'] = $("#payMes").val().trim(); // TODO cleanse??
             if (params['source'].length == 0) {

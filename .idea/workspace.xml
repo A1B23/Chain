@@ -2,16 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cebf9d2d-a62e-42e7-96a7-c7c6c47f10f3" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/runFaucet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/InterfaceLocking.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/InterfaceLocking.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/classes.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/classes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PDPCCoin.bat" beforeDir="false" afterPath="$PROJECT_DIR$/PDPCCoin.bat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/initArgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/initArgs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/miner/miner.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/miner/miner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/faucet/faucet.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/faucet/faucet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/faucet/interface.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/faucet/interface.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/modelW.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/modelW.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/peers.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/peers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/static/js/vis_draw.js" beforeDir="false" afterPath="$PROJECT_DIR$/project/static/js/vis_draw.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/templates/TabFaucet.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/TabFaucet.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/templates/TabWallet.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/TabWallet.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/templates/visualise.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/visualise.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runFaucet.py" beforeDir="false" afterPath="$PROJECT_DIR$/runFaucet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runWallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/runWallet.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -22,35 +25,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="interface.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/nspec/wallet/interface.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="59" column="9" selection-start-line="59" selection-start-column="9" selection-end-line="59" selection-end-column="9" />
-              <folding>
-                <element signature="e#0#27#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="initArgs.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/initArgs.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="306">
-              <caret line="108" column="55" selection-start-line="108" selection-start-column="55" selection-end-line="108" selection-end-column="55" />
-              <folding>
-                <element signature="e#0#74#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="controller.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/controller.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="230">
-              <caret line="243" selection-start-line="243" selection-end-line="243" />
+            <state relative-caret-position="238">
+              <caret line="277" selection-start-line="277" selection-end-line="277" />
               <folding>
                 <element signature="e#0#40#0" expanded="true" />
               </folding>
@@ -61,38 +40,17 @@
       <file leaf-file-name="InterfaceLocking.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/InterfaceLocking.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="139">
-              <caret line="67" selection-start-line="67" selection-end-line="67" />
-              <folding>
-                <element signature="e#0#76#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="224">
+              <caret line="50" selection-start-line="50" selection-end-line="50" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="local.py" pinned="false" current-in-tab="false">
-        <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/werkzeug/local.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="346" selection-start-line="346" selection-end-line="346" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="classes.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/classes.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="2" column="25" selection-start-line="2" selection-start-column="25" selection-end-line="2" selection-end-column="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="faucet.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="faucet.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/nspec/faucet/faucet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="244" column="85" selection-start-line="244" selection-start-column="85" selection-end-line="244" selection-end-column="85" />
+            <state relative-caret-position="17">
+              <caret line="11" selection-start-line="11" selection-end-line="11" />
               <folding>
                 <element signature="e#0#117#0" expanded="true" />
               </folding>
@@ -100,13 +58,34 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="interface.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/nspec/faucet/interface.py">
+      <file leaf-file-name="wallet.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/nspec/wallet/wallet.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="173">
+              <caret line="280" selection-start-line="280" selection-end-line="280" />
+              <folding>
+                <element signature="e#0#117#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="modelW.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/nspec/wallet/modelW.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="85">
+              <caret line="5" column="88" selection-start-line="5" selection-start-column="88" selection-end-line="5" selection-end-column="88" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="peers.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/peers.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="122">
-              <caret line="8" selection-start-line="8" selection-end-line="8" />
+              <caret line="222" selection-start-line="222" selection-end-line="222" />
               <folding>
-                <element signature="e#0#45#0" expanded="true" />
+                <element signature="e#0#81#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -115,8 +94,20 @@
       <file leaf-file-name="runWallet.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/runWallet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
-              <caret line="31" selection-start-line="31" selection-end-line="39" selection-end-column="6" />
+            <state relative-caret-position="265">
+              <caret line="27" column="48" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="interface.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/project/nspec/faucet/interface.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="88">
+              <caret line="25" column="91" selection-start-line="25" selection-start-column="91" selection-end-line="25" selection-end-column="91" />
+              <folding>
+                <element signature="e#0#39#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -124,8 +115,8 @@
       <file leaf-file-name="runFaucet.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/runFaucet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="231">
-              <caret line="42" column="16" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
+            <state relative-caret-position="442">
+              <caret line="27" column="48" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
             </state>
           </provider>
         </entry>
@@ -142,11 +133,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>json</find>
-      <find>makeM</find>
-      <find>blockDataHash</find>
-      <find>m_candidateMiner_order</find>
-      <find>makeBlockDataHash</find>
       <find>chainID</find>
       <find>hasWallet</find>
       <find>initGenesis</find>
@@ -172,6 +158,11 @@
       <find>send\(\)</find>
       <find>getw\(</find>
       <find>startsWith</find>
+      <find>sendGETToPeers</find>
+      <find>getKeyBalance</find>
+      <find>getAllBalance</find>
+      <find>getWalletBalance</find>
+      <find>getWalletTX</find>
     </findStrings>
     <replaceStrings>
       <replace>setOK</replace>
@@ -211,16 +202,13 @@
         <option value="$PROJECT_DIR$/project/pclass.py" />
         <option value="$PROJECT_DIR$/project/templates/miner.html" />
         <option value="$PROJECT_DIR$/project/templates/visualise.html" />
-        <option value="$PROJECT_DIR$/project/nspec/wallet/modelW.py" />
         <option value="$PROJECT_DIR$/project/templates/TabWallet.html" />
         <option value="$PROJECT_DIR$/project/static/js/vis_coms.js" />
         <option value="$PROJECT_DIR$/project/nspec/blockchain/interface.py" />
         <option value="$PROJECT_DIR$/runBC.py" />
         <option value="$PROJECT_DIR$/runMiner.py" />
-        <option value="$PROJECT_DIR$/runWallet.py" />
         <option value="$PROJECT_DIR$/project/nspec/miner/modelM.py" />
         <option value="$PROJECT_DIR$/project/nspec/wallet/transactions.py" />
-        <option value="$PROJECT_DIR$/project/nspec/wallet/wallet.py" />
         <option value="$PROJECT_DIR$/runGenesis.py" />
         <option value="$PROJECT_DIR$/project/nspec/genesis/interface.py" />
         <option value="$PROJECT_DIR$/project/models.py" />
@@ -233,17 +221,20 @@
         <option value="$PROJECT_DIR$/project/nspec/blockchain/verify.py" />
         <option value="$PROJECT_DIR$/project/nspec/blockchain/modelBC.py" />
         <option value="$PROJECT_DIR$/project/nspec/blockchain/balance.py" />
-        <option value="$PROJECT_DIR$/project/peers.py" />
         <option value="$PROJECT_DIR$/project/utils.py" />
         <option value="$PROJECT_DIR$/project/nspec/miner/miner.py" />
-        <option value="$PROJECT_DIR$/runFaucet.py" />
-        <option value="$PROJECT_DIR$/project/initArgs.py" />
         <option value="$PROJECT_DIR$/project/controller.py" />
         <option value="$PROJECT_DIR$/project/classes.py" />
-        <option value="$PROJECT_DIR$/project/nspec/faucet/interface.py" />
         <option value="$PROJECT_DIR$/project/nspec/wallet/interface.py" />
         <option value="$PROJECT_DIR$/project/InterfaceLocking.py" />
+        <option value="$PROJECT_DIR$/project/initArgs.py" />
+        <option value="$PROJECT_DIR$/project/peers.py" />
         <option value="$PROJECT_DIR$/project/nspec/faucet/faucet.py" />
+        <option value="$PROJECT_DIR$/project/nspec/wallet/modelW.py" />
+        <option value="$PROJECT_DIR$/project/nspec/wallet/wallet.py" />
+        <option value="$PROJECT_DIR$/runWallet.py" />
+        <option value="$PROJECT_DIR$/runFaucet.py" />
+        <option value="$PROJECT_DIR$/project/nspec/faucet/interface.py" />
       </list>
     </option>
   </component>
@@ -263,7 +254,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -323,10 +313,17 @@
               <item name="project" type="462c0819:PsiDirectoryNode" />
               <item name="static" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -468,10 +465,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.runFaucet" />
+        <item itemvalue="Python.runWallet" />
         <item itemvalue="Python.runBC" />
         <item itemvalue="Python.runMiner" />
         <item itemvalue="Python.runGenesis" />
-        <item itemvalue="Python.runWallet" />
       </list>
     </recent_temporary>
   </component>
@@ -717,14 +714,21 @@
       <option name="project" value="LOCAL" />
       <updated>1531643743016</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Initial faucet implementation up to simple donation">
+      <created>1531708637415</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1531708637415</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="1295" height="695" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2513661" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2513661" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.329582" />
@@ -734,7 +738,7 @@
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.2869416" />
+      <window_info anchor="bottom" id="Debug" order="3" visible="true" weight="0.2869416" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -785,7 +789,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="Wallet database, plus wallet creation and wallet basic selection, basic visualisation movement" />
     <MESSAGE value="Payment tab started, bug fix in wallet selection" />
     <MESSAGE value="Payment page works, balances page started, added user relation to wallets" />
     <MESSAGE value="Balances page works" />
@@ -810,7 +813,8 @@
     <MESSAGE value="Genesis generation completed, hardened chain init in main, set PDPCCoin" />
     <MESSAGE value="Cleaned up and removed default 400 in errMsg calls" />
     <MESSAGE value="Small bug fixes after recent changes, visual works again" />
-    <option name="LAST_COMMIT_MESSAGE" value="Small bug fixes after recent changes, visual works again" />
+    <MESSAGE value="Initial faucet implementation up to simple donation" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial faucet implementation up to simple donation" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -837,17 +841,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/wallet/wallet.py</url>
-          <line>29</line>
+          <line>30</line>
           <option name="timeStamp" value="736" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/wallet/wallet.py</url>
-          <line>28</line>
+          <line>29</line>
           <option name="timeStamp" value="737" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/wallet/wallet.py</url>
-          <line>223</line>
+          <line>224</line>
           <option name="timeStamp" value="743" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -866,9 +870,9 @@
           <option name="timeStamp" value="804" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/project/nspec/faucet/faucet.py</url>
-          <line>196</line>
-          <option name="timeStamp" value="808" />
+          <url>file://$PROJECT_DIR$/project/controller.py</url>
+          <line>276</line>
+          <option name="timeStamp" value="824" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -878,7 +882,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="809" />
+      <option name="time" value="825" />
     </breakpoint-manager>
   </component>
   <component name="debuggerHistoryManager">
@@ -1046,13 +1050,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/wallet/modelW.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/wallet/transactions.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
@@ -1088,16 +1085,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/wallet/wallet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1598">
-          <caret line="104" selection-start-line="104" selection-end-line="104" />
-          <folding>
-            <element signature="e#0#117#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Genesis_aa.json" />
     <entry file="file://$PROJECT_DIR$/Genesis_PDPCCoin.json">
       <provider selected="true" editor-type-id="text-editor">
@@ -1110,9 +1097,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2108">
           <caret line="132" column="44" selection-start-line="132" selection-start-column="44" selection-end-line="132" selection-end-column="44" />
-          <folding>
-            <element signature="e#0#95#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1147,23 +1131,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/peers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6154">
-          <caret line="371" selection-start-line="371" selection-end-line="371" />
-          <folding>
-            <element signature="e#0#81#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/verify.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1972">
           <caret line="123" selection-start-line="123" selection-end-line="123" />
-          <folding>
-            <element signature="e#0#66#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1171,9 +1142,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="357">
           <caret line="22" column="39" selection-start-line="22" selection-start-column="39" selection-end-line="22" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#33#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1214,26 +1182,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/runWallet.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
-          <caret line="31" selection-start-line="31" selection-end-line="39" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/initArgs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="108" column="55" selection-start-line="108" selection-start-column="55" selection-end-line="108" selection-end-column="55" />
-          <folding>
-            <element signature="e#0#74#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/faucet/modelW.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/faucet/modelW.py" />
     <entry file="file://$PROJECT_DIR$/project/classes.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
@@ -1243,25 +1192,69 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/wallet/interface.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
+        <state relative-caret-position="1003">
           <caret line="59" column="9" selection-start-line="59" selection-start-column="9" selection-end-line="59" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/initArgs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="70" column="55" selection-start-line="70" selection-start-column="55" selection-end-line="70" selection-end-column="55" />
           <folding>
-            <element signature="e#0#27#0" expanded="true" />
+            <element signature="e#0#74#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/peers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="122">
+          <caret line="222" selection-start-line="222" selection-end-line="222" />
+          <folding>
+            <element signature="e#0#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/wallet/modelW.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="5" column="88" selection-start-line="5" selection-start-column="88" selection-end-line="5" selection-end-column="88" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/wallet/wallet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="173">
+          <caret line="280" selection-start-line="280" selection-end-line="280" />
+          <folding>
+            <element signature="e#0#117#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/faucet/faucet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="11" selection-start-line="11" selection-end-line="11" />
+          <folding>
+            <element signature="e#0#117#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/werkzeug/local.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
+        <state relative-caret-position="156">
           <caret line="346" selection-start-line="346" selection-end-line="346" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/controller.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="230">
-          <caret line="243" selection-start-line="243" selection-end-line="243" />
+        <state relative-caret-position="238">
+          <caret line="277" selection-start-line="277" selection-end-line="277" />
           <folding>
             <element signature="e#0#40#0" expanded="true" />
           </folding>
@@ -1270,37 +1263,31 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/InterfaceLocking.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="139">
-          <caret line="67" selection-start-line="67" selection-end-line="67" />
-          <folding>
-            <element signature="e#0#76#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="224">
+          <caret line="50" selection-start-line="50" selection-end-line="50" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/faucet/interface.py">
+    <entry file="file://$PROJECT_DIR$/runWallet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="122">
-          <caret line="8" selection-start-line="8" selection-end-line="8" />
-          <folding>
-            <element signature="e#0#45#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="265">
+          <caret line="27" column="48" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/runFaucet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="42" column="16" selection-start-line="42" selection-start-column="16" selection-end-line="42" selection-end-column="16" />
+        <state relative-caret-position="442">
+          <caret line="27" column="48" selection-start-line="27" selection-start-column="48" selection-end-line="27" selection-end-column="48" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/faucet/faucet.py">
+    <entry file="file://$PROJECT_DIR$/project/nspec/faucet/interface.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="244" column="85" selection-start-line="244" selection-start-column="85" selection-end-line="244" selection-end-column="85" />
+        <state relative-caret-position="88">
+          <caret line="25" column="91" selection-start-line="25" selection-start-column="91" selection-end-line="25" selection-end-column="91" />
           <folding>
-            <element signature="e#0#117#0" expanded="true" />
+            <element signature="e#0#39#0" expanded="true" />
           </folding>
         </state>
       </provider>

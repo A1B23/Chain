@@ -222,11 +222,12 @@ class peers:
 
         resp = self.getPeers('activePeers', url, 0)
         if len(resp) == 0:
-            response.append(self.getPeers('shareToPeers', url, len(resp)))
+            response = self.getPeers('shareToPeers', url, 0)
         else:
-            response.append(resp)
+            response = resp
             if len(resp) < m_cfg['minPeers']:
-                response.append(self.getPeers('shareToPeers', url, len(resp)))
+                for tx in (self.getPeers('shareToPeers', url, len(resp))):
+                    response.append[tx]
         return response
 
     # def deActivate(self, peer):

@@ -1,5 +1,5 @@
 from project.utils import errMsg, setOK
-from project.classes import c_faucetInterface
+from project.classes import c_faucetInterface, c_walletInterface
 from project.models import m_info
 from project.nspec.wallet.modelW import m_db
 
@@ -21,21 +21,21 @@ class faucetInterface:
 
         if urlID == 'wall':
             if (url.startswith("/wallet/list/wallet")):
-                return c_faucetInterface.getAllWallets(linkInfo['user'])
+                return c_walletInterface.getAllWallets(linkInfo['user'])
             elif (url.startswith("/wallet/list/keys/s")):
-                return c_faucetInterface.getAllKeys(linkInfo)
+                return c_faucetInterface.getAllKeys(linkInfo)       #different from wallet!
             elif (url.startswith("/wallet/list/balance")):
-                return c_faucetInterface.getKeyBalance(linkInfo)
+                return c_walletInterface.getKeyBalance(linkInfo)
             elif (url.startswith("/wallet/list/allbalances")):
-                return c_faucetInterface.getAllBalance(linkInfo)
+                return c_walletInterface.getAllBalance(linkInfo)
             elif (url.startswith("/wallet/list/allbalance")):
-                return c_faucetInterface.getWalletBalance(linkInfo)
+                return c_walletInterface.getWalletBalance(linkInfo)
             elif (url.startswith("/wallet/list/allkeybalance")):
-                return c_faucetInterface.getWalletKeyBalance(linkInfo)
+                return c_walletInterface.getWalletKeyBalance(linkInfo)
             elif (url.startswith("/wallet/list/allTXs/")):
-                return c_faucetInterface.getAllTX(linkInfo)
+                return c_walletInterface.getAllTX(linkInfo)
             elif (url.startswith("/wallet/list/allTX/")):
-                return c_faucetInterface.getWalletTX(linkInfo)
+                return c_walletInterface.getWalletTX(linkInfo)
 
         if (urlID == 'addr'):
             return setOK(linkInfo)

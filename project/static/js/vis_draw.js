@@ -206,7 +206,9 @@ function calcCoords() {
             if (!setXY("B", r[rr], x, y, size)) {
                 if (!setXY("W", r[rr], x, y, size)) {
                     if (!setXY("M", r[rr], x, y, size)) {
-                        //???
+                        if (!setXY("F", r[rr], x, y, size)) {
+                            //???
+                        }
                     }
                 }
             }

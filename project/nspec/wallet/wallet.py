@@ -5,10 +5,11 @@ from project.models import m_transaction_order
 from pycoin.ecdsa import generator_secp256k1, sign
 from project.utils import setOK, errMsg, putDataInOrder, getTime
 import sqlite3
-from project.nspec.wallet.modelW import m_db, regexWallet
+from project.nspec.wallet.modelW import m_db, regexWallet, m_balanceData
 from contextlib import closing
 import re
 from project.nspec.blockchain.verify import verifyAddr
+from copy import deepcopy
 
 
 class wallet:
@@ -250,25 +251,27 @@ class wallet:
 
     def getAllBalance(self, params):
         user = params['user']
-        bal = {'confirmedBalance': 0, 'pendingBalance': 0, 'safeBalance': 0}
+        bal = bal = deepcopy(m_balanceData)
         for key in self.doSelect("SELECT address FROM Wallet WHERE User='" + user + "'"):
             val, respCode = self.collectKeyBalance(key)
             if (respCode == 200):
-                bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
-                bal['pendingBalance'] = bal['pendingBalance'] + val['pendingBalance']
-                bal['safeBalance'] = bal['safeBalance'] + val['safeBalance']
+                self.sumBalance(bal, val)
         return setOK(bal)
+
+    def sumBalance(self, bal, val):
+        bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
+        bal['pendingBalance'] = bal['pendingBalance'] + val['pendingBalance']
+        # bal['safeBalance'] = bal['safeBalance'] + val['safeBalance']
+
 
     def getWalletBalance(self, params):
         wal = params['wallet']
         user = params['user']
-        bal = {'confirmedBalance': 0, 'pendingBalance': 0, 'safeBalance': 0}
+        bal = deepcopy(m_balanceData)
         for key in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
             val, respCode = self.collectKeyBalance(key)
             if (respCode == 200):
-                bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
-                bal['pendingBalance'] = bal['pendingBalance'] + val['pendingBalance']
-                bal['safeBalance'] = bal['safeBalance'] + val['safeBalance']
+                self.sumBalance(bal, val)
         return setOK(bal)
 
     def getWalletKeyBalance(self, params):
@@ -278,10 +281,10 @@ class wallet:
         for addr in self.doSelect("SELECT address FROM Wallet WHERE WName='" + wal + "' AND User='" + user + "'"):
             val, respCode = self.collectKeyBalance(addr)
             if (respCode == 200):
-                bal2 = {'confirmedBalance': 0, 'pendingBalance': 0, 'safeBalance': 0}
+                bal2 = deepcopy(m_balanceData)
                 bal2['confirmedBalance'] = val['confirmedBalance']
                 bal2['pendingBalance'] = val['pendingBalance']
-                bal2['safeBalance'] = + val['safeBalance']
+                bal2['safeBalance'] = val['safeBalance']
                 bal[addr] = bal2
         return setOK(bal)
 
