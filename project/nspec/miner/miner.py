@@ -6,7 +6,7 @@ from threading import Thread
 from project.nspec.blockchain.modelBC import m_candidateMiner, minBlockReward
 from project.utils import checkRequiredFields
 from project.models import defHash, m_cfg
-from project.nspec.miner.modelM import *
+from project.nspec.miner.modelM import cfg, newCandidate
 from project.pclass import c_peer
 from project.classes import c_walletInterface
 from copy import deepcopy
@@ -147,12 +147,12 @@ def doMine():
                     print("wrap around encountered")
                 count = count + 1
                 show = show + 1
-                if show > 20000:
+                if show > 25000:
                     print(str(count) + " "+str(candidate['nonce']))
                     show = 0
 
                 if count >= cfg['maxNonce']:
-                    print("Max loop reached, end attmempts")
+                    print("Max loop reached, end attempts")
                     break
                 #this does not use the make minershash as it is optimised for fixDat to be faster
                 minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
@@ -201,8 +201,6 @@ def initMiner(IP):
     if c_walletInterface.hasWallet(wallet) is False:
         c_walletInterface.addKeysToWalletBasic({'name': wallet, 'user': wallet+'AsUser', 'numKeys': 1, 'keyNames': ['minerKey']}, wallet)
     repl = c_walletInterface.getDataFor(['name', 'minerKey'], wallet, "", wallet+'AsUser')
-    #cfg['privKey'] = generate_private_key()
-    #cfg['address'] = get_public_address_from_privateKey(cfg['privKey'])
     cfg['address'] = repl[4]
     thread = Thread(target=pullCandidate)
     thread.start()

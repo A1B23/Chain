@@ -1,5 +1,5 @@
 from project.nspec.blockchain.modelBC import m_genesisSet, m_completeBlock
-from project.utils import genNodeID, isBCNode, isWallet, isMiner, isGenesis
+from project.utils import genNodeID, isBCNode, isWallet, isMiner, isGenesis, isFaucet
 from project.classes import c_blockchainNode, c_genesisInterface
 from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
@@ -32,7 +32,7 @@ def finalise(host, peer, port, type):
         initPendingTX()
     elif isMiner() is True:
         initMiner(host)
-    elif isWallet() is True:
+    elif (isWallet() is True) or (isFaucet() is True):
         #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
         m_db['db'] = sqlite3.connect(m_db['DATABASE'])
     elif isGenesis() is True:
@@ -104,6 +104,10 @@ def init(parser):
     m_cfg['minPeers'] = args.minPeers
     m_cfg['maxPeers'] = args.maxPeers
     m_cfg['mode'] = args.mode
+
+    if useNet >= len(m_genesisSet):
+        print("useNet reference has no genesis block...")
+        sys.exit(-1)
 
     if useNet == 0:
         m_info['about'] = "SoftUniChain/0.9-csharp"

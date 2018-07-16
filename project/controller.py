@@ -1,6 +1,6 @@
 from project import app, render_template
 from flask import request, jsonify
-from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis
+from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet
 import json, requests
 from project.InterfaceLocking import mainInterface
 import project.classes
@@ -213,6 +213,8 @@ def index():
         return render_template("indexBC" + addOn + ".html")
     if (isWallet()):
         return render_template("TabWallet" + addOn + ".html")
+    if (isFaucet()):
+        return render_template("TabFaucet" + addOn + ".html")
     if (isGenesis()):
         project.classes.c_genesisInterface.initGenesis()
         return render_template("TabGenesis" + addOn + ".html")

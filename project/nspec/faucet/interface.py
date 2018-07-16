@@ -1,10 +1,10 @@
-from project.utils import *
-from project.classes import c_walletInterface
+from project.utils import errMsg, setOK
+from project.classes import c_faucetInterface
 from project.models import m_info
 from project.nspec.wallet.modelW import m_db
 
 
-class walletInterface:
+class faucetInterface:
     def nodeSpecificGETNow(self, url, linkInfo):
         urlID = url[1:5]
         #if (urlID == 'send'):
@@ -21,21 +21,21 @@ class walletInterface:
 
         if urlID == 'wall':
             if (url.startswith("/wallet/list/wallet")):
-                return c_walletInterface.getAllWallets(linkInfo['user'])
+                return c_faucetInterface.getAllWallets(linkInfo['user'])
             elif (url.startswith("/wallet/list/keys/s")):
-                return c_walletInterface.getAllKeys(linkInfo)
+                return c_faucetInterface.getAllKeys(linkInfo)
             elif (url.startswith("/wallet/list/balance")):
-                return c_walletInterface.getKeyBalance(linkInfo)
+                return c_faucetInterface.getKeyBalance(linkInfo)
             elif (url.startswith("/wallet/list/allbalances")):
-                return c_walletInterface.getAllBalance(linkInfo)
+                return c_faucetInterface.getAllBalance(linkInfo)
             elif (url.startswith("/wallet/list/allbalance")):
-                return c_walletInterface.getWalletBalance(linkInfo)
+                return c_faucetInterface.getWalletBalance(linkInfo)
             elif (url.startswith("/wallet/list/allkeybalance")):
-                return c_walletInterface.getWalletKeyBalance(linkInfo)
+                return c_faucetInterface.getWalletKeyBalance(linkInfo)
             elif (url.startswith("/wallet/list/allTXs/")):
-                return c_walletInterface.getAllTX(linkInfo)
+                return c_faucetInterface.getAllTX(linkInfo)
             elif (url.startswith("/wallet/list/allTX/")):
-                return c_walletInterface.getWalletTX(linkInfo)
+                return c_faucetInterface.getWalletTX(linkInfo)
 
         if (urlID == 'addr'):
             return setOK(linkInfo)
@@ -50,7 +50,7 @@ class walletInterface:
             'linkInfo': linkInfo
         }
         ## put your logic here and create the reply as next line
-        return jsonify(response), 400
+        return errMsg(response)
 
 
     def nodeSpecificPOSTNow(self, url, linkInfo, json, request):
@@ -61,11 +61,11 @@ class walletInterface:
 
         if (urlID == 'wallet'):
             if (url.startswith("/wallet/transfer")):
-                return c_walletInterface.payment(json)
+                return c_faucetInterface.payment(json)
             elif (url.startswith("/wallet/createKey")):
-                return c_walletInterface.createKeys(json)
+                return c_faucetInterface.createKeys(json)
             elif (url.startswith("/wallet/create")):
-                return c_walletInterface.createWallet(json)
+                return c_faucetInterface.createWallet(json)
 
         #json contains the json object submitted during the POST
         response = {
@@ -73,4 +73,4 @@ class walletInterface:
             'info': "This API is not (yet) implemented...."
         }
         ## put your logic here and create the reply as next line
-        return jsonify(response), 400
+        return errMsg(response)

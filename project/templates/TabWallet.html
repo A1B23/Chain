@@ -281,8 +281,8 @@
         <br /><br />
         Most recent transaction hash: <span id="TxHash"></span>
         <div class="tab subtab paytab">
-            <button class="tablinks paytab" onclick="openTab(event, 'paytab','otherPay')">Payment to any account</button>
-            <button class="tablinks paytab" onclick="openTab(event, 'paytab','selfPay')">Transfer to own selected Wallet</button>
+            <button class="tablinks paytab" onclick="openTab(event, 'paytab','otherPay')" style="background-color: #fc4f17">Payment to any account</button>
+            <button class="tablinks paytab" onclick="openTab(event, 'paytab','selfPay')" style="background-color: #7ef78a">Transfer to own selected Wallet</button>
             <button class="tablinks paytab" onclick="openTab(event, 'paytab','infop')">Info</button>
         </div>
         <div id="otherPay" class="tabcontent paytab">
@@ -1063,7 +1063,7 @@
                 prepareSelectWallet("txWallet", false);
             } else if (tabName === "walletpTX") {
                 prepareSelectWallet("txpWallet", false);
-            } if (tabName === "Payment") {
+            } else if (tabName === "Payment") {
                 preparePayment();
             }
         }
