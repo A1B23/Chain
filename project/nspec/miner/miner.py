@@ -1,10 +1,9 @@
 import hashlib
 from time import sleep
 import random
-from project.utils import getFutureTimeStamp
 from threading import Thread
 from project.nspec.blockchain.modelBC import m_candidateMiner, minBlockReward
-from project.utils import checkRequiredFields
+from project.utils import checkRequiredFields, getFutureTime
 from project.models import defHash, m_cfg
 from project.nspec.miner.modelM import cfg, newCandidate
 from project.pclass import c_peer
@@ -27,15 +26,6 @@ def getCandidate():
         return resp
     except Exception:
         return {'peerError': True}
-
-
-def getEstimatedTimeStamp(diff):
-    # we need to estimate the reasonable time is takes to find solution
-    # which is based on difficulty, because if the timestamp is not realistic
-    # and we want to adjust difficulty based on actual calculatoin power, then the
-    # timestamp will not work, but this assumes the timestamp is a crucial element for
-    # the decision
-    return getFutureTimeStamp(diff*1000) #TODO test
 
 
 def isDataValid(resp_text):
@@ -67,6 +57,20 @@ def isDataValid(resp_text):
     return True
 
 
+def changeNonceDate():
+    cfg['findNonce'] = False
+    while cfg['waitAck'] is False:
+        sleep(1)
+    cfg['countSame'] = 0
+    #TODO how to realistically estimate solution date, what are permitted differences?
+    newCandidate['dateCreated'] = getFutureTime((newCandidate['difficulty']-4)*(newCandidate['difficulty']-4)*10)
+    newCandidate['fixDat'] = newCandidate['blockDataHash'] + "|" + newCandidate['dateCreated'] + "|"
+    newCandidate['nonce'] = random.randint(0, cfg['maxNonce'] - 1)  # avoid that each miner starts at same level
+    print("Start Nonce " + str(newCandidate['nonce']))
+    cfg['findNonce'] = True
+    cfg['waitAck'] = False
+    return
+
 def pull():
     try:
         print("asking")
@@ -89,11 +93,15 @@ def pull():
             cfg['lastHash'] = resp_text['blockDataHash']
             newCandidate['blockDataHash'] = resp_text['blockDataHash']
             newCandidate['difficulty'] = resp_text['difficulty']
-            newCandidate['dateCreated'] = getEstimatedTimeStamp(newCandidate['difficulty'])
-            newCandidate['fixDat'] = newCandidate['blockDataHash'] + "|" + newCandidate['dateCreated'] + "|"
-            newCandidate['nonce'] = random.randint(0, cfg['maxNonce']-1)  # avoid that each miner starts at same level
-            cfg['findNonce'] = True
-            cfg['waitAck'] = False
+            changeNonceDate()
+        else:
+            cfg['countSame'] = cfg['countSame'] + 1
+            #TODO stratgey: go by number of pulls or go by number of tries? Here it is pulls
+            #but aside from pulls if we ever reach maxcount of nonce tries, we also change
+            if (cfg['countSame'] > cfg['refresh']) and (cfg['foundSolution'] is False):
+                #as the block has not changed, we change the date and restart
+                changeNonceDate()
+
 
     except Exception:
         print("No/Invalid peer reply, retry....")
@@ -131,16 +139,15 @@ def doMine():
                 cfg['waitAck'] = True
         candidate = deepcopy(newCandidate)
         cfg['waitAck'] = False
-        print("Start Nonce "+str(candidate['nonce']))
         target = cfg['zero_string'][:candidate['difficulty']]
         try:
             # Request and wait a response from the N/W
-            foundSolution = False
+            cfg['foundSolution'] = False
             count = 0
             #TODO remove the show once it works?
             show = 0
             minedBlockHash = "N/A"
-            while (foundSolution is False) and (cfg['findNonce'] is True):
+            while (cfg['foundSolution'] is False) and (cfg['findNonce'] is True):
                 candidate['nonce'] = candidate['nonce'] + 1
                 if candidate['nonce'] >= cfg['maxNonce']:
                     candidate['nonce'] = 0
@@ -151,18 +158,22 @@ def doMine():
                     print(str(count) + " "+str(candidate['nonce']))
                     show = 0
 
-                if count >= cfg['maxNonce']:
-                    print("Max loop reached, end attempts")
-                    break
+                if count >= cfg['maxNonceTry']:
+                    print("Max trial number reached, get new date")
+                    cfg['waitAck'] = True
+                    changeNonceDate()
+                    candidate = deepcopy(newCandidate)
+                    count = 0
+
                 #this does not use the make minershash as it is optimised for fixDat to be faster
                 minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
 
                 if minedBlockHash[:candidate['difficulty']] == target:
-                    foundSolution = True
+                    cfg['foundSolution'] = True
 
             cfg['findNonce'] = False
             cfg['done'] = True
-            if foundSolution is True:
+            if cfg['foundSolution'] is True:
                 # After finding a hashcode, now submit the mined block by POST
                 # Data for POST
                 ndata = {
@@ -194,7 +205,7 @@ def doMine():
 
 
 def initMiner(IP):
-    random.seed(a=getFutureTimeStamp(0))
+    random.seed(a=hashlib.sha256(getFutureTime(0)))
     cfg['pulling'] = True
     #TODO make minerWallet name configurable so that they don't overwrite each other when run locally
     wallet = 'minerWallet' + (IP[-2:].replace(".", "x"))

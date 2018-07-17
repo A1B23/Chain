@@ -22,7 +22,7 @@ class transactions:
         }
         if (len(address) != len(defAdr)):
             errMsg("Inavlid Address Len")
-        response = self.getPendTXByAddress(address)
+        response = self.getPendTXByAddress(address) #order not clearly defined in slide29, pending more important
         # if a given hash is found already, no other exists, else keep searching
         #there is no pending, so return all
         # if (len(hash) == 0) or (len(response) == 0):

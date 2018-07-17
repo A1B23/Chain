@@ -62,16 +62,18 @@ class blockChainNode:
         m_stats.update(sysIn['m_stats'])
 
     def getMinerCandidate(self, minerAddress):
+        #TODO share same block for different miner later on to save memory
         if minerAddress in m_BufferMinerCandidates:
             cand = m_BufferMinerCandidates[minerAddress]['mineCandidate']
             if cand['index'] == m_candidateBlock['index']:
                 if m_BufferMinerCandidates[minerAddress]['minerBlock']['blockDataHash'] == m_candidateBlock['blockDataHash']:
-                    m_BufferMinerCandidates[minerAddress]['countRepeat'] = m_BufferMinerCandidates[minerAddress]['countRepeat'] + 1
+                    ##m_BufferMinerCandidates[minerAddress]['countRepeat'] = m_BufferMinerCandidates[minerAddress]['countRepeat'] + 1
                     ### If there is no solution and no miner can find a solution, then unless a new tx
                     ### comes in the network hangs, so need to limit the number of reuse here and change the timestamp
-                    if m_BufferMinerCandidates[minerAddress]['countRepeat'] < maxSameBlockPerMiner:
-                        return setOK(cand) #if nothing has changed, return same block
+                    ##if m_BufferMinerCandidates[minerAddress]['countRepeat'] < maxSameBlockPerMiner:
+                    ##    return setOK(cand) #if nothing has changed, return same block
 
+                    return setOK(cand)  # if nothing has changed, return same block
         # as candidate blocks change with every new TX and different miners might deal
         # with different blocks, we must keep the miner specific block in case the
         # miner succeeds
@@ -106,7 +108,6 @@ class blockChainNode:
         print("Generate new candidate for miner: " + minerAddress + " with Hash: " + candidateMiner['blockDataHash'] + " reward: " + str(fees))
         m_BufferMinerCandidates[minerAddress] = {}
         m_BufferMinerCandidates[minerAddress]['mineCandidate'] = deepcopy(candidateMiner)
-        m_BufferMinerCandidates[minerAddress]['countRepeat'] = 0
         m_BufferMinerCandidates[minerAddress]['minerBlock'] = minerSpecificBlock
         return setOK(candidateMiner)
 

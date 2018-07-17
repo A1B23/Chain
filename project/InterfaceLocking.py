@@ -1,4 +1,4 @@
-from project.utils import isBCNode, isWallet, isGenesis, isFaucet, checkRequiredFields
+from project.utils import isBCNode, isWallet, isGenesis, isFaucet, checkRequiredFields, errMsg, setOK
 from project.nspec.blockchain.interface import chainInterface
 from project.nspec.wallet.interface import walletInterface
 from project.nspec.faucet.interface import faucetInterface
@@ -6,7 +6,6 @@ from project.nspec.genesis.interface import genesisInterface
 from project.models import m_permittedPOST, m_permittedGET, m_cfg, m_simpleLock, m_isPOST, m_peerSkip, m_info
 from time import sleep
 import re
-from flask import jsonify
 
 
 
@@ -47,10 +46,7 @@ class mainInterface:
         }
         try:
             if (not self.permittedURLGET(url)):
-                response = {
-                    'errMsg': "This URL/API is invalid or not available. " + url
-                }
-                return jsonify(response), 400
+                return errMsg("This URL/API is invalid or not available. " + url)
             if (not "statusChain" in m_cfg):
                 m_cfg['statusChain'] = False    #backward compatible
             while ((len(m_isPOST)>0) or (m_cfg['statusChain']==True)):
@@ -83,25 +79,31 @@ class mainInterface:
         }
 
         try:
+
+            for x in json:
+                if not re.match("[0-9a-zA-Z]+", x):
+                    return errMsg("Invalid JSON key: " + str(x))
+                if isinstance(json[x],int) is False:
+                    if not re.match("[0-9a-zA-Z \.%!@#$\-_+=;:,/?<>]*", json[x]):
+                        return errMsg("Invalid character in JSON data: "+str(x))
+
             # This is only applicable to POST, and is a shortcut to stop endless broadcast
             # of the same message
             for urlJson in m_peerSkip:
                 if (urlJson['url'] == url):
-                    m, l, f = checkRequiredFields(json, urlJson['json'], urlJson['json'],True)
+                    m, l, f = checkRequiredFields(json, urlJson['json'], urlJson['json'], True)
                     if ((len(m)==0) and (len(f)==0)):
-                        response = {
-                            'message': "Acknowledge... "
-                        }
-                        return jsonify(response), 200
+                        #TODO what text here?
+                        return setOK("Acknowledge... ")
             # TODO for bigger network, make this bigger as well?
-            if (len(m_peerSkip) > 10):
+            if len(m_peerSkip) > 10:
                 del m_peerSkip[0]
 
-            if (not self.permittedURLPOST(url)):
-                response = {
-                    'errMsg': "This URL/API is invalid or not available. " + url
-                }
-                return jsonify(response), 400
+            if self.permittedURLPOST(url) is False:
+                return errMsg("This URL/API is invalid or not available. " + url)
+
+
+
             m_isPOST.append(url)
 
             while ((len(m_isPOST)>1) or (m_cfg['statusChain']==True)):

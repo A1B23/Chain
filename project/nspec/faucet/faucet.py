@@ -6,6 +6,7 @@ import project.classes
 
 class faucet:
     def getAllKeys(self, params):
+        #TODO split this in wallet o get the data an d then wallet return and faucet process further at the end
         wal = 'unidentified'
         try:
             wal = params['wallet']

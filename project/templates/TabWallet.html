@@ -106,22 +106,23 @@
     <br />Current State: <span id="state">No wallet selected</span><br />
     All values and payments are measured in micro-coins
 
-    <div class="tab maintab">
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Wallets</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Keys')">Keys</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
+                                                                   <div class="tab maintab">
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Wallets</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Keys')">Keys</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','safeBalance')">safeBalance</button>
+                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
 
-        <br />
-        <br />
-        <div class="alert">
-            <span class="closebtn" onclick="closeAlert();">&times;</span>
-            <span id='alertText'></span>
-        </div>
-    </div>
+                                                                       <br />
+                                                                       <br />
+                                                                       <div class="alert">
+                                                                           <span class="closebtn" onclick="closeAlert();">&times;</span>
+                                                                           <span id='alertText'></span>
+                                                                       </div>
+                                                                   </div>
 
     <div id="Wallets" class="tabcontent maintab">
         <div class="tab subtab walletTab">
@@ -368,6 +369,7 @@
                 <option value="1">offline1</option>
             </select>
             <br />
+            <input type="checkbox" id="useSafeBalance"> Additionally calculate safeBalance (not yet implemented)<br />
             <button class="keys" onclick="JavaScript:getBalanceWallet($('#balWallet').val())">Show summed up balance</button><br />
             <button class="keys" onclick="JavaScript:getBalanceWalletKeys($('#balWallet').val())">Show balances by keys</button><br />
             <span id="balResult"></span>
@@ -381,6 +383,12 @@
             You can check for a single wallet, or check for all wallets at the same time<br />
             For can also check the balanmce for individual keys (same as during payment)
         </div>
+    </div>
+    <div id="safeBalance" class="tabcontent maintab">
+        In future we want to allow the user to define what is considered 'safe' as this depends on factors like
+        amount of value or difficulty etc. This is not fixed to 6 confirmations, as in Nakov chain.
+        <br />
+        Implementation pending....
     </div>
     <div id="TxView" class="tabcontent maintab">
         <input type="radio" name="type" value="0" /> address

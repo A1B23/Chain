@@ -24,18 +24,15 @@ def sha256StrToHex(toStr):
     return hashlib.sha256(toStr.encode("utf8")).hexdigest()
 
 
-def getFutureTimeStamp(addedTime):
-    #TODO add a few sseconds addedTime, which depends on difficulty to the time stamp
-    timestamp = (datetime.datetime.now()).isoformat()
-    timestamp = timestamp + "Z"
-    return timestamp
-
-
 def getTime():
     timestamp = datetime.datetime.now().isoformat()
     timestamp = timestamp[:timestamp.index(".")+4] + "Z"
     return timestamp
 
+def getFutureTime(deltaInSecs):
+    timestamp = datetime.datetime.now().timedelta(seconds=deltaInSecs).isoformat()
+    timestamp = timestamp[:timestamp.index(".")+4] + "Z"
+    return timestamp
 
 def genNodeID():
     timestamp = (time.time() * 10000)

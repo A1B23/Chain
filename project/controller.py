@@ -165,6 +165,7 @@ def peers_connect():
     linkInfo = {}
     try:
         values = request.get_json()
+        #TODO clean json
         repl = c_peer.peersConnect(request.path, linkInfo, values, request)
         what, code = repl
         if what.status_code == 200:
