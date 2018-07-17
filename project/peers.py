@@ -508,7 +508,7 @@ class peers:
             if self.checkPeerAliveAndValid(newNode) is False:
                 del m_cfg['peers'][newNode]
                 return errMsg("Invalid or not connected peer/chain: " + newNode)
-            return setOK({'message': 'Connected to peer: '+newNode})
+            return setOK('Connected to peer: '+newNode)
         return errMsg("Invalid peer/chain/recursion: " + newNode)
 
     def listPeers(self):

@@ -205,7 +205,7 @@ def doMine():
 
 
 def initMiner(IP):
-    random.seed(a=hashlib.sha256(getFutureTime(0)))
+    random.seed(a=hashlib.sha256(getFutureTime(0).encode("utf8")))
     cfg['pulling'] = True
     #TODO make minerWallet name configurable so that they don't overwrite each other when run locally
     wallet = 'minerWallet' + (IP[-2:].replace(".", "x"))

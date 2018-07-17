@@ -292,7 +292,7 @@
                     <td width="70%">
                         Provide recipient's<br />
                         address <input type="text" id="otherAddress" value="" size="60">, or<br />
-                        public key <input type="text" id="otherPubKey" value="" size="60"><br />
+                        public key <input type="text" id="otherPubKey" value="" size="80"><br />
                     </td>
                     <td width="*" valign="center">
                         <button class="keys" onclick="JavaScript:payAccount()" style="color: white; background-color: #c11515">Proceed for payment to provided account</button>
@@ -751,7 +751,7 @@
                     doAlert("Only one recipient information to be provided!", 0);
                     return;
                 }
-                dat.push("publicKey");
+                dat.push("pubKey");
                 dat.push(ref);
             }
             params['walletDest'] = "";

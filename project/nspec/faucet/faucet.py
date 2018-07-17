@@ -58,18 +58,18 @@ class faucet:
                 return "Invalid fee"
             total = fee + json['amount']
             addrN = json['source'][0]
-            if addrN != "address":
+            if (addrN != "address") or ((json['receiver'][0] != "address") and (json['receiver'][0] != "pubKey")):
                 return "Invalid address reference"
             addr = json['source'][1]
             src = json['walletSrc']
-            for k in project.classes.c_walletInterface.doSelect("SELECT address FROM Wallet WHERE WName='" + src + "' AND User='" + src + "'"):
-                if k == addr:
-                    return "Invalid address reference" #no payment to faucet itself, which just drains the funds
+            for k in project.classes.c_walletInterface.doSelect("SELECT " + json['receiver'][0]+" FROM Wallet WHERE WName='" + src + "' AND User='" + src + "'"):
+                if k == json['receiver'][1]:
+                    return "Invalid recipient reference" #no payment to faucet itself, which just drains the funds
 
             maxTotal = project.classes.c_walletInterface.doSelect("SELECT KName FROM Wallet WHERE WName='" + src + "' AND User='" + src + "' AND address='"+addr+"'")
             if json['walletPW'] != maxTotal[0].split("#")[2]:
                  return "Invalid address reference"
-            if (fee >= total) or (total > maxTotal[0].split("#")[1]):
+            if (fee >= total) or (total > int(maxTotal[0].split("#")[1])):
                 return "Sum outside permitted range for individual request"
             return ""
         except Exception:

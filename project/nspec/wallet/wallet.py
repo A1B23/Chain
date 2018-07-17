@@ -227,9 +227,11 @@ class wallet:
                 resps = c_peer.sendPOSTToPeers("transactions/send", signedTX)
                 if len(resps) == 0:
                     return errMsg("No peer reachable, please retry again or check peer settings...")
-                #TODO should we compare all replies??? Not really??? Just take first one?
-                resp = resps[0].json()
-                return setOK(resp)
+                #TODO should we compare all replies??? Not really??? Just take first one...
+                for xx in resps:
+                    if len(xx) != 0:
+                        return setOK(xx.json())
+                return errMsg("No peer reachable, please retry again or check peer settings...")
             return errMsg("Payment/transfer failed due to parameter for keys")
         except Exception:
             return errMsg("Payment/transfer failed due to parameter error")

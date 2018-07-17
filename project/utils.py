@@ -30,7 +30,7 @@ def getTime():
     return timestamp
 
 def getFutureTime(deltaInSecs):
-    timestamp = datetime.datetime.now().timedelta(seconds=deltaInSecs).isoformat()
+    timestamp = (datetime.datetime.now() + datetime.timedelta(seconds=deltaInSecs)).isoformat()
     timestamp = timestamp[:timestamp.index(".")+4] + "Z"
     return timestamp
 

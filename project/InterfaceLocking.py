@@ -83,9 +83,16 @@ class mainInterface:
             for x in json:
                 if not re.match("[0-9a-zA-Z]+", x):
                     return errMsg("Invalid JSON key: " + str(x))
-                if isinstance(json[x],int) is False:
+                if isinstance(json[x],str) is True:
                     if not re.match("[0-9a-zA-Z \.%!@#$\-_+=;:,/?<>]*", json[x]):
                         return errMsg("Invalid character in JSON data: "+str(x))
+                elif isinstance(json[x], list) is True:
+                    for xx in json[x]:
+                        if isinstance(xx, str) is True:
+                            if not re.match("[0-9a-zA-Z \.%!@#$\-_+=;:,/?<>]*", xx):
+                                return errMsg("Invalid character in JSON data: " + str(xx))
+                elif isinstance(json[x], int) is False:
+                    return errMsg("Invalid character in JSON data: " + str(json[x]))
 
             # This is only applicable to POST, and is a shortcut to stop endless broadcast
             # of the same message
