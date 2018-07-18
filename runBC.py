@@ -20,7 +20,8 @@ if __name__ == "__main__":
         "/address/[0-9a-f]+/balance",
         "/peers",
         "/listNodes",  # TODO test only
-        "/mining/get-mining-job/[0-9a-f]+$"
+        "/mining/get-mining-job/[0-9a-f]+$",
+        "/blocks/hash/[0-9]+/[0-9]+/[0-9]+"
     ])
     main("BCNode")
 

@@ -173,7 +173,7 @@ class wallet:
         cmd = cmd + " from Wallet where WName='" + wallet + "' AND "
         if (keyRef[0] == "address"):
             cmd = cmd + "address='"+keyRef[1]
-        elif (keyRef[0] == "publicKey"):
+        elif (keyRef[0] == "pubKey"):
             cmd = cmd + "pubKey='"+keyRef[1]
         elif (keyRef[0] == "name"):
             cmd = cmd + "KName='" + keyRef[1]
@@ -203,15 +203,16 @@ class wallet:
             if (toWallet == ""):
                 if (finalAddress[0] == "address"):
                     recAddress = finalAddress[1]
-                else:
+                elif (finalAddress[0] == "pubKey"):
                     recAddress = public_key_compressed_to_address(finalAddress[1])
+                else:
+                    return errMsg("Invalid recipient reference")
             else:
                 if (not pattern.match(toWallet)):
                     return errMsg("Invalid destination wallet name")
                 if (not self.hasWallet(toWallet)):
                     return errMsg("Invalid destination wallet name")
-                keys = self.getDataFor(finalAddress, toWallet, "address", user)
-                recAddress = keys[0]
+                recAddress = self.getDataFor(finalAddress, toWallet, "address", user)[0]
             keys = self.getDataFor(keyref, fromWallet, "", user)
             #get address based on wallet info and database verification even for address
             #get final address based on SQL query with final address and walref
@@ -293,7 +294,6 @@ class wallet:
                     bal2 = deepcopy(m_balanceData)
                     bal2['confirmedBalance'] = val['confirmedBalance']
                     bal2['pendingBalance'] = val['pendingBalance']
-                    bal2['safeBalance'] = val['safeBalance']
                     bal[addr] = bal2
             return setOK(bal)
         except Exception:

@@ -123,6 +123,11 @@ def blocks_getByNumber(number):
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 
+@app.route('/blocks/hash/<int:hfrom>/<int:hto>/<int:hcnt>', methods=['GET'])
+def getBlockHash(hfrom, hto, hcnt):
+    linkInfo = {"from": hfrom, "to": hto, 'cnt': hcnt}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
 @app.route('/transactions/<TXHash>', methods=["GET"])
 def transactions_hash(TXHash):
     linkInfo = {"TXHash": TXHash}

@@ -10,8 +10,10 @@ class chainInterface:
         #TODO ensure for all who have no parameter in URL hat linkoinfo is empty!
         if (urlID == 'block'):
             if (linkInfo == {}):
-                return jsonify(m_Blocks),200
+                return setOK(m_Blocks)
             else:
+                if url.startswith("/blocks/hash"):
+                    return c_blockchainNode.c_blockchainHandler.getBlockHash(linkInfo)
                 return c_blockchainNode.c_blockchainHandler.getJSONBlockByNumber((int) (linkInfo['blockNumber']))
 
         elif (urlID == "minin"):

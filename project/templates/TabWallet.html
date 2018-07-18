@@ -106,23 +106,23 @@
     <br />Current State: <span id="state">No wallet selected</span><br />
     All values and payments are measured in micro-coins
 
-                                                                   <div class="tab maintab">
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Wallets</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Keys')">Keys</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','safeBalance')">safeBalance</button>
-                                                                       <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
+    <div class="tab maintab">
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Wallets')">Wallets</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Keys')">Keys</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','safeBalance')">safeBalance</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
 
-                                                                       <br />
-                                                                       <br />
-                                                                       <div class="alert">
-                                                                           <span class="closebtn" onclick="closeAlert();">&times;</span>
-                                                                           <span id='alertText'></span>
-                                                                       </div>
-                                                                   </div>
+        <br />
+        <br />
+        <div class="alert">
+            <span class="closebtn" onclick="closeAlert();">&times;</span>
+            <span id='alertText'></span>
+        </div>
+    </div>
 
     <div id="Wallets" class="tabcontent maintab">
         <div class="tab subtab walletTab">
@@ -847,7 +847,7 @@
             var ret = []
 
             if (valp) {
-                ret.push("publicKey");
+                ret.push("pubKey");
                 ret.push(valp);
                 if ((vala) || (valn)) {
                     return [];
@@ -944,7 +944,7 @@
             var json = repl[0];
             var code = repl[1];
             if (code == 200) {
-                doAlert("Tx succeeded " + JSON.stringify(json), 8);
+                doAlert("Key balance " + JSON.stringify(json), 8);
             } else {
                 doAlert(JSON.stringify(json), 0);
             }
@@ -970,7 +970,7 @@
                 var cnt = 1;
                 for (var ad = 0; ad < json.length; ad++) {
                     for (var txt in json[ad]) {
-                        if ((txt == 'address') || (txt == "keyName") || (txt == "publicKey")) {
+                        if ((txt == 'address') || (txt == "keyName") || (txt == "pubKey")) {
                             var address = json[ad][txt].replace("/", "<br />")
                             var typeN = txt
                         } else {

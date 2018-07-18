@@ -169,7 +169,8 @@
             <option value="0">offline0</option>
             <option value="1">offline1</option>
         </select>        <button onclick="JavaScript:toClipBoard('selPayKeyA')" style="color: white; background-color: #808080">Copy</button>
-        <br />        
+        <br />  
+        <button class="keys" onclick="JavaScript:chkBalForKey('')">Check key balance</button>
         <div id="payPw"></div>
         <br />
         Maximum donation from this faucet: <span id="smax">0</span><br />
@@ -612,13 +613,13 @@
         }
 
         function getSingleSel(use) {
-            var valp = $('#selPayKeyP' + use).find(":selected").val();
-            var vala = $('#selPayKeyA' + use).find(":selected").val();
-            var valn = $('#selPayKeyN' + use).find(":selected").val();
+            var valp = $('#selPayKeyP' + use).find(":selected").text();
+            var vala = $('#selPayKeyA' + use).find(":selected").text();
+            var valn = $('#selPayKeyN' + use).find(":selected").text();
             var ret = []
 
             if (valp) {
-                ret.push("publicKey");
+                ret.push("pubKey");
                 ret.push(valp);
                 if ((vala) || (valn)) {
                     return [];
@@ -715,7 +716,7 @@
             var json = repl[0];
             var code = repl[1];
             if (code == 200) {
-                doAlert("Tx succeeded " + JSON.stringify(json), 8);
+                doAlert("Key balance " + JSON.stringify(json), 8);
             } else {
                 doAlert(JSON.stringify(json), 0);
             }
@@ -741,7 +742,7 @@
                 var cnt = 1;
                 for (var ad = 0; ad < json.length; ad++) {
                     for (var txt in json[ad]) {
-                        if ((txt == 'address') || (txt == "keyName") || (txt == "publicKey")) {
+                        if ((txt == 'address') || (txt == "keyName") || (txt == "pubKey")) {
                             var address = json[ad][txt].replace("/", "<br />")
                             var typeN = txt
                         } else {

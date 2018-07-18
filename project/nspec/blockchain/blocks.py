@@ -6,6 +6,7 @@ from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidate
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_candidateBlockBalance, m_static_emptyBlock
 from project.nspec.blockchain.modelBC import m_stats #, m_peerToBlock
 from project.utils import checkRequiredFields, isSameChain, setOK, errMsg
+from project.models import defHash
 from project.pclass import c_peer
 from copy import deepcopy
 import sys
@@ -255,3 +256,20 @@ class blockchain:
         if len(blk) > 0:
             return setOK(blk)
         return errMsg('BlockNumber not valid or not existent: '+str(blockNr))
+
+    def getBlockHash(self,params):
+        try:
+            hfrom = +params['from']
+            hto = +params['to']
+            hcnt = +params['cnt']
+            if (hfrom < 0) or (hfrom >= len(m_Blocks)) or (hto < hfrom) or \
+                    (hto >= len(m_Blocks)) or (hcnt < 0) or (hcnt > len(defHash)):
+                return errMsg("Inconsistent request")
+            repl = {}
+            if hcnt == 0:
+                hcnt = len(defHash)
+            for x in range(hfrom, hto+1):
+                repl.update({""+str(x):m_Blocks[x]['blockDataHash'][0:hcnt]})
+            return setOK(repl)
+        except Exception:
+            return errMsg("Invalid parameters")

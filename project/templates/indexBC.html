@@ -116,6 +116,7 @@
         <div class="tab subtab blockTab">
             <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'allBlocks'); doDirect('blocks','AB')">All blocks</button>
             <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'blockNum')">Block by number</button>
+            <button class="tablinks blockTab" onclick="JavaScript: openTab(event, 'blockTab', 'blockHash')">Block hashList</button>
         </div>
         <div id="allBlocks" class="tabcontent blockTab">
             Limit for table view:<br />
@@ -126,6 +127,14 @@
             Provide blocknumber<input type="text" id="paramBN" value="" size="20"><button class="tablinks txTab" onclick="JavaScript: doParameter('blocks/?', 'BN');">Submit</button><br />
             <div id="optionsBN"></div>
             <span id="resultBN">Command results....</span>
+        </div>
+        <div id="blockHash" class="tabcontent blockTab">
+            First block <input type="text" id="paramBHF" value="" size="5"><br />
+            Last block <input type="text" id="paramBHT" value="" size="5"><br />
+            HashLength <input type="text" id="paramBHL" value="" size="5"><br />
+            <button class="tablinks txTab" onclick="JavaScript: doParameter('blocks/hash/?/?/?', 'BHF,BHT,BHL');">Submit</button><br />
+            <div id="optionsBHL"></div>
+            <span id="resultBHL">Command results....</span>
         </div>
     </div>
 
@@ -331,9 +340,14 @@
             }
         }
 
-        function doParameter(url, ext) {
-            var par = $("#param" + ext).val();
-            doDirect(url.replace("?", par), ext);
+        function doParameter(url, extIn) {
+            var pars = extIn.split(",")
+            for (var i = 0; i < pars.length; i++) {
+                var par = $("#param" + pars[i].trim()).val();
+                url = url.replace("?", par)
+                ext = pars[i]
+            }
+            doDirect(url, ext);
         }
 
         function doDirect(url, ext) {
