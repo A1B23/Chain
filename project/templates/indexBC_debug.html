@@ -30,9 +30,11 @@
                        <br /><button type="button" onClick="JavaScript:doGET('info')" style="background-color:#4CAF50"> /info</button>
                        <br /><button type="button" onClick="JavaScript:doGET('debug')" style="background-color:#0eb14d"> /debug</button>
                        <br /><button type="button" onClick="JavaScript:doGET('debug/reset-chain')" style="background-color:#0eb14d"> /debug/reset-chain</button>
-                       <br /><button type="button" onClick="JavaScript:doGET('debug/mine/{minerAddressd}/{difficulty}')" style="background-color:#0eb14d"> /debug/mine/{minerAddress}/{difficulty}</button><input type="text" size="12" value="0" id="pminerAddressd" /><input type="text" size="5" value="0" id="pdifficulty" />
+                       <br /><button type="button" onClick="JavaScript:doGET('removed debug/mine/{minerAddressd}/{difficulty}')" style="background-color:#0eb14d">[removed] /debug/mine/{minerAddress}/{difficulty}</button><input type="text" size="12" value="0" id="pminerAddressd" /><input type="text" size="5" value="0" id="pdifficulty" />
                        <br /><button type="button" onClick="JavaScript:doGET('blocks')" style="background-color:#e912e1"> /blocks</button>
                        <br /><button type="button" onClick="JavaScript:doGET('blocks/{number}')" style="background-color:#e912e1" )> /blocks/{number}</button><input type="text" size="5" value="0" id="pnumber" />
+                        <br /><button type="button" onClick="JavaScript:doGET('blocks/hash/{from}/{to}/{hlength}')" style="background-color:#e912e1" )> /blocks/{from}/{to}/{hlength}</button>
+                       <input type="text" size="5" value="0" id="pfrom" /><input type="text" size="5" value="0" id="pto" /><input type="text" size="5" value="0" id="phlength" />
                        <br /><button type="button" onClick="JavaScript:doGET('transactions/pending')" style="background-color:#ffd800"> /transactions/pending</button>
                        <br /><button type="button" onClick="JavaScript:doGET('transactions/confirmed')" style="background-color:#ffd800"> /transactions/confirmed</button>
                        <br /><button type="button" onClick="JavaScript:doGET('transactions/{TXHash}')" style="background-color:#ffd800"> /transactions/{TXHash}</button><input type="text" size="32" value="0" id="pTXHash" />

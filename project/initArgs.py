@@ -67,14 +67,14 @@ def main(type):
 
 def init(parser):
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
-    parser.add_argument('-hip', '--host', default="127.0.0.22", help='hostname/IP')
-    parser.add_argument('-con', '--connect', default="2", help='list of 127.0.0.x peers to send messages')
+    parser.add_argument('-hip', '--host', default="127.0.0.32", help='hostname/IP')
+    parser.add_argument('-con', '--connect', default="2", help='list of 127.0.0.x or full url peers to send messages')
     parser.add_argument('-cID', '--chainID', default="", help='identify net by genesis blockHash')
-    parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: NAPCoin')
+    parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: PDPCCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
     parser.add_argument('-maP', '--maxPeers', default=1, type=int, help='max peer communication, if more peers are known')
     parser.add_argument('-trk', '--canTrack', default="Y", help='use delay option to hold GET/POST until visualisation is updated')
-    parser.add_argument('-mod', '--mode', default="Y", help='modus of miner to work, e.g. y=await user to trigger mining')
+    parser.add_argument('-mod', '--mode', default="N", help='modus of miner to work, e.g. y=await user to trigger mining')
     parser.add_argument('-deb', '--asDebug', default="N", help='activate the debug GUI for the node instead of the user GUI')
 
     args = parser.parse_args()

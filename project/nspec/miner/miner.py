@@ -22,7 +22,10 @@ def miner_get(url):
 def getCandidate():
     try:
         resp = miner_get("/mining/get-mining-job/" + cfg['address'])
-        resp, code = resp[0][0]
+        if len(resp) == 1:
+            resp, code = resp[0]
+        else:
+            resp, code = resp[0][0]
         return resp
     except Exception:
         return {'peerError': True}
@@ -116,7 +119,7 @@ def pullCandidate():
     while m_cfg['shutdown'] is False:
         try:
             pull()
-            sleep(int(newCandidate['difficulty']/2)+1)
+            sleep(int(newCandidate['difficulty']/2)+2)
         except Exception:
             print("Pulling candidate block failed...")
 

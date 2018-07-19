@@ -62,14 +62,14 @@ class peers:
 
     def doGET(self, url):
         parsed_uri = urlparse(url)
-        domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
+        domain = '{uri.scheme}://{uri.netloc}{uri.path}'.format(uri=parsed_uri)
         # if domain + "cfg" == url:
         #     peerOffer = {
         #         "peerUrl": m_info['nodeUrl']
         #     }
         #     self.asynchPOST("peers/connect", peerOffer, " ")
-        self.visualDelay(self.makeDelay(url, {}, False))
-        return requests.get(url=url, headers={'accept': 'application/json'})
+        self.visualDelay(self.makeDelay(domain, {}, False))
+        return requests.get(url=domain, headers={'accept': 'application/json'})
 
     def asPost(self, type, url, json, cnt):
         for peer in self.randomOrderFor(m_cfg[type]):
@@ -344,14 +344,30 @@ class peers:
                 else:
                     newNode = x
 
-                if (len(newNode) > 0) and (newNode != m_info['nodeId']) and (not newNode in m_cfg['peerOption']):
-                    m_cfg['peerOption'][newNode] = deepcopy(m_peerInfo)
-                    m_cfg['peerOption'][newNode]['source'] = source
+                err = self.addPeerOption(newNode, source)
+                if len(err) >0 :
+                    print("Failed to register peer: " + err)
+
+
+    def addPeerOption(self, newURL, source):
+        try:
+            result = urlparse(newURL)
+            newURL = result.scheme+"://"+result.netloc
+        except Exception:
+            return "Invalid url structure"
+
+        if (newURL != m_info['nodeId']) and (newURL not in m_cfg['peerOption']):
+            if (newURL in m_cfg['activePeers']) or (newURL in m_cfg['shareToPeers']):
+                return "Already connected to peer: " + newURL
+            m_cfg['peerOption'][newURL] = deepcopy(m_peerInfo)
+            m_cfg['peerOption'][newURL]['source'] = source
+            return ""
+        return "Already connecting to peer: " + newURL
+
 
 
     def suitablePeer(self, peer, nodeId):
         try:
-            #TODO if we got peer recommended, check that is it the same nodeId
             s1 = self.doGET(peer + "/info")
             reply = json.loads(s1.text)
             m, l, f = checkRequiredFields(reply, m_info, ["chainId", "about"], False)
@@ -363,15 +379,13 @@ class peers:
                 m_info['peers'] = len(m_cfg['peers'])
                 return {'wrongChain': True}
 
-            # if nodeId != "startup":
-            #     if nodeId != reply['nodeId']:
-            #         #TODO do we want to keep this srtict link?? wallet restart???
-            #         return {'wrongID': True}
             if not self.ensureBCNode(reply['type']):
                 return {'wrongType': True}
+
             if isBCNode():
                 if reply['blocksCount'] > len(m_Blocks):
-                    #m_peerToBlock['addBlock'] = peer
+                    # TODO verify that the claimed block matched its advertisemnt in
+                    # TODO  blockscount, tx and cumulativeDifficulty!!
                     threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer(), args=(peer,))
                     threadp.start()
             return reply
@@ -480,6 +494,7 @@ class peers:
         while m_cfg['shutdown'] is False:
             if "statusChain" not in m_cfg:
                 m_cfg['statusChain'] = False       # backward compatibility
+            #TODO still using statusPeer statusChain?
             while m_cfg['statusChain']:
                 sleep(1)
             while m_cfg['statusPeer']:
@@ -489,27 +504,18 @@ class peers:
             sleep(m_cfg['peersCheckDelay']) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
 
-    # TODO newNode set too late and several vars not used??
-    def peersConnect(self, path, linkInfo, values, request):
-        try:
-            values = request.get_json()
-        except Exception:
-            return errMsg("JSON not decodeable")
-        #check = json.loads(values)
+
+    def peersConnect(self, source, values):
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)
         if len(m) > 0:
-            return errMsg("Missing field 'peerUrl': " + str(values))
-        newNode = values['peerUrl']
-        peers = m_cfg['peers']
-        for k in peers:
-            if newNode == k:
-                return errMsg("Already connected to peer: " + newNode, 409)
-        if self.addPeer(newNode, False):
-            if self.checkPeerAliveAndValid(newNode) is False:
-                del m_cfg['peers'][newNode]
-                return errMsg("Invalid or not connected peer/chain: " + newNode)
-            return setOK('Connected to peer: '+newNode)
-        return errMsg("Invalid peer/chain/recursion: " + newNode)
+            return errMsg("Missing field 'peerUrl' ")
+        err = self.addPeerOption(values['peerUrl'], source)
+        if len(err) == 0:
+            return setOK("Connection to peer registered")
+        if err.startswith("Already connected"):
+            return errMsg("Already connected to peer: " + values['peerUrl'], 409)
+        return errMsg(err)
+
 
     def listPeers(self):
         response = {}

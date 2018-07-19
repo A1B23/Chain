@@ -4,10 +4,11 @@ from project.nspec.blockchain.transact import transactions
 from project.nspec.blockchain.blocks import blockchain
 from project.nspec.blockchain.modelBC import m_genesisSet, m_candidateBlock, m_candidateMiner
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_coinBase, m_minerFoundNonce
-from project.nspec.blockchain.modelBC import minBlockReward, maxSameBlockPerMiner
+from project.nspec.blockchain.modelBC import minBlockReward
 from project.nspec.blockchain.modelBC import m_pendingTX, m_AllBalances, m_BufferMinerCandidates, m_stats, m_Blocks
 from project.models import m_info, m_peerInfo, m_transaction_order
 from project.models import m_cfg
+from project.nspec.blockchain.verify import verifyAddr
 from project.pclass import c_peer
 from copy import deepcopy
 
@@ -63,6 +64,9 @@ class blockChainNode:
 
     def getMinerCandidate(self, minerAddress):
         #TODO share same block for different miner later on to save memory
+        err = verifyAddr(minerAddress)
+        if len(err) > 0:
+            return errMsg(err)
         if minerAddress in m_BufferMinerCandidates:
             cand = m_BufferMinerCandidates[minerAddress]['mineCandidate']
             if cand['index'] == m_candidateBlock['index']:
@@ -77,6 +81,8 @@ class blockChainNode:
         # as candidate blocks change with every new TX and different miners might deal
         # with different blocks, we must keep the miner specific block in case the
         # miner succeeds
+        if 'prevBlockHash' not in m_candidateBlock:
+            self.c_blockchainHandler.prepareNewCandidateBlock()
         minerSpecificBlock = deepcopy(m_candidateBlock)
         # TODO need house-keeping if miners disappear and don't come back,
         # else we get a queue overflow attack by fake miners
@@ -98,7 +104,7 @@ class blockChainNode:
         coinBase['to'] = minerAddress
         coinBase['dateCreated'] = getTime()
         coinBase['transactionDataHash'] = sha256ToHex(m_transaction_order, coinBase)
-        minerSpecificBlock['transactions'][0] = coinBase #just overwrite first TX, miner gets money for empty as well
+        minerSpecificBlock['transactions'].append(coinBase) #just overwrite first TX, miner gets money for empty as well
         candidateMiner['transactionsIncluded'] = len(minerSpecificBlock['transactions']) #inlcudes coinbase
         # now the block is done, hash it for miner
         # need to calculate now the hash for this specific miner based candidateBlock

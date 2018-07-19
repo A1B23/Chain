@@ -7,6 +7,7 @@ from project.models import re_addr, re_pubKey, defAdr, defPub, defSig,m_transact
 from copy import deepcopy
 from flask import jsonify
 
+
 firstTime = [True]
 
 
@@ -59,7 +60,17 @@ def verifyBasicTX(trans, isCoinBase, ref):
     else:
         colErr = colErr + verifyAddr(trans['from'], trans['senderPubKey'])
     colErr = colErr + verifyAddr(trans['to'])
+
     return colErr
+
+def isUniqueTXInBlocks(hash):
+    #As there is no reliable element to prevent replay attacks, we must scan entire chain
+    # to check a TX has never been used before
+    for b in m_Blocks:
+        for tx in b['transactions']:
+            if (tx['transactionDataHash'] == hash):
+                return False
+    return True
 
 
 def verifyAddr(addr, pubKey=""):
@@ -119,8 +130,12 @@ def verifyBlockAndAllTX(block, isGenesis):
             ret = verifyBasicTX(trans, isCoinBase, m_staticTransactionRef)
             #TODO add TX to block has!
             if (len(ret)>0):
-                return ret
+                return ret #error case
+            # we only ned to check block hashes as here we have no pending TXs
+            if isUniqueTXInBlocks(trans['transactionDataHash']) == False:
+                return "Duplicate TX detected"
             isCoinBase = isGenesis  #geneis block verification only has coinbase like entries
+
     return ""
 
 def receivedNewTransaction(trans, fromPeer, share):
@@ -138,13 +153,14 @@ def receivedNewTransaction(trans, fromPeer, share):
 
         # Checks for collisions -> duplicated transactions are skipped
         if hash in m_pendingTX:
-            return errMsg("Duplicate TX received",400)
+            return errMsg("TX is duplicate of in pending TX")
 
-        #TODO Checks the sender account balance to be >= value + fee
-        #TODO Checks whether value >= 0 and fee > 10 (min fee)
+        if isUniqueTXInBlocks(hash) == False:
+            return errMsg("TX is duplicate of TX in existing block")
+
 
         #Puts the transaction in the "pending transactions" pool
-        m_pendingTX.update({trans['transactionDataHash']:deepcopy(trans)})
+        m_pendingTX.update({trans['transactionDataHash']: deepcopy(trans)})
         trans["transferSuccessful"] = True
         trans["minedInBlockIndex"] = len(m_Blocks)
         m_candidateBlock['transactions'].append(deepcopy(trans))

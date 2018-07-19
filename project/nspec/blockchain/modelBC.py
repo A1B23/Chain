@@ -223,7 +223,6 @@ m_AllBalances = {}
 m_balHistory = {
     #blockNumber: m_singleBalance
 }
-m_candidateBlockBalance = {}
 m_completeBlock = {}
 
 

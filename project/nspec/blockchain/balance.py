@@ -15,6 +15,22 @@ def createNewBalance(blockNo):
     return newInfo
 
 
+def updateTempBalance(txList, tempBalance):
+    for tx in txList:
+        afrom, ato, value, total, txhash = tx['from'], tx['to'], tx['value'], (tx['value']+tx['fee']), tx['transactionDataHash']
+        # this can be called either during block setting up
+        # or after receiving confirmed block
+        if not afrom in tempBalance:
+            tempBalance.update({afrom: 0})
+
+        tempBalance[afrom] = tempBalance[afrom] - total #reduce by value + fee
+
+        if not ato in tempBalance:
+            tempBalance.update({ato: value})
+        else:
+            tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
+    return True
+
 def updateConfirmedBalance(txList, isGenesis):
     tempBalance = {}
     for tx in txList:
@@ -49,25 +65,16 @@ def updateConfirmedBalance(txList, isGenesis):
             tempBalance.update({ato: m_AllBalances[ato]['curBalance']})
 
         tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
-        # m_candidateBlockBalance[ato][1] = m_candidateBlockBalance[ato][1] - pend
     return tempBalance
 
 def confirmUpdateBalances(txList, isGenesis):
-    # m_candidateBlockBalance.clear()
-    err = confirmUpdateBalancesNow(txList, isGenesis)
-    # m_candidateBlockBalance.clear()
-    return err
-
-
-def confirmUpdateBalancesNow(txList, isGenesis):
-    #TODO remove block index
     # entering here we know the structure of the TX are all ok, so settle only balances
     # first we update the buffer info, and only if all pass
     # then update the actual balances involved
     # theoretically if it is our own block, all should be correct, but we check anyway
     updBalance = updateConfirmedBalance(txList,isGenesis)
     if len(updBalance) == 0:
-        return "Block rejected, invalid TX detected in: " + tx['transactionDataHash']
+        return "Block rejected, invalid TX detected in: " + txList['transactionDataHash']
 
     # all tx in this block are valid, so update actual balances based on the results from checking
     for addr in updBalance:

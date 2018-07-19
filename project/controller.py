@@ -171,13 +171,7 @@ def peers_connect():
     try:
         values = request.get_json()
         #TODO clean json
-        repl = c_peer.peersConnect(request.path, linkInfo, values, request)
-        what, code = repl
-        if what.status_code == 200:
-            url = values['peerUrl']
-            threadx = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(url,))
-            threadx.start()
-        return repl
+        return c_peer.peersConnect(request.path, values)
     except Exception:
         return errMsg("JSON not decodeable")
 
@@ -196,10 +190,12 @@ def mining_submitBlock():
         return errMsg("JSON not decodable")
     return c_MainIntf.nodeSpecificPOST(request.path, linkInfo, values, request)
 
-@app.route('/debug/mine/<minerAddress>/<int:difficulty>', methods=["GET"])
-def debug_mining(minerAddress, difficulty):
-    linkInfo = {"address": minerAddress, "difficulty": difficulty}
-    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+#the next routre was removed, as it is not clear how a node can force a mining with arbitrary address
+#unless the node does its own mining, which doe snot make sense
+# @app.route('/debug/mine/<minerAddress>/<int:difficulty>', methods=["GET"])
+# def debug_mining(minerAddress, difficulty):
+#     linkInfo = {"address": minerAddress, "difficulty": difficulty}
+#     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
 
 #This table shows Flask’s built-in URL converters.
