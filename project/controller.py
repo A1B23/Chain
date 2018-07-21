@@ -9,7 +9,6 @@ from copy import deepcopy
 from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
 from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates
 import re
-from threading import Thread
 
 c_MainIntf = mainInterface()
 
@@ -24,7 +23,10 @@ def visualGet():
                 item['releaseID'] = dat['delayID']
                 del item['delayID']
                 break
-        return jsonify(dat), 200
+        dat['activePeers'] = m_cfg['activePeers']
+        dat['shareToPeers'] = m_cfg['shareToPeers']
+        dat['peerOption'] = m_cfg['peerOption']
+        return setOK(dat)
     except Exception:
         print("visualGet Failed")
     return errMsg("Request failed")
@@ -211,13 +213,13 @@ def index():
     if m_cfg['debug'] == True:
         addOn = "_debug"
 
-    if (isBCNode()):
+    if isBCNode() is True:
         return render_template("indexBC" + addOn + ".html")
-    if (isWallet()):
+    if isWallet() is True:
         return render_template("TabWallet" + addOn + ".html")
-    if (isFaucet()):
+    if isFaucet() is True:
         return render_template("TabFaucet" + addOn + ".html")
-    if (isGenesis()):
+    if isGenesis() is True:
         project.classes.c_genesisInterface.initGenesis()
         return render_template("TabGenesis" + addOn + ".html")
 
@@ -329,4 +331,4 @@ def clrNode():
         if oldNode in m_cfg['nodes']:
             m_cfg['nodes'].remove(oldNode)
 
-    return jsonify(m_cfg), 200
+    return setOK(m_cfg)

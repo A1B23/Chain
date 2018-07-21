@@ -3,16 +3,18 @@ collect = false;
 
 function collected(jsonIn, data) {
     var json = JSON.parse(jsonIn);
-    nodes[data[0]][data[1]]['doCollect'] = true
+    nodes[data[0]][data[1]]['activePeers'] = json.activePeers
+    nodes[data[0]][data[1]]['shareToPeers'] = json.shareToPeers
+    nodes[data[0]][data[1]]['ping'] = true
     if (json.hasOwnProperty("delayID")) {
-        var typ = data[0];
-        var from = data[1];
         var to = json.url;
         var pos = to.indexOf(":", 6);
         if (pos > 0) {
-            nodes[data[0]][data[1]]['doCollect'] = false
             var toDom = to.substring(0, pos + 5);
-            comNodes.push({ 'iter': 0, 'fromType': typ, 'fromDom': from, 'url': to, 'toType': getType(toDom), 'toDom': toDom, 'delayID': json.delayID });
+            comNodes.push({
+                'iter': 0, 'fromType': data[0], 'fromDom': data[1], 'url': to,
+                'toType': getType(toDom), 'toDom': toDom, 'delayID': json.delayID,
+            });
         }
     } 
     drawCanvas();
@@ -20,29 +22,44 @@ function collected(jsonIn, data) {
 
 function drawAllComs() {
     var lenc = comNodes.length;
+    ctx.save();
+    ctx.shadowColor = '#333';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 5;
+    ctx.shadowOffsetY = 5;
+    var m2 = Math.PI * 2;
+    var def = ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'];
+    var cols = 0;
     for (var com = 0; com < lenc; com++) {
         var item = comNodes[com];
         if (item.hasOwnProperty('delta')) {
-            var show = item.url.substring(item.url.indexOf("/", 8) + 1);
             var node = item.delta;
             var gr = ctx.createRadialGradient(node.x, node.y, node.size / 4, node.x, node.y, node.size);
-            var cols = ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'];
-            if (animCol.hasOwnProperty(show)) {
-                cols = animCol[show];
+            cols = def;
+            for (var spec in animCol) {
+                if (item.show.startsWith(spec)) {
+                    cols = animCol[spec];
+                    break;
+                }
             }
             gr.addColorStop(0, cols[0]);
             gr.addColorStop(0.5, cols[1]);
             gr.addColorStop(1, cols[2]);
             ctx.fillStyle = gr;
             ctx.beginPath();
-            ctx.arc(node.x, node.y, node.size, 0, Math.PI * 2, false);
+            ctx.arc(node.x, node.y, node.size, 0, m2, false);
             ctx.closePath();
             ctx.fill();
-            ctx.fillStyle = "black";
-            ctx.font = "10px _sans";
-            ctx.textBaseline = "top";
-            var use_y = node.y;
-            ctx.fillText(show, node.x, node.y + (node.toRight ? -node.size * 2 : node.size));
+        }
+    }
+    ctx.restore();
+    ctx.fillStyle = "black";
+    ctx.font = "10px _sans";
+    ctx.textBaseline = "top";
+    for (var com = 0; com < lenc; com++) {
+        var item = comNodes[com];
+        if (item.hasOwnProperty('delta')) {
+            ctx.fillText(item.show, item.delta.x, item.delta.y + (item.delta.toRight ? -item.delta.size * 2 : item.delta.size));
         }
     }
 }
@@ -69,6 +86,7 @@ function collectSuspend() {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
+                    // TODO this should be asynch to be faster!!!!
                     doPOSTSynch(dom + "/visualCfg",  { 'active': false, 'pattern': "" });
                 }
             }
@@ -79,7 +97,7 @@ function collectSuspend() {
 function collectPerType(typ,isLast) {
     for (var dom in nodes[typ]) {
         if (nodes[typ].hasOwnProperty(dom)) {
-            if (nodes[typ][dom]['doCollect']) {
+            if (nodes[typ][dom]['needCollect'] == true) {
                 doGETCallback(dom + "/visualGet", collected, [typ, dom]);
             }
         }
@@ -94,6 +112,11 @@ function collectPerType(typ,isLast) {
 
 function doCollect(contin) {
     var lTyp = Object.keys(nodes).length
+    if (contin) {
+        nodesstate = "cont"
+    } else {
+        nodesstate = "loop"
+    }
     for (var typ in nodes) {
         if (nodes.hasOwnProperty(typ)) {
             // need to break the link of typ and localise it
@@ -119,6 +142,7 @@ function collectRun() {
 
 function collectPause() {
     collect = false;
+    nodesstate = "loop"
     $("#crun").text("run");
     $("#cstep").prop("disabled", false);
     $("#cpause").prop("disabled", true);
@@ -147,12 +171,17 @@ function releaseFor(url) {
     }
 }
 
+var mi = Math.floor(maxIter / 3);
 function updateCom() {
     var comNodesL = comNodes.length;
     if (comNodesL > 0) {
+        var use_x = 0;
+        var use_y = 0;
+        var toright = true;
+        var deltax = 0;
         for (var com = 0; com < comNodesL; com++) {
             var item = comNodes[com];
-            if (item.iter == Math.floor(maxIter / 3)) {
+            if (item.iter == mi) {
                 doGETCallback(item.fromDom + "/visualGet", collected, [item.fromType, item.fromDom]);
             }
             if (item.iter >= maxIter) {
@@ -160,44 +189,33 @@ function updateCom() {
                 com--;
                 comNodesL--;
                 releaseFor(item.fromDom + "/visualRelease/" + item.delayID);
-                nodes[item.fromType][item.fromDom]['doCollect'] = true;
+                nodes[item.fromType][item.fromDom]['needCollect'] = true;
                 continue;
             }
             var from = getXYType(item.fromType, item.fromDom)
             if (from.hasOwnProperty(item.toDom)) {
                 var to = getXYType(item.toType, item.toDom);
-                var deltax = (to.x - from.x) / maxIter * item.iter;
-                var use_y = from.y;
-                var use_x = from.x;
-                var toright = true;
+                deltax = (to.x - from.x) / maxIter * item.iter;
                 if (to.x < from.x) {
-                    use_y += 7;
-                    use_x -= 7;
+                    use_y = from.y+ 7;
+                    use_x = from.x - 7;
                     toright = false;
                 } else {
-                    use_y -= 9;
-                    use_x += 9;
+                    use_y = from.y - 9;
+                    use_x = from.x + 9;
+                    toright = true
                 }
 
                 comNodes[com]['delta'] = { 'x': use_x + deltax, 'y': deltax * from[item.toDom].slope + use_y, 'size': 10, 'toRight': toright };
             } else {
-                //console.log("No to Dom for " + com + " "+item);
-                //console.log(from);
-                // TODO instead of this we should see how to draw to the node by using nodes destinations????
-                //if (item.iter % 2 == 0) {
-                //    comNodes[com]['delta'] = { 'x': from.x + item.iter/4, 'y': from.y, 'size': 10 };
-                //} else {
-                //    comNodes[com]['delta'] = { 'x': from.x - item.iter/4, 'y': from.y, 'size': 10 };
-                //}
                 fact = ((maxIter - item.iter) / maxIter)
                 comNodes[com]['delta'] = { 'x': from.x * fact, 'y': from.y * fact, 'size': 10 * fact };
             }
+            comNodes[com]['show'] = item.url.substring(item.url.indexOf("/", 8) + 1);
+            comNodes[com].iter = comNodes[com].iter + 1;
         }
         if (collect) {
             drawCanvas();
-        }
-        for (var com = 0; com < comNodesL; com++) {
-            comNodes[com].iter = comNodes[com].iter + 1;
         }
     }
     setTimeout(function () { updateCom() }, +$("#animDelay").val());
@@ -205,20 +223,21 @@ function updateCom() {
 
 function doGETCallback(url, callBack, callBackData) {
     try {
+        nodes[callBackData[0]][callBackData[1]]['needCollect'] = true
         var xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4) {
                 collectCount--;
                 callBack(this.responseText, callBackData);
+                nodes[callBackData[0]][callBackData[1]]['needCollect'] = true
             }
         };
         xhttp.open("GET", url, true);
         xhttp.send();
-        nodes[callBackData[0]][callBackData[1]]['doCollect'] = false
+        nodes[callBackData[0]][callBackData[1]]['needCollect'] = false
     } catch (err) {
         collectCount--;
-        console.log("Error for doGETCallBack" + url + " as " + err.message);
-        nodes[callBackData[0]][callBackData[1]]['doCollect'] = true
+        console.log("Error for doGETCallBack" + url + " as " + err.message);  
     }
 }
 
@@ -233,7 +252,6 @@ function doPOSTSynch(url, data) {
         return [json, xhr.status];
     } catch (err) {
         console.log("Error for doPOSTSynch" + url + " as " + err.message);
-        return doPOSTSynch(url, data);
     }
 
 }

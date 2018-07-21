@@ -332,6 +332,7 @@ class peers:
         for x in nodes.split(','):
             if len(x) > 0:
                 newNode=""
+                #type = 'shareToPeers'
                 if len(x) < 4:
                     try:
                         xint = int(x.strip())
@@ -344,12 +345,14 @@ class peers:
                 else:
                     newNode = x
 
+
+                #TODO add type parameter later as startup has more prio??
                 err = self.addPeerOption(newNode, source)
-                if len(err) >0 :
+                if len(err) > 0:
                     print("Failed to register peer: " + err)
 
 
-    def addPeerOption(self, newURL, source):
+    def addPeerOption(self, newURL, source, dest="peerOption"):
         try:
             result = urlparse(newURL)
             newURL = result.scheme+"://"+result.netloc
@@ -359,8 +362,8 @@ class peers:
         if (newURL != m_info['nodeId']) and (newURL not in m_cfg['peerOption']):
             if (newURL in m_cfg['activePeers']) or (newURL in m_cfg['shareToPeers']):
                 return "Already connected to peer: " + newURL
-            m_cfg['peerOption'][newURL] = deepcopy(m_peerInfo)
-            m_cfg['peerOption'][newURL]['source'] = source
+            m_cfg[dest][newURL] = deepcopy(m_peerInfo)
+            m_cfg[dest][newURL]['source'] = source
             return ""
         return "Already connecting to peer: " + newURL
 
@@ -386,7 +389,7 @@ class peers:
                 if reply['blocksCount'] > len(m_Blocks):
                     # TODO verify that the claimed block matched its advertisemnt in
                     # TODO  blockscount, tx and cumulativeDifficulty!!
-                    threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer(), args=(peer,))
+                    threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(peer,reply['blocksCount'],False))
                     threadp.start()
             return reply
         except Exception:

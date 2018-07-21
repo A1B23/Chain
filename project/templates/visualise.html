@@ -216,7 +216,7 @@
         Refresh Data Rate <input type="range" min="800" max="3000" value="1500" class="slider" id="refreshRate">
         Anim Delay <input type="range" min="10" max="500" value="150" class="slider" id="animDelay">
         Canvas Width <input type="range" min="100" max="1200" value="1000" class="slider" id="twidth" oninput="resizeCanvas();">
-        Canvas Height <input type="range" min="100" max="900" value="500" class="slider" id="theight" oninput="resizeCanvas();">
+        Canvas Height <input type="range" min="100" max="900" value="400" class="slider" id="theight" oninput="resizeCanvas();">
         <br />
         <canvas onmousemove="draw(event)" id="canvas" class="border">Oops, no canvas supported by your browser?</canvas>
     </div>
@@ -225,8 +225,6 @@
     <script src="../static/js/vis_hooks.js"></script>
     <script>
         ctx = null
-        totalScan = 0;
-        initScan = true;
         maxIter = 32;
 
         function clearDom(dom) {
@@ -253,6 +251,7 @@
             }
 
             comNodes = []
+            nodestate = ""
 
             rings = [[], [], [], [], []]
 
@@ -267,7 +266,9 @@
             animCol = {
                 "info": ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
                 "peers": ['rgb(210,105,30)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
-                "W": ['rgb(255,255,0)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+                "mining/get": ['rgb(210,0,0)', 'rgb(0,255,0)', 'rgb(0,0,0)'],
+                "mining/sub": ['rgb(0,0,210)', 'rgb(0,255,0)', 'rgb(0,0,0)'],
+                "blocks": ['rgb(0,0,210)', 'rgb(255,255,0)', 'rgb(255,0,0)']
             }
             ctx.canvas.width = getWidth();
             ctx.canvas.height = getHeight();
@@ -281,7 +282,7 @@
         }
 
 
-        function collectSizes() {
+        function collectSizeRotate() {
             setSizes = [];
             rot = [];
             for (var i = 1; i < rings.length + 1; i++) {

@@ -15,6 +15,7 @@ from flask import jsonify
 
 
 class blockchain:
+    status = {'getMissingBlocks': False}
 
     def setNetBasedOnChainID(self, id):
         # the id is the blochhash, so find the index and the
@@ -55,6 +56,7 @@ class blockchain:
             print("Ooops, it appears that the genesis Block is not correct, please fix... " + err)
             sys.exit(-1)
         m_Blocks.append(deepcopy(m_genesisSet[useNet]))
+
 
 
     def resetChain(self):
@@ -141,38 +143,52 @@ class blockchain:
         m_candidateBlock['transactions'].extend(m_pendingTX)
 
 
-    def getMissingBlocksFromPeer(self, peer):
-        if peer[-1] != "/":
-            peer = peer + "/"
-        base = "blocks/"
-        print("Work on missing block"+peer)
-        retry = 3
-        while True:
-            url = base + str(len(m_Blocks))
-            try:
-                res, stat = c_peer.sendGETToPeerToAnyone(peer, url)
-            except Exception:
-                return ""
-            if stat == 200:
-                print("block came in")
-                m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
-                if len(m) == 0:
-                    print("fields ok")
-                    err = self.verifyThenAddBlock(res)
-                    print("block add '"+err+"'")
-                    if len(err) > 0:
-                        return err
-                    # inform all our peers about the block
-                    m_BufferMinerCandidates.clear()
-                    c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res, peer)
-            else:
-                retry = retry - 1 #maybe block has not spread well yet
-                if retry <= 0:
-                    return "No valid information, stopped block updates."
-                continue  # must continue as we have no res[index]
+    def getMissingBlocksFromPeer(self, peer,upLimit,isAlert):
+        #TODO put an upper limit here based on info from peer
+        if self.status['getMissingBlocks'] is True:
+            return
+        try:
+            self.status['getMissingBlocks'] = True
+            if (len(peer) > 0) and (peer[-1] != "/"):
+                peer = peer + "/"
+            base = "blocks/"
+            print("Work on missing block"+peer)
+            retry = 3
+            while True:
+                if (upLimit <= len(m_Blocks)):
+                    self.status['getMissingBlocks'] = False
+                    return ""
+                url = base + str(len(m_Blocks))
+                try:
+                    res, stat = c_peer.sendGETToPeerToAnyone(peer, url)
+                except Exception:
+                    self.status['getMissingBlocks'] = False
+                    return ""
+                if stat == 200:
+                    print("block came in")
+                    m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
+                    if len(m) == 0:
+                        print("fields ok")
+                        err = self.verifyThenAddBlock(res)
+                        print("block add '"+err+"'")
+                        if len(err) > 0:
+                            self.status['getMissingBlocks'] = False
+                            return err
+                        # inform all our peers about the block
+                        m_BufferMinerCandidates.clear()
+                        if isAlert is True:
+                            c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res, peer)
+                else:
+                    retry = retry - 1 #maybe block has not spread well yet
+                    if retry <= 0:
+                        self.status['getMissingBlocks'] = False
+                        return "No valid information, stopped block updates."
+                    continue  # must continue as we have no res[index]
+        except Exception:
+            self.status['getMissingBlocks'] = False
 
     def receivedBlockNotificationFromPeer(self, blockInfo):
-        # TODO verify that the claimed block matched its advertisemnt in
+        # TODO verify that the claimed block matched its advertisment in
         # TODO  blockscount, tx and cumulativeDifficulty!!
         m, l, f = checkRequiredFields(blockInfo, m_informsPeerNewBlock, [], False)
         if (len(m) == 0) and (l == 0):
@@ -190,15 +206,20 @@ class blockchain:
                     return errMsg("Chain difficulty equal current, current is:" + str(m_stats['m_cumulativeDifficulty']))
                 else:
                     restoreBlock = m_Blocks[len(m_Blocks)-1] #keep for potential roll back!
-                    del m_Blocks[len(m_Blocks)-1]
-            else:
+                    #del m_Blocks[len(m_Blocks)-1]
                 #TODO keep POST lock now active with a separate flag!!!
                 #TODO make sure that threading does not create issues later
                 #but as of now it is better to ack first the notification and then
                 #start assking for blocks, as there could be more than one
-                threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'],restoreBlock,))
+                #TODO implement
+                return errMsg("Not yet implemented....")
+
+            else:
+                #easy case just add the new block on top
+                threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'],blockInfo['blockCount'], True))
                 threadx.start()
                 return setOK("Thank you for the notification.")
+
         else:
             return errMsg("Invalid block structure")
 

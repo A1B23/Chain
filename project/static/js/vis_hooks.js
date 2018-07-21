@@ -30,7 +30,7 @@ $("#test").on("click", function () {
 $("#scan").on("change", function () {
     if (this.checked) {
         setTimeout(function () {
-            if (initScan == false) {
+            if (nodestate != "") {
                 reScan();
             } else {
                 newScan();
@@ -109,12 +109,4 @@ function addLog(text, start) {
     //document.getElementById("response").value = document.getElementById("response").value + ntext;
     return ntext
 }
-
-function setShadow(on) {
-    ctx.shadowColor = 'black';
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 5;
-    ctx.shadowOffsetY = 5;
-}
-
 
