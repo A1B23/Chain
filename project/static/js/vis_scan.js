@@ -49,22 +49,23 @@ function scanFor(ipIn, typIn, ringIn, init) {
         var url = dom + "/cfg";
         var xhttp = new XMLHttpRequest();
         if (init == true) {
-            nodestate = "init";
+            nodesstate = "init";
         }
-        if (nodestate == "cont") {
+        if (nodesstate == "cont") {
             if (hasNode(typ, dom)) {
                 // no need to check again, it is continuously probed by the visual nodes?
                 if (ringIn == nodes[typ][dom]['ring']) {
-                    if (nodes[typ][dom].hasOwnProperty('cactivePeers')) {
-                        return
+                    if (nodes[typ][dom].hasOwnProperty('ping')) {
+                        if (nodes[typ][dom]['ping'] == true) {
+                            return
+                        }
                     }
-                } else {
-                    delete nodes[typ][dom];
-                    delete rings[ringIn][dom]
-                    var cdom = clearDom(dom);
-                    if ($("#" + cdom).length != 0) {
-                        $("#" + cdom).remove();
-                    }
+                } 
+                delete nodes[typ][dom];
+                delete rings[ringIn][dom]
+                var cdom = clearDom(dom);
+                if ($("#" + cdom).length != 0) {
+                    $("#" + cdom).remove();
                 }
             }
         }
@@ -72,8 +73,8 @@ function scanFor(ipIn, typIn, ringIn, init) {
             if (this.readyState == 4) {
                 addLog("\n(" + typ + ") Reply:" + url, false);
                 if (ring >= 4) {
-                    if (nodestate == 'init') {
-                        nodestate = "loop";
+                    if (nodesstate == 'init') {
+                        nodesstate = "loop";
                     }
                 }
                 if (this.status == 200) {

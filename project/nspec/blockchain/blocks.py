@@ -30,7 +30,7 @@ class blockchain:
         }
         return jsonify(response), 200
 
-    def initChain(self):
+    def initChain(self,onePeer=""):
         m_Blocks.clear()
         m_balHistory.clear()
         m_pendingTX.clear()
@@ -56,6 +56,10 @@ class blockchain:
             print("Ooops, it appears that the genesis Block is not correct, please fix... " + err)
             sys.exit(-1)
         m_Blocks.append(deepcopy(m_genesisSet[useNet]))
+
+        threadx = Thread(target=self.getMissingBlocksFromPeer,
+                         args=(onePeer, -1, False))
+        threadx.start()
 
 
 
@@ -155,7 +159,7 @@ class blockchain:
             print("Work on missing block"+peer)
             retry = 3
             while True:
-                if (upLimit <= len(m_Blocks)):
+                if (upLimit > 0) and (upLimit <= len(m_Blocks)):
                     self.status['getMissingBlocks'] = False
                     return ""
                 url = base + str(len(m_Blocks))
@@ -165,25 +169,26 @@ class blockchain:
                     self.status['getMissingBlocks'] = False
                     return ""
                 if stat == 200:
-                    print("block came in")
                     m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
                     if len(m) == 0:
-                        print("fields ok")
                         err = self.verifyThenAddBlock(res)
-                        print("block add '"+err+"'")
                         if len(err) > 0:
                             self.status['getMissingBlocks'] = False
                             return err
                         # inform all our peers about the block
                         m_BufferMinerCandidates.clear()
                         if isAlert is True:
-                            c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", res, peer)
+                            toPeer = deepcopy(m_informsPeerNewBlock)
+                            toPeer["blocksCount"] = len(m_Blocks)
+                            toPeer["cumulativeDifficulty"] = m_info['cumulativeDifficulty']
+                            toPeer["nodeUrl"] = m_info['nodeUrl']
+                            c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer, peer)
                 else:
                     retry = retry - 1 #maybe block has not spread well yet
                     if retry <= 0:
                         self.status['getMissingBlocks'] = False
                         return "No valid information, stopped block updates."
-                    continue  # must continue as we have no res[index]
+                    #continue  # must continue as we have no res[index]
         except Exception:
             self.status['getMissingBlocks'] = False
 
@@ -216,7 +221,7 @@ class blockchain:
 
             else:
                 #easy case just add the new block on top
-                threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'],blockInfo['blockCount'], True))
+                threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'],blockInfo['blocksCount'], True))
                 threadx.start()
                 return setOK("Thank you for the notification.")
 

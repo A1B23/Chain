@@ -21,7 +21,7 @@
     </style>
 </head>
 <body>
-    Welcome to PDPC_Coin <b>Visualiser:</b><br />
+    Welcome to PDPC_Coin <b>Visualiser:</b>
     Show Control: <input type="checkbox" id="ctrl">
     &nbsp;&nbsp;
     Show page: <input type="checkbox" id="GUI">
@@ -30,7 +30,7 @@
         <option value="3">medium</option>
         <option value="5">large</option>
     </select>
-    &nbsp;&nbsp;&nbsp;&nbsp;
+    <br />
     <span class="alt1">
         Cont. Scan: <input type="checkbox" id="scan">
         <button type="button" class="options" onClick="JavaScript: newScan();">newScan</button>
@@ -41,8 +41,10 @@
         <button type="button" class="options" id="crun" onClick="JavaScript: setTimeout(function () {collectRun()},100)">run</button>
         <button type="button" class="options" id="cpause" onClick="JavaScript:setTimeout(function () {collectPause()},100)">pause</button>
         <button type="button" class="options" id="cstep" onClick="JavaScript:setTimeout(function () {collectStep()},100)">step</button>
-        <button type="button" class="options" onClick="JavaScript: setTimeout(function () {collectRegex($('#trackRegex').val());},100)">Limit(regex)</button><input type="text" value="." class="options" size="30" id="trackRegex">
+        <button type="button" class="options" onClick="JavaScript: setTimeout(function () {collectRegex($('#trackRegex').val());},100)">Limit(regex)</button>
+        dom <input type="checkbox" id="autoDom"><input type="text" value="." class="options" size="30" id="trackRegex">
         <button type="button" class="options" id="csusp" onClick="JavaScript: setTimeout(function () {collectSuspend();},100)">Suspend tracking</button>
+        No text(;) <input type="text" value="" class="options" size="35" id="noText">
     </span>
     <div id="control"></div>
     <div class="iframes" id="views">
@@ -251,7 +253,7 @@
             }
 
             comNodes = []
-            nodestate = ""
+            nodesstate = ""
 
             rings = [[], [], [], [], []]
 
@@ -265,9 +267,9 @@
 
             animCol = {
                 "info": ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
-                "peers": ['rgb(210,105,30)', 'rgb(0,255,255)', 'rgb(0,0,0)'],
+                "peers": ['rgb(255, 194, 0)', 'rgb(0,255,255)', 'rgb(255, 194, 0)'],
                 "mining/get": ['rgb(210,0,0)', 'rgb(0,255,0)', 'rgb(0,0,0)'],
-                "mining/sub": ['rgb(0,0,210)', 'rgb(0,255,0)', 'rgb(0,0,0)'],
+                "mining/sub": ['rgb(0,0,210)', 'rgb(76, 58, 0)', 'rgb(204, 197, 178)'],
                 "blocks": ['rgb(0,0,210)', 'rgb(255,255,0)', 'rgb(255,0,0)']
             }
             ctx.canvas.width = getWidth();
@@ -276,8 +278,8 @@
 
 
         function draw(evt) {
-            if (ctx != null) { 
-            globMousePos = getMousePos(ctx.canvas, evt);
+            if (ctx != null) {
+                globMousePos = getMousePos(ctx.canvas, evt);
             }
         }
 

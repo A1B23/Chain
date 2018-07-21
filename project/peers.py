@@ -1,7 +1,7 @@
 from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode
 from threading import Thread
 from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
-from project.nspec.blockchain.modelBC import m_Blocks #, m_peerToBlock
+from project.nspec.blockchain.modelBC import m_Blocks
 from copy import deepcopy
 from time import sleep
 import random
@@ -60,7 +60,8 @@ class peers:
         return requests.post(url=url, json=json, headers={'accept': 'application/json'})
 
 
-    def doGET(self, url):
+    def doGET(self, url,fastTrack=False):
+        #normal is used to skip visual to get maxPeers, but show for minPeers!
         parsed_uri = urlparse(url)
         domain = '{uri.scheme}://{uri.netloc}{uri.path}'.format(uri=parsed_uri)
         # if domain + "cfg" == url:
@@ -68,7 +69,8 @@ class peers:
         #         "peerUrl": m_info['nodeUrl']
         #     }
         #     self.asynchPOST("peers/connect", peerOffer, " ")
-        self.visualDelay(self.makeDelay(domain, {}, False))
+        if fastTrack is False:
+            self.visualDelay(self.makeDelay(domain, {}, False))
         return requests.get(url=domain, headers={'accept': 'application/json'})
 
     def asPost(self, type, url, json, cnt):
@@ -78,8 +80,8 @@ class peers:
             if m_cfg[type][peer]['active'] is True:
                 try:
                     print("asynch: " + peer + url + str(json))
-                    if self.makeDelay(peer + url, json, True) <= 0:
-                        self.doPOST(peer + url, json)
+                    #if self.makeDelay(peer + url, json, True) <= 0:
+                    self.doPOST(peer + url, json)
                     cnt = cnt + 1
                     if cnt > m_cfg['minPeers']: #TODO stop sending when min reached, do more?
                         break
@@ -150,42 +152,52 @@ class peers:
         #this rountine mostly handls incoming requst from unknown nodes
         #so we try to get informatin first from known nodes, but we may
         #see later if we want to connect to the newbie
+        print("trying to request "+url+ " from peer "+peer)
         if peer in m_cfg['activePeers']:
             try:
+                print("try peer directly")
                 resp = self.sendGETToPeer(peer+url)
                 txt, code = resp
                 if code == 200:
+                    print("got peer directly")
                     return resp
             except Exception:
                 i=0
 
         for peerx in self.randomOrderFor(m_cfg['activePeers']):
             try:
+                print("try random peer from active "+peerx)
                 resp = self.sendGETToPeer(peerx+"/"+url)
                 txt, code = resp
                 if code == 200:
+                    print("got peer directly")
                     return resp
             except Exception:
                 i=0
 
         for peerx in self.randomOrderFor(m_cfg['shareToPeers']):
             try:
+                print("try random peer from share "+peerx)
                 resp = self.sendGETToPeer(peerx+"/"+url)
                 txt, code = resp
                 if code == 200:
+                    print("got peer directly")
                     return resp
             except Exception:
                 i=0
 
         try:
+            print("last try unsecure peer itself "+ peer)
             resp = self.sendGETToPeer(peer + url)
             txt, code = resp
             if code == 200:
+                print("got peer directly from unsecure source")
                 peer = peer[0:-1]
                 #have not seen this peer before, so we may connect later
                 if peer not in m_cfg['peerOption']:
                     m_cfg['peerOption'][peer] = deepcopy(m_peerInfo)
                     m_cfg['peerOption'][peer]['source'] = peer
+            print("Done")
             return resp
         except Exception:
             return ("{'noDelivery':True}", 400)
@@ -347,9 +359,13 @@ class peers:
 
 
                 #TODO add type parameter later as startup has more prio??
-                err = self.addPeerOption(newNode, source)
+                print("Supposed to connect to "+newNode)
+                err = self.addPeerOption(newNode, source, 'peerOption')
                 if len(err) > 0:
                     print("Failed to register peer: " + err)
+                    return ""
+        ks = next(iter(m_cfg['peerOption'].keys()))
+        return ks
 
 
     def addPeerOption(self, newURL, source, dest="peerOption"):
@@ -369,9 +385,9 @@ class peers:
 
 
 
-    def suitablePeer(self, peer, nodeId):
+    def suitablePeer(self, peer, fastTrack="False"):
         try:
-            s1 = self.doGET(peer + "/info")
+            s1 = self.doGET(peer + "/info",fastTrack)
             reply = json.loads(s1.text)
             m, l, f = checkRequiredFields(reply, m_info, ["chainId", "about"], False)
             if (len(f) > 0) or (len(m) > 0):  # we skip to check any additional fields, is that OK
@@ -389,32 +405,24 @@ class peers:
                 if reply['blocksCount'] > len(m_Blocks):
                     # TODO verify that the claimed block matched its advertisemnt in
                     # TODO  blockscount, tx and cumulativeDifficulty!!
-                    threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(peer,reply['blocksCount'],False))
+                    threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(peer,reply['blocksCount'],True))
                     threadp.start()
             return reply
         except Exception:
             return {'fail': True}
 
-    def checkAvailability(self, type, ref):
+    def available(self, peer, type, fastTrack='False'):
         remOption = []
-        for peer in self.randomOrderFor(m_cfg[type]):
-            if peer in m_cfg['peerAvoid']:
-                remOption.append(peer)
-                continue
-            cnt = 0
-            for peerx in m_cfg['activePeers']:
-                if peerx['active'] is True:
-                    cnt = cnt + 1
-            if cnt > m_cfg[ref]:
-                break
-            try:
-                reply = self.suitablePeer(peer, m_cfg[type][peer]['source'])
-            except Exception:
-                reply = {'fail': True}
-            if ("wrongType" in reply) or ("wrongID" in reply) or ("fail" in reply) or ("wrongChain" in reply): #not suitable or no reply
-                #give five chances, as it was supposed to be correct as per recommendation and some small error
-                m_cfg[type][peer]['wrongType'] = m_cfg[type][peer]['wrongType'] + 1
-                if ("fail" not in reply) and m_cfg[type][peer]['wrongType'] > m_cfg['maxWrong']:
+        retry = []
+        try:
+            reply = self.suitablePeer(peer, fastTrack)
+        except Exception:
+            reply = {'fail': True}
+        if ("wrongType" in reply) or ("wrongID" in reply) or ("fail" in reply) or ("wrongChain" in reply):  # not suitable or no reply
+            # give five chances, as it was supposed to be correct as per recommendation and some small error
+            m_cfg[type][peer]['wrongType'] = m_cfg[type][peer]['wrongType'] + 1
+            if ("fail" not in reply):
+                if m_cfg[type][peer]['wrongType'] > m_cfg['maxWrong']:
                     remOption.append(peer)
                     m_cfg['peerAvoid'].append(peer)
                     if peer in m_cfg['activePeers']:
@@ -425,23 +433,60 @@ class peers:
                     m_cfg['activePeers'][peer]['active'] = False
                 if (type != 'shareToPeers') and (peer in m_cfg['shareToPeers']):
                     m_cfg['shareToPeers'][peer]['active'] = False
-                continue
-
-            if peer not in m_cfg['shareToPeers']:
-                if peer not in m_cfg['activePeers']:
-                    m_cfg['shareToPeers'][peer] = deepcopy(m_peerInfo)
-                    m_cfg['shareToPeers'][peer]['active'] = True
-                    m_cfg['shareToPeers'][peer]['nodeId'] = reply['nodeId']
-                    remOption.append(peer)
-                else:
-                    m_cfg['activePeers'][peer]['active'] = True
             else:
-                m_cfg['shareToPeers'][peer]['active'] = True
+                retry.append(peer)
+            return retry, remOption
 
+        if peer not in m_cfg['shareToPeers']:
+            if peer not in m_cfg['activePeers']:
+                m_cfg['shareToPeers'][peer] = deepcopy(m_peerInfo)
+                m_cfg['shareToPeers'][peer]['active'] = True
+                m_cfg['shareToPeers'][peer]['nodeId'] = reply['nodeId']
+                remOption.append(peer)
+            else:
+                m_cfg['activePeers'][peer]['active'] = True
+        else:
+            m_cfg['shareToPeers'][peer]['active'] = True
+
+        return retry, remOption
+
+
+    def tryToAchieveMaxPeerActiveUsing(self, type, minOrMax):
+        remOption = []
+        retry = []
+        for peer in self.randomOrderFor(m_cfg[type]):
+            if peer in m_cfg['peerAvoid']:
+                remOption.append(peer)
+                continue
+            cnt = 0
+            for peerx in m_cfg['activePeers']:
+                if peerx['active'] is True:
+                    cnt = cnt + 1
+            if cnt > m_cfg[minOrMax]:
+                return remOption
+            retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
+            retry.extend(retr)
+            remOption.extend(remO)
+
+        if len(retry) > 0:
+            for rets in range(1, 4):
+                sleep(1)
+                for peer in retry:
+                    if peer in m_cfg['peerAvoid']:
+                        remOption.append(peer)
+                        continue
+                    cnt = 0
+                    for peerx in m_cfg['activePeers']:
+                        if peerx['active'] is True:
+                            cnt = cnt + 1
+                    if cnt > m_cfg[minOrMax]:
+                        return remOption
+                    retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
+                    remOption.extend(remO)
         return remOption
 
 
-    def manageType(self, type, ref, isActive):
+    def manageType(self, type, minOrMax, isActive):
         cnt = 0
         for peer in m_cfg['activePeers']:
             if peer['active'] is True:
@@ -452,7 +497,7 @@ class peers:
         if (isActive is True) and (cnt >= m_cfg['minPeers']):
             return True
 
-        remOption = self.checkAvailability(type, ref)
+        remOption = self.tryToAchieveMaxPeerActiveUsing(type, minOrMax)
         for peer in remOption:
             if peer in m_cfg[type]:
                 del m_cfg[type][peer]
@@ -474,20 +519,21 @@ class peers:
         #TODO ask for the per list and if we are peer of the other, upgrade to activePeers
         return
 
-    def ensurePeerNumber(self, isActive, ref):
+    def ensurePeerNumber(self, isActive, minOrMax):
         if isActive is True:
-            if self.manageType("activePeers", ref, isActive) is True:
+            if self.manageType("activePeers", minOrMax, isActive) is True:
                 return
-            if self.manageType("shareToPeers", ref, isActive) is True:
+            if self.manageType("shareToPeers", minOrMax, isActive) is True:
                 return
             self.upgradeShareToActive()
-        self.manageType("peerOption", ref, isActive)
+        self.manageType("peerOption", minOrMax, isActive)
 
         if isActive is True:
-            if (len(m_cfg['peerOption']) > 0) and (ref != 'maxPeers'):
-                threadp = Thread(target=self.ensurePeerNumber, args=(False, 'maxPeers'))
-                threadp.start()
-                return
+            if (len(m_cfg['peerOption']) > 0) and (minOrMax != 'maxPeers'):
+                #threadp = Thread(target=self.ensurePeerNumber, args=(False, 'maxPeers'))
+                #threadp.start()
+                self.ensurePeerNumber(False, 'maxPeers')
+                #return
 
         m_cfg['statusPeer'] = False
 

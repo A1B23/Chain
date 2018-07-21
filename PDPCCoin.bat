@@ -69,11 +69,11 @@ set mode=Y
 set minPeers=1
 set maxPeers=1
 set nodeIPnum=32
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% -mod %mode% --asDebug %asDebug%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --mode %mode% --asDebug %asDebug%"
 set nodeIPnum=33
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% -mod %mode% --asDebug %asDebug%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --mode %mode% --asDebug %asDebug%"
 set nodeIPnum=34
-start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% -mod %mode% --asDebug %asDebug%"
+start cmd.exe /K "color %col% & title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runMiner.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 4 --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --mode %mode% --asDebug %asDebug%"
 
 rem ###################### Faucet parameters 
 set typeDir=Faucet
@@ -93,4 +93,4 @@ set minPeers=2
 set maxPeers=3
 set col=2B
 echo %typeDir% start at IP 127.0.0.%nodeIPnum%
-start cmd.exe /K "color %col% &title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --asDebug %asDebug%"
+start cmd.exe /K "color %col% &title=%typeDir%-127.0.0.%nodeIPnum% & %myPyPath% runBC.py --host 127.0.0.%nodeIPnum% --netID %netID% --connect 2,6 --port %port% --minPeers %minPeers% --maxPeers %maxPeers% --canTrack %canTrack% --asDebug %asDebug%"

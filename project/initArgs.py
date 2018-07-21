@@ -13,6 +13,7 @@ from project.nspec.miner.miner import initMiner
 import sqlite3
 from project.nspec.wallet.modelW import m_db
 from copy import deepcopy
+import requests
 
 
 def finalise(host, peer, port, type):
@@ -21,14 +22,24 @@ def finalise(host, peer, port, type):
     useVis = m_cfg['canTrack']
     #temporarily switch off any delay to allow peer initialisation to go ahead without delay
     m_cfg['canTrack'] = False
-    c_peer.registerPotentialPeer(peer, port)
+    cont = True
+    while cont:
+        try:
+            sleep(1)
+            requests.get("http://"+host+":"+str(port))
+            #if r.status_code == 200: no check for 200, as miner has none and any reply will do!!!!
+            #cont = False
+            break
+        except Exception:
+            print("Waiting for flask...")
+    onePeer = c_peer.registerPotentialPeer(peer, port)
+    thread = Thread(target=c_peer.checkEveryXSecs)
+    thread.start()
+    while m_cfg['statusPeer'] == True:
+        sleep(1)
 
     if isBCNode() is True:
-        c_blockchainNode.c_blockchainHandler.initChain()
-        #threadp = Thread(target=c_blockchainNode.c_blockchainHandler.loopNewBlock)
-        #threadp.start()
-        #thread = Thread(target=initPendingTX)
-        #thread.start()
+        c_blockchainNode.c_blockchainHandler.initChain(onePeer)
         initPendingTX()
     elif isMiner() is True:
         initMiner(host)
@@ -38,10 +49,8 @@ def finalise(host, peer, port, type):
     elif isGenesis() is True:
         c_genesisInterface.initGenesis()
 
-    thread = Thread(target=c_peer.checkEveryXSecs)
-    thread.start()
-    while m_cfg['statusPeer'] == True:
-        sleep(1)
+
+
 
     m_cfg['canTrack'] = useVis
 
@@ -74,7 +83,7 @@ def init(parser):
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
     parser.add_argument('-maP', '--maxPeers', default=1, type=int, help='max peer communication, if more peers are known')
     parser.add_argument('-trk', '--canTrack', default="Y", help='use delay option to hold GET/POST until visualisation is updated')
-    parser.add_argument('-mod', '--mode', default="N", help='modus of miner to work, e.g. y=await user to trigger mining')
+    parser.add_argument('-mod', '--mode', default="Y", help='modus of miner to work, e.g. y=await user to trigger mining')
     parser.add_argument('-deb', '--asDebug', default="N", help='activate the debug GUI for the node instead of the user GUI')
 
     args = parser.parse_args()

@@ -53,13 +53,30 @@ function drawAllComs() {
         }
     }
     ctx.restore();
+    var skip = $("#noText").val().split(';');
+    if ((skip.length == 1) && (skip[0] == "*")) {
+        return;
+    }
+    var showit = true;
     ctx.fillStyle = "black";
     ctx.font = "10px _sans";
     ctx.textBaseline = "top";
+
     for (var com = 0; com < lenc; com++) {
         var item = comNodes[com];
         if (item.hasOwnProperty('delta')) {
-            ctx.fillText(item.show, item.delta.x, item.delta.y + (item.delta.toRight ? -item.delta.size * 2 : item.delta.size));
+            showit = true;
+            if ((skip.length > 1) || (skip[0].length > 0)) { 
+                for (var cn = 0; cn < skip.length; cn++) {
+                    if ((skip[cn].trim().length > 0) && (item.show.startsWith(skip[cn].trim()))) {
+                        showit = false;
+                        break;
+                    }
+                }
+            }
+            if (showit) {
+                ctx.fillText(item.show, item.delta.x, item.delta.y + (item.delta.toRight ? -item.delta.size * 2 : item.delta.size));
+            }
         }
     }
 }
@@ -70,7 +87,7 @@ function collectRegex(regex) {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
-                    doPOSTSynch(dom + "/visualCfg", { 'active': true, 'pattern': regex });
+                    doPOSTCfg(dom + "/visualCfg", { 'active': true, 'pattern': regex });
                 }
             }
         }
@@ -86,8 +103,7 @@ function collectSuspend() {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
-                    // TODO this should be asynch to be faster!!!!
-                    doPOSTSynch(dom + "/visualCfg",  { 'active': false, 'pattern': "" });
+                    doPOSTCfg(dom + "/visualCfg",  { 'active': false, 'pattern': "" });
                 }
             }
         }
@@ -112,10 +128,10 @@ function collectPerType(typ,isLast) {
 
 function doCollect(contin) {
     var lTyp = Object.keys(nodes).length
-    if (contin) {
+    if (collect) {
         nodesstate = "cont"
     } else {
-        nodesstate = "loop"
+        nodesstate = "step"
     }
     for (var typ in nodes) {
         if (nodes.hasOwnProperty(typ)) {
@@ -238,20 +254,21 @@ function doGETCallback(url, callBack, callBackData) {
     } catch (err) {
         collectCount--;
         console.log("Error for doGETCallBack" + url + " as " + err.message);  
+        nodes[callBackData[0]][callBackData[1]]['ping'] = false
     }
 }
 
-function doPOSTSynch(url, data) {
+function doPOSTCfg(url, data) {
     try {
         var xhr = new XMLHttpRequest();
-        xhr.open("POST", url, false);
+        xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send((typeof data == 'string') ? data : JSON.stringify(data));
-        var json = { "message": "fail" };
-        json = JSON.parse(xhr.responseText);
-        return [json, xhr.status];
+        //var json = { "message": "fail" };
+        //json = JSON.parse(xhr.responseText);
+        //return [json, xhr.status];
     } catch (err) {
-        console.log("Error for doPOSTSynch" + url + " as " + err.message);
+        console.log("Error for doPOSTCfg" + url + " as " + err.message);
     }
 
 }

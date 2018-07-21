@@ -61,23 +61,22 @@ def isDataValid(resp_text):
 
 
 def changeNonceDate():
-    cfg['findNonce'] = False
-    while cfg['waitAck'] is False:
-        sleep(1)
+    print("change nonce")
     cfg['countSame'] = 0
     #TODO how to realistically estimate solution date, what are permitted differences?
     newCandidate['dateCreated'] = getFutureTime((newCandidate['difficulty']-4)*(newCandidate['difficulty']-4)*10)
     newCandidate['fixDat'] = newCandidate['blockDataHash'] + "|" + newCandidate['dateCreated'] + "|"
     newCandidate['nonce'] = random.randint(0, cfg['maxNonce'] - 1)  # avoid that each miner starts at same level
     print("Start Nonce " + str(newCandidate['nonce']))
-    cfg['findNonce'] = True
-    cfg['waitAck'] = False
+    print("nonce done")
     return
 
 def pull():
     try:
         print("asking")
+        cfg['pulling'] = True
         resp_text = getCandidate()
+        print("got "+str(resp_text))
         if "peerError" in resp_text:
             print("Peer error, sleep")
             sleep(3)
@@ -87,12 +86,13 @@ def pull():
             print("Invalid node block data detected, ignored....")
             sleep(3)
             return
-
-        if (cfg['findNonce'] is False) or (cfg['lastHash'] != resp_text['blockDataHash']):
+        print("ok check, miner was idle "+str(cfg['done']))
+        if cfg['lastHash'] != resp_text['blockDataHash']:
             print("new block data")
-            cfg['findNonce'] = False
-            while cfg['waitAck'] is False:
-                sleep(1)
+            cfg['done'] = True #stop any ongoing looping
+
+        if cfg['done'] is True:
+            print("prepare block data for miner whenever miner is ready, even if we already have it all set")
             cfg['lastHash'] = resp_text['blockDataHash']
             newCandidate['blockDataHash'] = resp_text['blockDataHash']
             newCandidate['difficulty'] = resp_text['difficulty']
@@ -104,12 +104,11 @@ def pull():
             if (cfg['countSame'] > cfg['refresh']) and (cfg['foundSolution'] is False):
                 #as the block has not changed, we change the date and restart
                 changeNonceDate()
-
-
+        cfg['pulling'] = False
     except Exception:
         print("No/Invalid peer reply, retry....")
         sleep(5)  # no peer, give a bit of time to recover, keep the 'pulling' flag to avoid waste of calc power
-
+        # we keep the pulling flag, as without peer no point to churn CPUf
     return
 
 
@@ -129,28 +128,28 @@ def doMine():
     # request some block for mining to the networks(Node)
     # then try to find a hashing code and nonce value to meet with the difficulty
     while m_cfg['shutdown'] is False:
-        while cfg['findNonce'] is False:
-            sleep(1)
-            cfg['waitAck'] = True
+        cfg['done'] = True
+        cfg['pulling'] = True
         if m_cfg['mode'] == "Y":
             print("Enter m <return> to start mining")
             choice = "s"
             while choice != "m":
                 choice = input().lower()
-            while cfg['findNonce'] is False:
-                sleep(1)
-                cfg['waitAck'] = True
+
+        while cfg['pulling'] is True:
+            sleep(1)
+        cfg['done'] = False
         candidate = deepcopy(newCandidate)
-        cfg['waitAck'] = False
         target = cfg['zero_string'][:candidate['difficulty']]
         try:
             # Request and wait a response from the N/W
             cfg['foundSolution'] = False
+
             count = 0
             #TODO remove the show once it works?
             show = 0
             minedBlockHash = "N/A"
-            while (cfg['foundSolution'] is False) and (cfg['findNonce'] is True):
+            while (cfg['foundSolution'] is False) and (cfg['done'] is False):
                 candidate['nonce'] = candidate['nonce'] + 1
                 if candidate['nonce'] >= cfg['maxNonce']:
                     candidate['nonce'] = 0
@@ -174,7 +173,6 @@ def doMine():
                 if minedBlockHash[:candidate['difficulty']] == target:
                     cfg['foundSolution'] = True
 
-            cfg['findNonce'] = False
             cfg['done'] = True
             if cfg['foundSolution'] is True:
                 # After finding a hashcode, now submit the mined block by POST
@@ -203,7 +201,6 @@ def doMine():
             else:
                 print("No solution found or new block came in")
         except Exception:
-            cfg['findNonce'] = False
             print("Exception occurred... clear and refresh candidate")
 
 

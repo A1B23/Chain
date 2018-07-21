@@ -30,7 +30,7 @@ $("#test").on("click", function () {
 $("#scan").on("change", function () {
     if (this.checked) {
         setTimeout(function () {
-            if (nodestate != "") {
+            if (nodesstate != "") {
                 reScan();
             } else {
                 newScan();

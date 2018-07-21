@@ -169,7 +169,7 @@ class blockChainNode:
             else:
                 toPeer = deepcopy(m_informsPeerNewBlock)
                 toPeer["blocksCount"] = len(m_Blocks)
-                toPeer["cumulativeDifficulty"] = 55 # TODO this still need to be counted
+                toPeer["cumulativeDifficulty"] = m_info['cumulativeDifficulty']
                 toPeer["nodeUrl"] = m_info['nodeUrl']
                 c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer, "")
         except Exception:
