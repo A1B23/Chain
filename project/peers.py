@@ -23,7 +23,7 @@ import project.classes
 #You may run this check once per minute or when you send a notification about a new block
 
 class peers:
-
+    skipDoubleCheck = []
     #TODO when we receive info etc. from an unknonw node and outr count is below needd
     # then why does the peer list not take it as new node???
     def makeDelay(self, url, json, isAsyncPost):
@@ -108,20 +108,18 @@ class peers:
         m_peerSkip.append({"url": url, "json": json})
         thread.start()
 
-    def hasActivePeers(self):
-        for peer in m_cfg['activePeers']:
-            if m_cfg['activePeers'][peer]['active'] is True:
-                return True
-        return False
+    # def hasActivePeers(self):
+    #     for peer in m_cfg['activePeers']:
+    #         if m_cfg['activePeers'][peer]['active'] is True:
+    #             return True
+    #     return False
 
 
     def postPeers(self, list, url, json, cnt):
         response = []
-        # TODO taken ranofm if more than minPeers
         for peer in self.randomOrderFor(m_cfg[list]):
             if m_cfg[list][peer]['active'] is True:
                 try:
-                    #print("Peer: Share new info with " + url)
                     ret = self.doPOST(url=peer + url, json=json)
                     response.append(ret)
                     cnt = cnt + 1
@@ -187,11 +185,11 @@ class peers:
                 i=0
 
         try:
-            print("last try unsecure peer itself "+ peer)
+            print("last try unconfirmed source itself " + peer)
             resp = self.sendGETToPeer(peer + url)
             txt, code = resp
             if code == 200:
-                print("got peer directly from unsecure source")
+                print("got directly from unconfirmed source")
                 peer = peer[0:-1]
                 #have not seen this peer before, so we may connect later
                 if peer not in m_cfg['peerOption']:
@@ -242,41 +240,6 @@ class peers:
                     response.append[tx]
         return response
 
-    # def deActivate(self, peer):
-    #     if m_cfg['peers'][peer]['numberFail'] > m_cfg['peerDrop']:
-    #         print("Peer " + peer + " not responding " + str(m_cfg['peers'][peer]['numberFail']) + " times, de-activated...")
-    #         m_cfg['peers'][peer]['active'] = False
-    #         return True
-    #     return False
-
-    # def discoverPeers(self, needed):
-    #     findPeer = []
-    #     for peer in m_cfg['peers']:
-    #         if m_cfg['peers'][peer]['active'] is True:
-    #             try:
-    #                 s1 = self.doGET(peer + "/peers")
-    #             except Exception:
-    #                 m_cfg['peers'][peer]['active'] = False
-    #                 continue
-    #             reply = json.loads(s1.text)
-    #             for nodeId in reply:
-    #                 found = False
-    #                 for peer2 in m_cfg['peers']:
-    #                     if nodeId == m_cfg['peers'][peer2]['nodeId']:
-    #                         found = True
-    #                         break
-    #                 if found is False:
-    #                     findPeer.append(reply[nodeId])
-    #                     needed = needed - 1
-    #                     break
-    #
-    #             if needed <= 0:
-    #                 break   # do not just take all peers from one peer
-    #                 # to avoid peer aggregation, rather try another peer
-    #                 # to see if that one connects to another, even if it
-    #                 # means the lower boundary is off for a few more rounds
-    #     for peer in findPeer:
-    #         self.addPeer(peer, True)
 
     def ensureBCNode(self, type):
         # peers can actually only be BCNode, all else make no sense
@@ -304,15 +267,6 @@ class peers:
         reply = self.suitableReply(peer)
         if len(reply) == 0:
             return False
-        # if self.isPeerAliveAndValid(peer, reply) is True:
-        #     if ('blocksCount' in reply) and (reply['blocksCount'] > len(m_Blocks)):
-        #         base = peer
-        #         if base[-1] != "/":
-        #             base = base + "/"
-        #         base = base + "blocks/"
-        #         m_cfg['missingBlock'] = {base, peer}
-        #     return True
-        # return False
         return self.isPeerAliveAndValid(peer, reply)
 
     def addPeer(self, url, addCheck):
@@ -384,8 +338,7 @@ class peers:
         return "Already connecting to peer: " + newURL
 
 
-
-    def suitablePeer(self, peer, fastTrack="False"):
+    def suitablePeer(self, peer, fastTrack=False):
         try:
             s1 = self.doGET(peer + "/info",fastTrack)
             reply = json.loads(s1.text)
@@ -411,7 +364,7 @@ class peers:
         except Exception:
             return {'fail': True}
 
-    def available(self, peer, type, fastTrack='False'):
+    def available(self, peer, type, fastTrack=False):
         remOption = []
         retry = []
         try:
@@ -448,6 +401,10 @@ class peers:
         else:
             m_cfg['shareToPeers'][peer]['active'] = True
 
+        # double check prevents asking the same node twice for nin and then max
+        # but only in case we got reply, fo none reply we try again
+        if peer not in retry:
+            self.skipDoubleCheck.append(peer)
         return retry, remOption
 
 
@@ -463,13 +420,16 @@ class peers:
                 if peerx['active'] is True:
                     cnt = cnt + 1
             if cnt > m_cfg[minOrMax]:
-                return remOption
-            retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
-            retry.extend(retr)
-            remOption.extend(remO)
+                return
+
+            #double check prevents asking the same node twice for nin and then max
+            if peer not in self.skipDoubleCheck:
+                retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
+                retry.extend(retr)
+                remOption.extend(remO)
 
         if len(retry) > 0:
-            for rets in range(1, 4):
+            for rets in range(1, 3):
                 sleep(1)
                 for peer in retry:
                     if peer in m_cfg['peerAvoid']:
@@ -480,27 +440,31 @@ class peers:
                         if peerx['active'] is True:
                             cnt = cnt + 1
                     if cnt > m_cfg[minOrMax]:
-                        return remOption
+                        for peer in remOption:
+                            if peer in m_cfg[type]:
+                                del m_cfg[type][peer]
+                        return
                     retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
                     remOption.extend(remO)
-        return remOption
-
-
-    def manageType(self, type, minOrMax, isActive):
-        cnt = 0
-        for peer in m_cfg['activePeers']:
-            if peer['active'] is True:
-                cnt = cnt + 1
-        if cnt >= m_cfg['maxPeers']:
-            return True
-
-        if (isActive is True) and (cnt >= m_cfg['minPeers']):
-            return True
-
-        remOption = self.tryToAchieveMaxPeerActiveUsing(type, minOrMax)
         for peer in remOption:
             if peer in m_cfg[type]:
                 del m_cfg[type][peer]
+        return
+
+
+    def manageType(self, type, minOrMax):
+        cnt = 0
+        isMin = minOrMax.startswith("min")
+        for peer in m_cfg['activePeers']:
+            if peer['active'] is True:
+                cnt = cnt + 1
+        if cnt >= m_cfg['maxPeers']:
+            return True
+
+        if (isMin is True) and (cnt >= m_cfg['minPeers']):
+            return True
+
+        self.tryToAchieveMaxPeerActiveUsing(type, minOrMax)
 
         cnt = 0
         for peer in m_cfg['activePeers']:
@@ -510,7 +474,7 @@ class peers:
         if cnt >= m_cfg['maxPeers']:
             return True
 
-        if (isActive is True) and (cnt >= m_cfg['minPeers']):
+        if (isMin is True) and (cnt >= m_cfg['minPeers']):
             return True
 
         return False
@@ -519,21 +483,18 @@ class peers:
         #TODO ask for the per list and if we are peer of the other, upgrade to activePeers
         return
 
-    def ensurePeerNumber(self, isActive, minOrMax):
-        if isActive is True:
-            if self.manageType("activePeers", minOrMax, isActive) is True:
+    def ensurePeerNumber(self, minOrMax):
+        if minOrMax.startswith("min"):
+            if self.manageType("activePeers", minOrMax) is True:
                 return
-            if self.manageType("shareToPeers", minOrMax, isActive) is True:
+            if self.manageType("shareToPeers", minOrMax) is True:
                 return
             self.upgradeShareToActive()
-        self.manageType("peerOption", minOrMax, isActive)
+        self.manageType("peerOption", minOrMax)
 
-        if isActive is True:
+        if minOrMax.startswith("min") is True:
             if (len(m_cfg['peerOption']) > 0) and (minOrMax != 'maxPeers'):
-                #threadp = Thread(target=self.ensurePeerNumber, args=(False, 'maxPeers'))
-                #threadp.start()
-                self.ensurePeerNumber(False, 'maxPeers')
-                #return
+                self.ensurePeerNumber('maxPeers')
 
         m_cfg['statusPeer'] = False
 
@@ -541,6 +502,7 @@ class peers:
     def checkEveryXSecs(self):
         m_cfg['statusPeer'] = False
         while m_cfg['shutdown'] is False:
+            self.skipDoubleCheck.clear()
             if "statusChain" not in m_cfg:
                 m_cfg['statusChain'] = False       # backward compatibility
             #TODO still using statusPeer statusChain?
@@ -549,7 +511,7 @@ class peers:
             while m_cfg['statusPeer']:
                 sleep(1)
             m_cfg['statusPeer'] = True
-            self.ensurePeerNumber(True, "minPeers")
+            self.ensurePeerNumber("minPeers")
             sleep(m_cfg['peersCheckDelay']) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
 

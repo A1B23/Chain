@@ -131,7 +131,7 @@ def doMine():
         cfg['done'] = True
         cfg['pulling'] = True
         if m_cfg['mode'] == "Y":
-            print("Enter m <return> to start mining")
+            print("Enter m <return> to (re-)start mining, candidate changed or new:")
             choice = "s"
             while choice != "m":
                 choice = input().lower()
