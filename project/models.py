@@ -51,6 +51,8 @@ m_cfg = {
     "debug": False,
     "shutdown": False,
     "type": "TBD",
+    "chainLoaded": False,
+    "checkingChain": False
 }
 
 m_info = {

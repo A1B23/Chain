@@ -340,7 +340,7 @@ class peers:
 
     def suitablePeer(self, peer, fastTrack=False):
         try:
-            s1 = self.doGET(peer + "/info",fastTrack)
+            s1 = self.doGET(peer + "/info", fastTrack)
             reply = json.loads(s1.text)
             m, l, f = checkRequiredFields(reply, m_info, ["chainId", "about"], False)
             if (len(f) > 0) or (len(m) > 0):  # we skip to check any additional fields, is that OK
@@ -351,15 +351,17 @@ class peers:
                 m_info['peers'] = len(m_cfg['peers'])
                 return {'wrongChain': True}
 
+            if peer != reply['nodeUrl']:
+                return {'Inconsistency in nodeURL': True}
+
             if not self.ensureBCNode(reply['type']):
                 return {'wrongType': True}
 
             if isBCNode():
-                if reply['blocksCount'] > len(m_Blocks):
-                    # TODO verify that the claimed block matched its advertisemnt in
-                    # TODO  blockscount, tx and cumulativeDifficulty!!
-                    threadp = Thread(target=project.classes.c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer, args=(peer,reply['blocksCount'],True))
-                    threadp.start()
+                if (m_cfg['chainLoaded'] is True) and (reply['blocksCount'] > len(m_Blocks)):
+                    #ignore the return data from the situational check as here is primarily peer
+                    # and informing the blockmanager about potential peers is secondary here
+                    project.classes.c_blockchainNode.c_blockchainHandler.checkChainSituation('info', reply)
             return reply
         except Exception:
             return {'fail': True}

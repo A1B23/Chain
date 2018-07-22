@@ -20,8 +20,8 @@ def jsonToStr(jsonDict):
 def sha256ToHex(ref, data):
     return sha256StrToHex(putDataInOrder(ref, data))
 
-def sha256StrToHex(toStr):
-    return hashlib.sha256(toStr.encode("utf8")).hexdigest()
+def sha256StrToHex(toHashStr):
+    return hashlib.sha256(toHashStr.encode("utf8")).hexdigest()
 
 
 def getTime():

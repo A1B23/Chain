@@ -1,6 +1,8 @@
 from project.classes import c_blockchainNode
 from project.nspec.blockchain.verify import *
 from project.nspec.blockchain.balance import *
+from project.utils import getTime
+import json
 
 firstCall = True
 class chainInterface:
@@ -37,14 +39,13 @@ class chainInterface:
         elif (urlID == "balan"):
             return getAllBalances()
         elif (urlID == "load/"):
-            c_blockchainNode.c_blockchainHandler.initChain()
             with open(linkInfo["file"], "r") as myFile:
                 sysIn = json.load(myFile)
             c_blockchainNode.loadSys(sysIn)
 
             response = {
                 'message': 'system loaded from: ' + str(linkInfo["file"]),
-                'date': datetime.datetime.now().isoformat(),
+                'date': getTime()
             }
             return jsonify(response), 200
         elif (urlID == "save/"):

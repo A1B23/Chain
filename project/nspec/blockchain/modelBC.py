@@ -11,7 +11,6 @@ maxSameBlockPerMiner = 5
 
 m_stats = {
     "m_minFee": 10, #microcoins
-    "m_cumulativeDifficulty": 0
 }
 
 m_coinBase = {

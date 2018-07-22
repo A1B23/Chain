@@ -11,6 +11,7 @@ from project.models import m_cfg
 from project.nspec.blockchain.verify import verifyAddr
 from project.pclass import c_peer
 from copy import deepcopy
+from time import sleep
 
 class blockChainNode:
     c_tx = transactions()
@@ -30,6 +31,7 @@ class blockChainNode:
 
 
     def loadSys(self,sysIn):
+        self.c_blockchainHandler.clearChainLoadGenesis()
         myUrl = m_info['nodeUrl']
         myNodeID = m_info['nodeId']
         m_info.clear()
@@ -41,7 +43,6 @@ class blockChainNode:
         m_peerInfo.clear()
         m_peerInfo.update(sysIn['m_peerInfo'])
         m_Blocks.clear()
-        m_AllBalances.clear()   # I don't load BalanceInfo form file as it is calculated on the fly
         for block in sysIn['m_Blocks']:
             if (len(m_Blocks) == 0):
                 # TODO verify all fields are the same not only there!!!
@@ -56,14 +57,15 @@ class blockChainNode:
                     # TODO revert if loading failed!?!?!
                     return errMsg(ret)
 
-        m_pendingTX.clear()
         m_pendingTX.update(sysIn['m_pendingTX'])
-        m_BufferMinerCandidates.clear()
         m_BufferMinerCandidates.update(sysIn['m_BufferMinerCandidates'])
         m_stats.update(sysIn['m_stats'])
 
     def getMinerCandidate(self, minerAddress):
         #TODO share same block for different miner later on to save memory
+        if m_cfg['chainLoaded'] is False:
+            sleep(1)
+            return errMsg("No chain loaded yet, retry ....")
         err = verifyAddr(minerAddress)
         if len(err) > 0:
             return errMsg(err)
@@ -71,18 +73,11 @@ class blockChainNode:
             cand = m_BufferMinerCandidates[minerAddress]['mineCandidate']
             if cand['index'] == m_candidateBlock['index']:
                 if m_BufferMinerCandidates[minerAddress]['minerBlock']['blockDataHash'] == m_candidateBlock['blockDataHash']:
-                    ##m_BufferMinerCandidates[minerAddress]['countRepeat'] = m_BufferMinerCandidates[minerAddress]['countRepeat'] + 1
-                    ### If there is no solution and no miner can find a solution, then unless a new tx
-                    ### comes in the network hangs, so need to limit the number of reuse here and change the timestamp
-                    ##if m_BufferMinerCandidates[minerAddress]['countRepeat'] < maxSameBlockPerMiner:
-                    ##    return setOK(cand) #if nothing has changed, return same block
-
                     return setOK(cand)  # if nothing has changed, return same block
         # as candidate blocks change with every new TX and different miners might deal
-        # with different blocks, we must keep the miner specific block in case the
-        # miner succeeds
-        if 'prevBlockHash' not in m_candidateBlock:
-            self.c_blockchainHandler.prepareNewCandidateBlock()
+        # with different blocks, we must keep the miner specific block in case a miner succeeds
+        #if 'prevBlockHash' not in m_candidateBlock:
+        self.c_blockchainHandler.prepareNewCandidateBlock()
         minerSpecificBlock = deepcopy(m_candidateBlock)
         # TODO need house-keeping if miners disappear and don't come back,
         # else we get a queue overflow attack by fake miners
@@ -98,7 +93,8 @@ class blockChainNode:
                     return errMsg("Invalid minimum CoinBase fee TX in block", 404)
         coinBase = deepcopy(m_coinBase)
         candidateMiner['index'] = len(m_Blocks)
-        coinBase['minedInBlockIndex'] = len(m_Blocks)
+        coinBase['minedInBlockIndex'] = candidateMiner['index']
+        minerSpecificBlock['index'] = candidateMiner['index']
         candidateMiner['expectedReward'] = fees
         coinBase['value'] = fees
         coinBase['to'] = minerAddress
@@ -106,10 +102,10 @@ class blockChainNode:
         coinBase['transactionDataHash'] = sha256ToHex(m_transaction_order, coinBase)
         minerSpecificBlock['transactions'].append(coinBase) #just overwrite first TX, miner gets money for empty as well
         candidateMiner['transactionsIncluded'] = len(minerSpecificBlock['transactions']) #inlcudes coinbase
+
         # now the block is done, hash it for miner
         # need to calculate now the hash for this specific miner based candidateBlock
         # the hash for the miner has to be in specific order of data
-
         candidateMiner['blockDataHash'] = makeBlockDataHash(m_candidateBlock, False)
         print("Generate new candidate for miner: " + minerAddress + " with Hash: " + candidateMiner['blockDataHash'] + " reward: " + str(fees))
         m_BufferMinerCandidates[minerAddress] = {}

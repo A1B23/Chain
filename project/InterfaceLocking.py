@@ -18,7 +18,7 @@ class mainInterface:
 
     def delay(self,url,type):
         #sleep a seconds or a loop etc
-        print("Delay needed for: "+url + " type: "+str(type) + " stackGET: " + str(len(m_simpleLock)) + " stackPOST: " + str(len(m_isPOST)))
+        print("....................Delay needed for: "+url + " type: "+str(type) + " stackGET: " + str(len(m_simpleLock)) + " stackPOST: " + str(len(m_isPOST)))
         sleep(1)
         return True
 
@@ -49,13 +49,18 @@ class mainInterface:
                 return errMsg("This URL/API is invalid or not available. " + url)
             if (not "statusChain" in m_cfg):
                 m_cfg['statusChain'] = False    #backward compatible
+            maxWait = 15
             while ((len(m_isPOST)>0) or (m_cfg['statusChain']==True)):
+                if (url == "/info"):
+                    break
                 if (self.delay(url,1) == False):
                     break   #for some reason we decide to ignore the lock
+                maxWait = maxWait - 1
+                if maxWait < 0:
+                    print("Console maxwait for chain update reached, just go ahead now ....")
+                    break
 
             m_simpleLock.append(url)
-            #TODO remove test sleep
-            #sleep(3)
             if (isBCNode()):
                 ret = self.c_blockInterface.nodeSpecificGETNow(url, linkInfo)
             elif (isWallet()):
