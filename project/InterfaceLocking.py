@@ -45,15 +45,15 @@ class mainInterface:
             'info': "This URL/API is not available/broken"
         }
         try:
-            if (not self.permittedURLGET(url)):
+            if self.permittedURLGET(url) is False:
                 return errMsg("This URL/API is invalid or not available. " + url)
-            if (not "statusChain" in m_cfg):
+            if "statusChain" not in m_cfg:
                 m_cfg['statusChain'] = False    #backward compatible
             maxWait = 15
             while ((len(m_isPOST)>0) or (m_cfg['statusChain']==True)):
-                if (url == "/info"):
+                if url == "/info": #this is needed for peers to cross reference each other
                     break
-                if (self.delay(url,1) == False):
+                if self.delay(url,1) is False:
                     break   #for some reason we decide to ignore the lock
                 maxWait = maxWait - 1
                 if maxWait < 0:
@@ -61,18 +61,18 @@ class mainInterface:
                     break
 
             m_simpleLock.append(url)
-            if (isBCNode()):
+            if isBCNode() is True:
                 ret = self.c_blockInterface.nodeSpecificGETNow(url, linkInfo)
-            elif (isWallet()):
+            elif isWallet() is True:
                 ret = self.c_walletInterface.nodeSpecificGETNow(url, linkInfo)
-            elif (isFaucet()):
+            elif isFaucet() is True:
                 ret = self.c_faucetInterface.nodeSpecificGETNow(url, linkInfo)
-            elif (isGenesis()):
+            elif isGenesis() is True:
                 ret = self.c_genesisInterface.nodeSpecificGETNow(url, linkInfo)
         except Exception:
             print("Oops, GET exception happened ....")
 
-        if (url in m_simpleLock):
+        if url in m_simpleLock:
             m_simpleLock.remove(url) #maybe need to check for being there, then need to add random to URL
         return ret
 
@@ -102,7 +102,7 @@ class mainInterface:
             # This is only applicable to POST, and is a shortcut to stop endless broadcast
             # of the same message
             for urlJson in m_peerSkip:
-                if (urlJson['url'] == url):
+                if urlJson['url'] == url:
                     m, l, f = checkRequiredFields(json, urlJson['json'], urlJson['json'], True)
                     if ((len(m)==0) and (len(f)==0)):
                         #TODO what text here?
@@ -114,30 +114,28 @@ class mainInterface:
             if self.permittedURLPOST(url) is False:
                 return errMsg("This URL/API is invalid or not available. " + url)
 
-
-
             m_isPOST.append(url)
 
             while ((len(m_isPOST)>1) or (m_cfg['statusChain']==True)):
-                if (self.delay(url,2) == False):
+                if self.delay(url,2) is False:
                     break   #for some reason we decide to ignore the loop
             while (len(m_simpleLock)>0):
-                if (self.delay(url,3) == False):
+                if self.delay(url,3) is False:
                     break   #for some reason we decide to ignore the loop
 
-            if (isBCNode()):
+            if isBCNode() is True:
                 ret = self.c_blockInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
-            elif (isWallet()):
+            elif isWallet() is True:
                 ret = self.c_walletInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
-            elif (isFaucet()):
+            elif isFaucet() is True:
                 ret = self.c_faucetInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
-            elif (isGenesis()):
+            elif isGenesis() is True:
                 ret = self.c_genesisInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
             #sleep is for test only to see POST locking works!!!
             #sleep(10)
         except Exception:
             print("POST exception caught")
 
-        if (url in m_isPOST):
+        if url in m_isPOST:
             m_isPOST.remove(url) #maybe need to check for being there, then need to add random to URL
         return ret

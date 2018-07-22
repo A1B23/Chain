@@ -11,27 +11,27 @@ class faucet:
         try:
             wal = params['wallet']
             pattern = re.compile(regexWallet)
-            if (not pattern.match(wal)):
+            if not pattern.match(wal):
                 return errMsg("Invalid wallet name.")
 
             cmd = "SELECT"
             sel = False
-            if ("py" in params['sel']):
+            if "py" in params['sel']:
                 cmd = cmd + " 'pubkey:' || pubKey,"
                 sel = True
 
-            if ("ay" in params['sel']):
+            if "ay" in params['sel']:
                 cmd = cmd + " 'addr:' || address,"
                 sel = True
 
-            if ("ny" in params['sel']):
+            if "ny" in params['sel']:
                 cmd = cmd + " 'name:' || KName"
                 sel = True
 
-            if (sel == False):
+            if sel is False:
                 cmd = cmd + " pubKey, address, KName"
             else:
-                if (cmd.endswith(",")):
+                if cmd.endswith(","):
                     cmd = cmd[0:-1]
 
             cmd = cmd + " FROM Wallet WHERE WName='" + wal + "'"
