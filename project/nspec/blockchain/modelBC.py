@@ -110,7 +110,8 @@ m_candidateBlock = {
 m_informsPeerNewBlock = {
     "blocksCount": -1,
     "cumulativeDifficulty": -1,
-    "nodeUrl": "" #""http://chain-node-03.herokuapp.com:5555"
+    "nodeUrl": "" ,#""http://chain-node-03.herokuapp.com:5555",
+    "blockHash": defHash #added by PDPCCoin to reduce bounce effects
 }
 
 m_genesisSet = [

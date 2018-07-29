@@ -37,7 +37,8 @@ def isDataValid(resp_text):
         print("required fields not matched")
         return False
 
-    if (resp_text['difficulty'] > len(cfg['zero_string'])) or (resp_text['difficulty'] < 0):
+    #TODO shoul dthis be further limited to half of zero and at least 5???
+    if (resp_text['difficulty'] >= len(cfg['zero_string'])) or (resp_text['difficulty'] < 0):
         print("Difficulty not possible")
         return False
 

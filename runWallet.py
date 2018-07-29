@@ -31,9 +31,9 @@ if __name__ == "__main__":
 
     m_permittedPOST.clear()
     m_permittedPOST.extend([
-        "/transactions/send",  # TODO POST
-        "/peers/connect",  # TODO POST
-        "/peers/notify-new-block",  # TODO POST
+        "/transactions/send",
+        "/peers/connect",
+        "/peers/notify-new-block",
         "/wallet/create$",
         "/wallet/createKey$",
         "/wallet/transfer$"

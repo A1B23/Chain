@@ -1,5 +1,5 @@
 from project.nspec.blockchain.modelBC import m_AllBalances, m_staticBalanceInfo, m_pendingTX
-from project.models import defAdr, m_TemplateSingleBalance
+from project.models import defAdr, m_TemplateSingleBalance, m_info
 from project.utils import setOK, errMsg
 from copy import deepcopy
 
@@ -87,6 +87,32 @@ def confirmUpdateBalances(txList, isGenesis):
         if tx['transactionDataHash'] in m_pendingTX:
             del m_pendingTX[tx['transactionDataHash']]
 
+    return ""
+
+
+def confirmRevertBalances(txList):
+    # entering here we know the structure of the TX are all ok, so settle only balances
+    # first we update the buffer info, and only if all pass
+    # then update the actual balances involved
+    # theoretically if it is our own block, all should be correct, but we check anyway
+    updBalance = updateConfirmedBalance(txList, False)
+    if len(updBalance) == 0:
+        #This should never happen!!!
+        return "Block rejected, invalid TX detected in: " + txList['transactionDataHash']
+
+    # all tx in this block are valid, so update actual balances based on the results from checking
+    for addr in updBalance:
+        #if (not addrTo in m_AllBalances):
+        #    addNewRealBalance(addr, blockIndex)
+        m_AllBalances[addr]['curBalance'] = m_AllBalances[addr]['curBalance'] - (updBalance[addr] - m_AllBalances[addr]['curBalance'])
+
+    #balances updated, re-install actual TX into pending list
+    for tx in txList:
+        #special case for coinbase, because the miner fee is not an actual transaction to restore!
+        if tx != defAdr:
+            if tx['transactionDataHash'] not in m_pendingTX:
+                m_pendingTX[tx['transactionDataHash']] = tx
+    m_info['confirmedTransactions'] = m_info['confirmedTransactions'] - len(txList)
     return ""
 
 

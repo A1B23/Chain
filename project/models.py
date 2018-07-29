@@ -94,10 +94,10 @@ m_permittedGET = [
 ]
 
 m_permittedPOST = [
-    "/transactions/send",  # TODO POST
-    "/peers/connect",  # TODO POST
-    "/peers/notify-new-block",  # TODO POST
-    "/mining/submit-mined-block"  # TODO POST
+    "/transactions/send",
+    "/peers/connect",
+    "/peers/notify-new-block",
+    "/mining/submit-mined-block"
 ]
 
 m_signed_txn_order = [

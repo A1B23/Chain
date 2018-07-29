@@ -163,11 +163,7 @@ class blockChainNode:
                 colErr = "Internal error on setting up block"
                 minerAddress=""
             else:
-                toPeer = deepcopy(m_informsPeerNewBlock)
-                toPeer["blocksCount"] = len(m_Blocks)
-                toPeer["cumulativeDifficulty"] = m_info['cumulativeDifficulty']
-                toPeer["nodeUrl"] = m_info['nodeUrl']
-                c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer, "")
+                self.c_blockchainHandler.notifyPeer()
         except Exception:
             colErr = colErr + " and grave error encountered"
 
