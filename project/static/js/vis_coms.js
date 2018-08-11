@@ -6,6 +6,7 @@ function collected(jsonIn, data) {
     nodes[data[0]][data[1]]['activePeers'] = json.activePeers
     nodes[data[0]][data[1]]['shareToPeers'] = json.shareToPeers
     nodes[data[0]][data[1]]['ping'] = true
+    nodes[data[0]][data[1]]['cfg'] = json
     if (json.hasOwnProperty("delayID")) {
         var to = json.url;
         var pos = to.indexOf(":", 6);

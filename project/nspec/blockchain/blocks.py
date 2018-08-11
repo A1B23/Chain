@@ -297,11 +297,10 @@ class blockchain:
                     return res, stat
         return "Unsupported block claimed by " + peer, 400
 
-    def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock):
+    def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry=2):
         if self.status['getMissingBlocks'] is True:
             return ""
         try:
-            retry = 2
             self.status['getMissingBlocks'] = True
             print("Work on missing block"+peer)
             while True:

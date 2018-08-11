@@ -4,7 +4,8 @@ import json
 import datetime
 import hashlib
 from flask import jsonify
-from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash
+from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash, m_cfg
+from project.nspec.blockchain.modelBC import m_Blocks, m_pendingTX
 
 #Call this for debuggin print to screen which needs to be removed at the end
 def d(mes):
@@ -69,6 +70,12 @@ def isFaucet():
 def isExplorer():
     return checkType(m_info['type'], "Explorer")
 
+def addCfg(m_ret):
+    if isBCNode():
+        if m_cfg['chainInit'] is False:
+            m_ret['chainHeight'] = len(m_Blocks)
+            m_ret['pendTX'] = len(m_pendingTX)
+            m_ret['lastHash'] = m_Blocks[-1]['blockHash']
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):
     missing = []

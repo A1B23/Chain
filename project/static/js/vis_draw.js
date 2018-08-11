@@ -79,6 +79,7 @@ function drawNode(typ, dom, node, cols) {
     return false;
 }
 
+allhint = { 'b': "", 'nb': "" }
 function annotateNode(typ, dom, node, cols) {
     //console.log("draw node");
     var n = nodes[typ];
@@ -93,13 +94,29 @@ function annotateNode(typ, dom, node, cols) {
                 ipa = typ + "/" + ipa.substring(pos + 1);
             }
         }
-        ctx.fillText(ipa, node.x - node.size / 2, node.y-node.size/3);
-        hint = ""
-        cfg = item['cfg']
-        hint += "b:" + cfg['chainHeight']
-        hint += " / p:" + cfg['pendTX']
-        hint += " / h:" + cfg['lastHash'].substring(0, 5) + "..." + cfg['lastHash'].substring(cfg['lastHash'].length - 5) 
-        ctx.fillText(hint, node.x - node.size *2/3 - hint.length, node.y - 1.5*node.size);
+        ctx.fillText(ipa, node.x - node.size / 2, node.y - node.size / 3);
+        var hint = ""
+        if (typ.startsWith("B") || typ.startsWith("*B")) {
+            var cfg = item['cfg']
+            hint += "b:" + cfg['chainHeight']
+            hint += " / p:" + cfg['pendTX']
+            var c = cfg['lastHash']
+            var i = 0;
+            while ((i < c.length) && (c[i] == "0")) {
+                i++;
+            }
+            hint += " / d:" + i + " / h:" + "..." + cfg['lastHash'].substring(cfg['lastHash'].length - 5)
+            if ((allhint['b'].length>0) && (allhint['b'] != hint)) {
+                ctx.fillStyle = "orange";
+            }
+            if (allhint['nb'].length ==0) {
+                allhint['nb'] = hint;
+            }
+        }
+        if (hint.length > 0) {
+            ctx.fillText(hint, node.x - node.size * 2 / 3 - hint.length, node.y - 1.5 * node.size);
+        }
+        ctx.fillStyle = "black";
         //console.log("draw node end true");
         return true;
     }
@@ -179,6 +196,14 @@ function annotateAllNodes() {
                 if (Object.keys(dx).length > 2) {
                     annotateNode(typ, dom, dx, col[typ]);
                 }
+            }
+        }
+    }
+    for (var keys in allhint) {
+        if (allhint.hasOwnProperty(keys)) {
+            if (keys.startsWith("n")) {
+                allhint[keys[1]] = allhint[keys]
+                allhint[keys] = ""
             }
         }
     }

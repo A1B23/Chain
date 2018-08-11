@@ -48,6 +48,7 @@ def finalise(host, peer, port, type):
     m_cfg['canTrack'] = useVis
 
     if isBCNode():
+        c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer("",-1,False,{},1)
         initPendingTX()
     elif isMiner():
         initMiner(host)

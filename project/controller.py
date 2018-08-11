@@ -1,6 +1,6 @@
 from project import app, render_template
 from flask import request, jsonify
-from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet
+from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, addCfg
 import json
 import requests
 from project.InterfaceLocking import mainInterface
@@ -27,6 +27,7 @@ def visualGet():
         dat['activePeers'] = m_cfg['activePeers']
         dat['shareToPeers'] = m_cfg['shareToPeers']
         dat['peerOption'] = m_cfg['peerOption']
+        addCfg(dat)
         return setOK(dat)
     except Exception:
         print("visualGet Failed")
@@ -70,11 +71,7 @@ def visualCfg():
 @app.route('/cfg', methods=["GET"])
 def get_cfg():
     m_ret = deepcopy(m_cfg)
-    if isBCNode():
-        if m_cfg['chainInit'] is False:
-            m_ret['chainHeight'] = len(m_Blocks)
-            m_ret['pendTX'] = len(m_pendingTX)
-            m_ret['lastHash'] = m_Blocks[-1]['blockHash']
+    addCfg(m_ret)
     return setOK(m_ret)
 
 ### TODO remove after debugging
