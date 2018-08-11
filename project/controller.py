@@ -1,13 +1,14 @@
 from project import app, render_template
 from flask import request, jsonify
 from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet
-import json, requests
+import json
+import requests
 from project.InterfaceLocking import mainInterface
 import project.classes
 from project.pclass import c_peer
 from copy import deepcopy
 from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
-from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates
+from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates, m_Blocks
 import re
 
 c_MainIntf = mainInterface()
@@ -31,12 +32,12 @@ def visualGet():
         print("visualGet Failed")
     return errMsg("Request failed")
 
-@app.route('/visualRelease/<int:id>', methods=["GET"])
-def visualRelease(id):
+@app.route('/visualRelease/<int:idx>', methods=["GET"])
+def visualRelease(idx):
     try:
         found = False
         for item in m_Delay:
-            if ('releaseID' in item) and (item['releaseID'] == id):
+            if ('releaseID' in item) and (item['releaseID'] == idx):
                 rel = item
                 found = True
                 break
@@ -54,7 +55,7 @@ def visualRelease(id):
 def visualCfg():
     try:
         values = request.get_json()
-        if (values['active'] is True):
+        if values['active'] is True:
             pattern = re.compile(values['pattern'])
             m_visualCFG['active'] = True
             m_visualCFG['pattern'] = pattern
@@ -68,7 +69,13 @@ def visualCfg():
 
 @app.route('/cfg', methods=["GET"])
 def get_cfg():
-    return setOK(m_cfg)
+    m_ret = deepcopy(m_cfg)
+    if isBCNode():
+        if m_cfg['chainInit'] is False:
+            m_ret['chainHeight'] = len(m_Blocks)
+            m_ret['pendTX'] = len(m_pendingTX)
+            m_ret['lastHash'] = m_Blocks[-1]['blockHash']
+    return setOK(m_ret)
 
 ### TODO remove after debugging
 @app.route('/load/<file>', methods=["GET"])
@@ -94,18 +101,16 @@ def debug():
     response.append(m_info)
     response.append(m_pendingTX)
     response.append(m_BufferMinerCandidates)
-
     return jsonify(response), 200
 
-#GET /debug/reset-chain
 @app.route('/debug/reset-chain', methods=["GET"])
 def debug_resetChain():
-    #TODO updat eby type
-    ## this is a very special case, as it is not GET but actually a POST issue
+    # TODO updat eby type
+    # this is a very special case, as it is not GET but actually a POST issue
     m_isPOST.append("Reset Chain")
-    while (len(m_isPOST)>1):
-        if (c_MainIntf.delay("reset-chain",999) == False):
-            break   #for some reason we decide to ignore the lock
+    while len(m_isPOST) > 1:
+        if c_MainIntf.delay("reset-chain",999) is False:
+            break   # for some reason we decide to ignore the lock
     ret = project.classes.c_blockchainNode.c_blockchainHandler.resetChainReply()
     m_isPOST.clear()
     return ret
@@ -213,13 +218,13 @@ def index():
     if m_cfg['debug'] == True:
         addOn = "_debug"
 
-    if isBCNode() is True:
+    if isBCNode():
         return render_template("indexBC" + addOn + ".html")
-    if isWallet() is True:
+    if isWallet():
         return render_template("TabWallet" + addOn + ".html")
-    if isFaucet() is True:
+    if isFaucet():
         return render_template("TabFaucet" + addOn + ".html")
-    if isGenesis() is True:
+    if isGenesis():
         project.classes.c_genesisInterface.initGenesis()
         return render_template("TabGenesis" + addOn + ".html")
 
@@ -294,6 +299,7 @@ def gen_viewGX():
     linkInfo = {}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
+
 @app.route('/genFaucet', methods=['POST'])
 @app.route('/useTX', methods=['POST'])
 @app.route('/genGX', methods=['POST'])
@@ -322,7 +328,7 @@ def clrNode():
     required = ['node']
     python_obj = json.loads(values)
     for k in required:
-        if not (k in python_obj):
+        if k not in python_obj:
             return 'Invalid param', 400
 
     #TODO what was clrNode and setNode() doing?

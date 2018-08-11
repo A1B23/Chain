@@ -138,7 +138,8 @@ def verifyBlockAndAllTX(block, isGenesis):
 
     return ""
 
-def receivedNewTransaction(trans, fromPeer, share):
+
+def receivedNewTransaction(trans, share):
     # Checks for missing / invalid fields / invalid field values
     colErr = verifyBasicTX(trans, False, m_transaction) #such can never be coinbase, so False!
 
@@ -172,7 +173,7 @@ def receivedNewTransaction(trans, fromPeer, share):
             # Sends the transaction to all peer nodes through the REST API
             # It goes from peer to peer until it reaches the entire network
             #TODO do we still need this 'fromPeer'?
-            c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn, fromPeer)
+            c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn)
             return jsonify(response), 201 #201 as per slide 38
         return #nothing returmed, nothing sent
     return errMsg(colErr)

@@ -45,8 +45,8 @@ m_cfg = {
     # 0 means all commands accepted, POST blocks against get
     # 1 means we are reloading the entire blocks at startup, so until this is finished, no reply
     # 2 means we are checking for peers again... default for starting up
-    "statusChain": False,
-    "statusPeer": True,
+    "chainInit": False,
+    "checkingPeers": True,
     "canTrack": False,
     "debug": False,
     "shutdown": False,

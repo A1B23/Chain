@@ -11,11 +11,17 @@ function drawCanvas() {
     ctx.shadowOffsetY = 7;
     drawAllNodes();
     ctx.restore();
+    ctx.save();
+    annotateAllNodes();
+    ctx.restore();
     drawAllComs();
 }
 
 
 var mp2 = Math.PI * 2;
+var m7 = Math.PI / 7;
+var p180 = Math.PI / 180;
+
 function drawGrid() {
     ctx.setLineDash([3, 6])
     var sradx = Math.trunc((getWidth() * .45) / rings.length);
@@ -43,7 +49,6 @@ function resizeCanvas() {
 
 
 function drawNode(typ, dom, node, cols) {
-    //console.log("draw node");
     var n = nodes[typ];
     if (n.hasOwnProperty(dom)) {
         var item = n[dom]
@@ -68,9 +73,17 @@ function drawNode(typ, dom, node, cols) {
             ctx.closePath();
             ctx.fill();
         }
-        ctx.fillStyle = "black";
-        ctx.font = "10px _sans";
-        ctx.textBaseline = "top";
+        return true;
+    }
+    //console.log("draw node end false");
+    return false;
+}
+
+function annotateNode(typ, dom, node, cols) {
+    //console.log("draw node");
+    var n = nodes[typ];
+    if (n.hasOwnProperty(dom)) {
+        var item = n[dom]
         var ipa = typ
         var pos = dom.lastIndexOf(":")
         if (pos > 0) {
@@ -80,7 +93,13 @@ function drawNode(typ, dom, node, cols) {
                 ipa = typ + "/" + ipa.substring(pos + 1);
             }
         }
-        ctx.fillText(ipa, node.x - node.size / 2, node.y);
+        ctx.fillText(ipa, node.x - node.size / 2, node.y-node.size/3);
+        hint = ""
+        cfg = item['cfg']
+        hint += "b:" + cfg['chainHeight']
+        hint += " / p:" + cfg['pendTX']
+        hint += " / h:" + cfg['lastHash'].substring(0, 5) + "..." + cfg['lastHash'].substring(cfg['lastHash'].length - 5) 
+        ctx.fillText(hint, node.x - node.size *2/3 - hint.length, node.y - 1.5*node.size);
         //console.log("draw node end true");
         return true;
     }
@@ -148,8 +167,24 @@ function drawAllNodes() {
     }
 }
 
+function annotateAllNodes() {
+    var dx = 0;
+    ctx.fillStyle = "black";
+    ctx.font = "10px _sans";
+    ctx.textBaseline = "top";
+    for (var typ in nodes) {
+        if (nodes.hasOwnProperty(typ)) {
+            for (var dom in nodes[typ]) {
+                dx = getXYType(typ, dom);
+                if (Object.keys(dx).length > 2) {
+                    annotateNode(typ, dom, dx, col[typ]);
+                }
+            }
+        }
+    }
+}
 
-var m7 = Math.PI / 7;
+
 function drawArrow(fromx, fromy, tox, toy, size) {
     //variables to be used when creating the arrow
     var angle = Math.atan2(toy - fromy, tox - fromx);
@@ -192,7 +227,7 @@ function calcSlope(typ,dom,type, drawFrom) {
 }
 
 
-var p180 = Math.PI / 180;
+
 function calcCoords() {
     var sradx = Math.trunc((getWidth() * .45) / rings.length);
     var srady = Math.trunc((getHeight() * .45) / rings.length);

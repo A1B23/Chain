@@ -20,56 +20,55 @@ def finalise(host, peer, port, type):
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
     useVis = m_cfg['canTrack']
-    #temporarily switch off any delay to allow peer initialisation to go ahead without delay
+    # temporarily switch off any delay to allow peer initialisation to go ahead without delay
     m_cfg['canTrack'] = False
-    cont = True
-    while cont:
+    if isBCNode():
+        c_blockchainNode.c_blockchainHandler.clearChainLoadGenesis()
+    elif isWallet() or isFaucet():
+        m_db['db'] = sqlite3.connect(m_db['DATABASE'])
+    elif isGenesis():
+        c_genesisInterface.initGenesis()
+
+    holdOn = True
+    while holdOn:
         try:
             sleep(1)
             requests.get("http://"+host+":"+str(port))
-            #if r.status_code == 200: no check for 200, as miner has none and any reply will do!!!!
-            #cont = False
-            break
+            holdOn = False
         except Exception:
-            print("Waiting for flask...")
+            print("Holding on for flask...")
     onePeer = c_peer.registerPotentialPeer(peer, port)
     thread = Thread(target=c_peer.checkEveryXSecs)
     thread.start()
-    while m_cfg['statusPeer'] == True:
+    while m_cfg['checkingPeers'] == True:
         sleep(1)
-
-    if isBCNode() is True:
-        c_blockchainNode.c_blockchainHandler.initChain(onePeer,True,False)  #Todo add the hashfcth and fetchall as cmdline
-        initPendingTX()
-    elif isMiner() is True:
-        initMiner(host)
-    elif (isWallet() is True) or (isFaucet() is True):
-        #CREATE TABLE `Wallet` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE, `WName` TEXT NOT NULL UNIQUE, `privKey` TEXT, `pubKey` TEXT, `address` TEXT, `KName` TEXT, `ChkSum` TEXT )
-        m_db['db'] = sqlite3.connect(m_db['DATABASE'])
-    elif isGenesis() is True:
-        c_genesisInterface.initGenesis()
-
-
-
+        print("Still initialising peers..")
+    print("Initialise peers completed")
 
     m_cfg['canTrack'] = useVis
+
+    if isBCNode():
+        initPendingTX()
+    elif isMiner():
+        initMiner(host)
+
 
 @app.after_request
 def after_request(response):
     # this allows the visualiser to support CORS
-    #to be more secure, should not allow '*' but only allow the local visualiser, but have not succeeded, so open all
+    # to be more secure, should not allow '*' but only allow the local visualiser, but have not succeeded, so open all
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
     return response
 
 
-def main(type):
-    m_info['type'] = type
-    m_cfg['type'] = type
+def main(typeIn):
+    m_info['type'] = typeIn
+    m_cfg['type'] = typeIn
     parser = ArgumentParser()
     host, port, peer = init(parser)
-    thread = Thread(target=finalise, args=(host, peer, port, type))
+    thread = Thread(target=finalise, args=(host, peer, port, typeIn))
     thread.start()
     app.run(host=host, port=port, threaded=True)
 
@@ -126,7 +125,7 @@ def init(parser):
         m_info['about'] = "NAPCoin"
 
     m_completeBlock.clear()
-    m_completeBlock.update(deepcopy(m_genesisSet[useNet])) # this is for refernce and ensures corrcet chainId!
+    m_completeBlock.update(deepcopy(m_genesisSet[useNet]))  # this is for reference and ensures correct chainId!
     m_completeBlock.update({"prevBlockHash": 0})
 
     if args.canTrack == "Y":
@@ -138,9 +137,9 @@ def init(parser):
         print("Debug GUI activated")
         m_info['type'] = "*"+m_info['type']
 
-    #if we want to have navkov as peer for testing blocks enable next line can soon be removed
-    #c_peer.setPeersAs("https://stormy-everglades-34766.herokuapp.com",80)
-    #TODO search for 'navkov has wrong nodeUrl info' and enable the modeUrl correction as well
+    # if we want to have navkov as peer for testing blocks enable next line can soon be removed
+    # c_peer.setPeersAs("https://stormy-everglades-34766.herokuapp.com",80)
+    # TODO search for 'navkov has wrong nodeUrl info' and enable the modeUrl correction as well
     print(m_cfg)
     print(m_info)
     # maxBytes to small number, in order to demonstrate the generation of multiple log files (backupCount).

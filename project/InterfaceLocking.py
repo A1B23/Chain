@@ -7,16 +7,13 @@ from project.models import m_permittedPOST, m_permittedGET, m_cfg, m_simpleLock,
 from time import sleep
 import re
 
-
-
 class mainInterface:
     c_blockInterface = chainInterface()
     c_walletInterface = walletInterface()
     c_faucetInterface = faucetInterface()
     c_genesisInterface = genesisInterface()
 
-
-    def delay(self,url,type):
+    def delay(self, url, type):
         #sleep a seconds or a loop etc
         print("....................Delay needed for: "+url + " type: "+str(type) + " stackGET: " + str(len(m_simpleLock)) + " stackPOST: " + str(len(m_isPOST)))
         sleep(1)
@@ -28,8 +25,7 @@ class mainInterface:
                 return True
         return False
 
-
-    def permittedURLGET(self,url):
+    def permittedURLGET(self, url):
         for test in m_permittedGET:
             if re.match(test, url):
                 return True
@@ -47,13 +43,13 @@ class mainInterface:
         try:
             if self.permittedURLGET(url) is False:
                 return errMsg("This URL/API is invalid or not available. " + url)
-            if "statusChain" not in m_cfg:
-                m_cfg['statusChain'] = False    #backward compatible
+            if "chainInit" not in m_cfg:
+                m_cfg['chainInit'] = False    #backward compatible
             maxWait = 15
-            while ((len(m_isPOST)>0) or (m_cfg['statusChain']==True)):
+            while (len(m_isPOST) > 0) or (m_cfg['chainInit'] is True):
                 if url == "/info": #this is needed for peers to cross reference each other
                     break
-                if self.delay(url,1) is False:
+                if self.delay(url, 1) is False:
                     break   #for some reason we decide to ignore the lock
                 maxWait = maxWait - 1
                 if maxWait < 0:
@@ -116,11 +112,11 @@ class mainInterface:
 
             m_isPOST.append(url)
 
-            while ((len(m_isPOST)>1) or (m_cfg['statusChain']==True)):
+            while ((len(m_isPOST)>1) or (m_cfg['chainInit']==True)):
                 if self.delay(url,2) is False:
                     break   #for some reason we decide to ignore the loop
             while (len(m_simpleLock)>0):
-                if self.delay(url,3) is False:
+                if self.delay(url, 3) is False:
                     break   #for some reason we decide to ignore the loop
 
             if isBCNode() is True:

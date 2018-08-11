@@ -163,7 +163,7 @@ class blockChainNode:
                 colErr = "Internal error on setting up block"
                 minerAddress=""
             else:
-                self.c_blockchainHandler.notifyPeer()
+                self.c_blockchainHandler.asynchNotifyPeers()
         except Exception:
             colErr = colErr + " and grave error encountered"
 

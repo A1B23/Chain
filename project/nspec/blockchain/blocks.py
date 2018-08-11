@@ -16,12 +16,6 @@ from flask import jsonify
 class blockchain:
     status = {'getMissingBlocks': False}
 
-    def setNetBasedOnChainID(self, id):
-        # the id is the blochhash, so find the index and the
-        useID = 1 #just default value
-        self.resetChain()
-        return
-
     def resetChainReply(self):
         self.resetChain()
         response = {
@@ -44,7 +38,6 @@ class blockchain:
         m_info['confirmedTransactions'] = len(m_genesisSet[useNet]['transactions'])
         m_info['pendingTransactions'] = 0
 
-        #addNewRealBalance(defAdr, 0)
         err = verifyBlockAndAllTX(m_genesisSet[useNet], True)
         if len(err) > 0:
             print("Ooops, it appears that the genesis Block is not correct, please fix...  "+err)
@@ -57,12 +50,11 @@ class blockchain:
             sys.exit(-1)
         m_Blocks.append(deepcopy(m_genesisSet[useNet]))
 
-
     def initChain(self,onePeer="", fetchAll=False, hashFetch=False):
         self.clearChainLoadGenesis()
 
         if fetchAll is False:
-            #get the blocks one by one, due to size or whatever (later maybe even only getting the hashes!
+            # get the blocks one by one, due to size or whatever (later maybe even only getting the hashes!
             threadx = Thread(target=self.getMissingBlocksFromPeer,args=(onePeer, -1, False,{}))
             threadx.start()
             return
@@ -73,22 +65,18 @@ class blockchain:
                 self.getAllBlocksOneReadDirect()
         m_cfg['chainLoaded'] = True
 
-
     def resetChain(self):
-        m_cfg['statusChain'] = True
-        m_cfg['statusChain'] = False
+        m_cfg['chainInit'] = True
         try:
             self.initChain("", True, False)
         except Exception:
             print("Seems no peers ready yet....")
-        m_cfg['statusChain'] = False
-
+        m_cfg['chainInit'] = False
 
     def getAllBlocksOneReadDirect(self):
-        #coming here we are sure that we have back-up or nothing to loose!
+        # coming here we are sure that we have back-up or nothing to loose!
         allPeersInfo = c_peer.sendGETToPeers("info")
         ret = -1
-        bestPeer=""
 
         while (ret != 200) and (len(allPeersInfo)>0):
             #some peers exists and may have blocks, so we follow them
@@ -127,14 +115,13 @@ class blockchain:
                             self.clearChainLoadGenesis()
                             break
                     m_info['blocksCount'] = len(m_Blocks)
-                    continue    #with ret being 200, this ends the loop!!!
+                    continue    # with ret being 200, this ends the loop!!!
                 del allPeersInfo[maxIdx]
                 continue
 
-
     def prepareNewCandidateBlock(self):
         m_candidateBlock.clear()
-        m_candidateBlock.update(deepcopy(m_static_emptyBlock)) #contains coinbase
+        m_candidateBlock.update(deepcopy(m_static_emptyBlock)) # contains coinbase
         m_candidateBlock['index'] = len(m_Blocks)
         m_candidateBlock['prevBlockHash'] = m_Blocks[-1]['blockHash']
         m_BufferMinerCandidates.clear()
@@ -143,21 +130,20 @@ class blockchain:
         m_candidateBlock['transactions'].clear()
         m_candidateBlock['transactions'].extend(m_pendingTX)
 
-
     def handleChainBackTracking(self, res, source, blockInfo):
         #TODO think of a way to handle this after the initial simple cases worked
         self.resetChain()
         m_cfg['checkingChain'] = False
         return setOK("Reset my chain")
 
-    def notifyPeer(self, peer = ""):
+    def asynchNotifyPeers(self):
         try:
-            toPeer = deepcopy(m_informsPeerNewBlock)
-            toPeer["blocksCount"] = len(m_Blocks)
-            toPeer["cumulativeDifficulty"] = m_info['cumulativeDifficulty']
-            toPeer["nodeUrl"] = m_info['nodeUrl']
-            toPeer["blockHash"] = m_Blocks[-1]['blockHash']
-            c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", toPeer, peer)
+            forPeer = deepcopy(m_informsPeerNewBlock)
+            forPeer["blocksCount"] = len(m_Blocks)
+            forPeer["cumulativeDifficulty"] = m_info['cumulativeDifficulty']
+            forPeer["nodeUrl"] = m_info['nodeUrl']
+            forPeer["blockHash"] = m_Blocks[-1]['blockHash']
+            c_peer.sendAsynchPOSTToPeers("peers/notify-new-block", forPeer)
         except Exception:
             return
 
@@ -178,6 +164,7 @@ class blockchain:
             peer = blockInfo['nodeUrl']
             if blockInfo['blocksCount'] < len(m_Blocks):
                 print("stay with local chain anyway as it is longer than for " + peer)
+                #TODO asycnhc inform the lagging peer!!
                 return errMsg("Notified chain shorter than local current, current is:" + str(len(m_Blocks)))
             if source == "notification":
                 if 'blockHash' in blockInfo: #PDPCCoin specific shortcut
@@ -194,7 +181,7 @@ class blockchain:
                 print("blocks on par, check next step with "+peer)
                 #this means we have conflict on the same top block, probably parallel mined
                 if blockInfo['cumulativeDifficulty'] < m_info['cumulativeDifficulty']:
-                    self.notifyPeer(peer)
+                    self.asynchNotifyPeers()
                     m_cfg['checkingChain'] = False
                     print("local difficulty higher, no change")
                     return errMsg("Peers chain cumulativeDifficulty lower than local current, current is:" + str(m_info['cumulativeDifficulty']))
@@ -249,14 +236,14 @@ class blockchain:
                             restor = m_Blocks[-1]
                             confirmRevertBalances(restor['transactions'])
                             del m_Blocks[-1]
-                            err = self.checkAndAddBlock(res, False, peer)
+                            err = self.checkAndAddBlock(res, False)
                             if len(err) > 0:
                                print("something was wrong, restore own previous block")
-                               self.checkAndAddBlock(restor, False, peer)
+                               self.checkAndAddBlock(restor, False)
                                m_cfg['checkingChain'] = False
                                return errMsg("Invalid block received")
                         else:
-                            self.notifyPeer(peer)
+                            self.asynchNotifyPeers()
                             print("local copy maintained after all")
                             i=0
                         m_cfg['checkingChain'] = False
@@ -273,7 +260,7 @@ class blockchain:
                     #backtrack into the stack!!!
                     if res['prevBlockHash'] != m_Blocks[-1]['blockHash']:
                         print("hashes different need to settle backtrack")
-                        self.notifyPeer(peer)
+                        self.asynchNotifyPeers()
                         return errMsg("Chain forked")
                     if source == 'notification':
                         print("Sender want a reply, so process")
@@ -292,7 +279,6 @@ class blockchain:
             m_cfg['checkingChain'] = False
             return errMsg("Processing error occurred")
 
-
     def getNextBlock(self, peer, offset):
         if (len(peer) > 0) and (peer[-1] != "/"):
             peer = peer + "/"
@@ -310,7 +296,6 @@ class blockchain:
                 if res['index'] == len(m_Blocks)+offset:
                     return res, stat
         return "Unsupported block claimed by " + peer, 400
-
 
     def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock):
         if self.status['getMissingBlocks'] is True:
@@ -335,7 +320,7 @@ class blockchain:
                     if res['difficulty'] < m_info['currentDifficulty']:
                         m_cfg['checkingChain'] = False
                         return "Invalid difficulty in block detected"
-                    err = self.checkAndAddBlock(res, isAlert, peer)
+                    err = self.checkAndAddBlock(res, isAlert)
                     if len(err) > 0:
                         m_cfg['chainLoaded'] = True
                         m_cfg['checkingChain'] = False
@@ -345,20 +330,19 @@ class blockchain:
                         m_cfg['checkingChain'] = False
                         self.status['getMissingBlocks'] = False
                         return ""
-                    retry = retry - 1 #maybe block has not spread well yet
+                    retry = retry - 1 # maybe block has not spread well yet
                     if retry <= 0:
                         self.status['getMissingBlocks'] = False
                         m_cfg['chainLoaded'] = True
                         m_cfg['checkingChain'] = False
                         return "No valid information, stopped block updates."
-                    #continue  # must continue as we have no res[index]
         except Exception:
             self.status['getMissingBlocks'] = False
         m_cfg['checkingChain'] = False
         m_cfg['chainLoaded'] = (len(m_Blocks) > 0)
         return "Verification failed"
 
-    def checkAndAddBlock(self, res, isAlert, peer):
+    def checkAndAddBlock(self, res, isAlert):
         err = self.verifyThenAddBlock(res)
         if len(err) > 0:
             self.status['getMissingBlocks'] = False
@@ -366,7 +350,7 @@ class blockchain:
         # inform all our peers about the block
         m_BufferMinerCandidates.clear()
         if isAlert is True:
-            self.notifyPeer(peer)
+            self.asynchNotifyPeers()
         self.status['getMissingBlocks'] = False
         return ""
 
@@ -376,12 +360,10 @@ class blockchain:
             m, l, f = checkRequiredFields(blockInfo, m_informsPeerNewBlock, [], False)
             if (len(m) == 0) and (l == 0):
                 return self.checkChainSituation('notification', blockInfo)
-
         except Exception:
             i=0
 
         return errMsg("Invalid block structure")
-
 
     def verifyThenAddBlock(self, block):
         try:
@@ -390,12 +372,12 @@ class blockchain:
                 return "Block index invalid"
         except Exception:
             return "Invalid block"
-        #check structure of block and TX, but not yet the balances
+        # check structure of block and TX, but not yet the balances
         err = verifyBlockAndAllTX(block, False)
         if len(err) > 0:
             return err
 
-        #structures are all corrcet so now check balances and update them
+        # structures are all corrcet so now check balances and update them
         # clearing of all pending transactions involved in the block is done inside completed updatebalance!
         err = confirmUpdateBalances(block['transactions'], False)
         if len(err) > 0:
@@ -410,7 +392,6 @@ class blockchain:
         m_info['pendingTransactions'] = len(m_pendingTX)
         return ""
 
-
     def getBlockByNumber(self, blockNr):
         if blockNr >= 0:
             if blockNr < len(m_Blocks):
@@ -423,8 +404,8 @@ class blockchain:
             return setOK(blk)
         return errMsg('BlockNumber not valid or not existent: '+str(blockNr))
 
-    #this is not part of standard Nakov, but useful for info testing and debugging and
-    #later for chain verifications or fast loading
+    # this is not part of standard Nakov, but useful for info testing and debugging and
+    # later for chain verifications or fast loading
     def getBlockHash(self, params):
         try:
             hfrom = +params['from']
