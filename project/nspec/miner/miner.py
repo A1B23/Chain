@@ -1,5 +1,7 @@
 import hashlib
 from time import sleep
+import datetime
+import time
 import random
 from threading import Thread
 from project.nspec.blockchain.modelBC import m_candidateMiner, minBlockReward
@@ -72,6 +74,7 @@ def changeNonceDate():
     print("nonce done")
     return
 
+
 def pull():
     try:
         print("asking")
@@ -88,13 +91,13 @@ def pull():
             sleep(3)
             return
         print("ok check, miner was idle "+str(cfg['done']))
-        if cfg['lastHash'] != resp_text['blockDataHash']:
+        if cfg['blockHash'] != resp_text['blockDataHash']:
             print("new block data")
             cfg['done'] = True #stop any ongoing looping
 
         if cfg['done'] is True:
             print("prepare block data for miner whenever miner is ready, even if we already have it all set")
-            cfg['lastHash'] = resp_text['blockDataHash']
+            cfg['blockHash'] = resp_text['blockDataHash']
             newCandidate['blockDataHash'] = resp_text['blockDataHash']
             newCandidate['difficulty'] = resp_text['difficulty']
             changeNonceDate()
@@ -116,8 +119,13 @@ def pull():
 def pullCandidate():
     thread = Thread(target=doMine)
     thread.start()
+    cfg['foundSolution'] = False
     while m_cfg['shutdown'] is False:
         try:
+            while cfg['foundSolution'] is True:
+                # if it is true, we are just sending, or we have a delay in sending for simulation
+                # so no point to ask for new block, just sleep a bit
+                sleep(1)
             pull()
             sleep(int(newCandidate['difficulty']/2)+2)
         except Exception:
@@ -129,25 +137,42 @@ def doMine():
     # request some block for mining to the networks(Node)
     # then try to find a hashing code and nonce value to meet with the difficulty
     while m_cfg['shutdown'] is False:
+        cfg['foundSolution'] = False
         cfg['done'] = True
         cfg['pulling'] = True
         if m_cfg['mode'] == "Y":
             print("Enter m <return> to (re-)start mining, candidate changed or new:")
-            choice = "s"
-            while choice != "m":
-                choice = input().lower()
-
+            choice = 0
+            while True:
+                try:
+                    if choice > 0:
+                        print("Invalid request: "+sel)
+                    choice = choice + 1
+                    sel = input().lower()
+                    if sel == 'm':
+                        sel = 0
+                        break
+                    if sel[0] == "d":
+                        secs = int(sel[1:])
+                        if secs > 0:
+                            sel = datetime.datetime.now() + datetime.timedelta(seconds=secs)
+                            sel = "d" + str(int(time.mktime(sel.timetuple())))
+                            break
+                    if sel[0] == "s":
+                        secs = int(sel[1:])
+                        if (secs >= 0) and (secs < 60):
+                            break
+                except Exception:
+                    print("Invalid input: "+sel)
+            cfg['mineSend'] = sel
         while cfg['pulling'] is True:
             sleep(1)
         cfg['done'] = False
         candidate = deepcopy(newCandidate)
         target = cfg['zero_string'][:candidate['difficulty']]
         try:
-            # Request and wait a response from the N/W
-            cfg['foundSolution'] = False
-
             count = 0
-            #TODO remove the show once it works?
+            # show progress of nonce finding
             show = 0
             minedBlockHash = "N/A"
             while (cfg['foundSolution'] is False) and (cfg['done'] is False):
@@ -186,6 +211,25 @@ def doMine():
                 }
 
                 sent = False
+                if cfg['mineSend'] != 0:
+                    try:
+                        if cfg['mineSend'][0] == "d":
+                            sel = int(cfg['mineSend'][1:])
+                            while int(time.mktime(datetime.datetime.now().timetuple())) < sel:
+                                print("Wait to send due to delay...")
+                                sleep(1)
+                        elif cfg['mineSend'][0] == "s":
+                            sel = int(cfg['mineSend'][1:])
+                            isLower = (datetime.datetime.now().second <= sel)
+                            while datetime.datetime.now().second != sel:
+                                if (isLower is True) and (datetime.datetime.now().second >= sel):
+                                    break
+                                else:
+                                    isLower = (datetime.datetime.now().second <= sel)
+                                print("Wait to send due seconds check..." + str(isLower))
+                                sleep(1)
+                    except Exception:
+                        print("send control invalid: "+cfg['mineSend'])
                 for peer in m_cfg['activePeers']:
                     resp = c_peer.doPOST(url=peer + "/mining/submit-mined-block", json=ndata)
                     sent = True
@@ -198,7 +242,7 @@ def doMine():
                 if (sent is True) and (resp.status_code == 200):
                     print("MINING SUCCESS (" + str(count) + " tries): " + resp.text)
                 else:
-                    print("MINING FAIL: ", resp.text)
+                    print("MINING FAILED: ", resp.text)
             else:
                 print("No solution found or new block came in")
         except Exception:
@@ -208,8 +252,9 @@ def doMine():
 def initMiner(IP):
     random.seed(a=hashlib.sha256(getFutureTime(0).encode("utf8")))
     cfg['pulling'] = True
-    #TODO make minerWallet name configurable so that they don't overwrite each other when run locally
-    wallet = 'minerWallet' + (IP[-2:].replace(".", "x"))
+    # TODO make minerWallet name configurable so that they don't overwrite each other when run locally
+    # using IP is just a quick work around
+    wallet = 'minerWallet' + (IP.replace(".", "x"))
     if c_walletInterface.hasWallet(wallet) is False:
         c_walletInterface.addKeysToWalletBasic({'name': wallet, 'user': wallet+'AsUser', 'numKeys': 1, 'keyNames': ['minerKey']}, wallet)
     repl = c_walletInterface.getDataFor(['name', 'minerKey'], wallet, "", wallet+'AsUser')

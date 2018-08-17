@@ -20,7 +20,7 @@ function doPOSTSynch(url, updateField, data) {
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send((typeof data == 'string')?data:JSON.stringify(data));
         var json = { "message": "fail" };
-        if (xhr.status == 200) {
+        if ((xhr.status == 200) || (xhr.status == 201)) {
             text = xhr.responseText.replace(/\n/g, "");
             json = JSON.parse(xhr.responseText);
             if (updateField != null) {

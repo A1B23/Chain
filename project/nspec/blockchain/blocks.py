@@ -4,7 +4,7 @@ from threading import Thread
 from project.models import useNet, m_info, m_cfg
 from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.nspec.blockchain.modelBC import m_informsPeerNewBlock, m_balHistory, m_static_emptyBlock
-from project.utils import checkRequiredFields, isSameChain, setOK, errMsg, sha256StrToHex
+from project.utils import checkRequiredFields, isSameChain, setOK, errMsg, sha256StrToHex, d
 from project.models import defHash
 from project.pclass import c_peer
 from copy import deepcopy
@@ -128,7 +128,9 @@ class blockchain:
 
         #TODO add a maximum number for TX here
         m_candidateBlock['transactions'].clear()
-        m_candidateBlock['transactions'].extend(m_pendingTX)
+        for txh in m_pendingTX:
+            dx = deepcopy(m_pendingTX[txh])
+            m_candidateBlock['transactions'].append(dx)
 
     def handleChainBackTracking(self, res, source, blockInfo):
         #TODO think of a way to handle this after the initial simple cases worked
@@ -160,10 +162,10 @@ class blockchain:
         #only in info:
         #   "confirmedTransactions": 208
         try:
-            print("checking status due to " + source)
+            d("checking status due to " + source)
             peer = blockInfo['nodeUrl']
             if blockInfo['blocksCount'] < len(m_Blocks):
-                print("stay with local chain anyway as it is longer than for " + peer)
+                d("stay with local chain anyway as it is longer than for " + peer)
                 #TODO asycnhc inform the lagging peer!!
                 return errMsg("Notified chain shorter than local current, current is:" + str(len(m_Blocks)))
             if source == "notification":
@@ -172,18 +174,18 @@ class blockchain:
                         print("is the same, probably rebound...")
                         return setOK("Thank you for the notification.")
             while m_cfg['checkingChain'] is True:
-                print("Already checking chain status, so complete the first one")
+                d("Already checking chain status, so complete the first one")
                 #return errMsg("Please wait for current synchronisation to complete...")
                 sleep(1)
             m_cfg['checkingChain'] = True
 
             if blockInfo['blocksCount'] == len(m_Blocks):
-                print("blocks on par, check next step with "+peer)
+                d("blocks on par, check next step with "+peer)
                 #this means we have conflict on the same top block, probably parallel mined
                 if blockInfo['cumulativeDifficulty'] < m_info['cumulativeDifficulty']:
                     self.asynchNotifyPeers()
                     m_cfg['checkingChain'] = False
-                    print("local difficulty higher, no change")
+                    d("local difficulty higher, no change")
                     return errMsg("Peers chain cumulativeDifficulty lower than local current, current is:" + str(m_info['cumulativeDifficulty']))
                 else:
                     # we have same height and same or lower difficulty, so we need to roll the dice for now
@@ -197,17 +199,17 @@ class blockchain:
                         # 0) we ignore your cumDiff
                         # a) myDiff versus your blockDifficulty
                         # b) mycum-myDiff+yourDiff == your claimed cumDif
-                        print("got peer block as requested with OK")
-                        #We repeat the check here in case we had info instead of notification!
+                        d("got peer block as requested with OK")
+                        # We repeat the check here in case we had info instead of notification!
                         if res['blockHash'] == m_Blocks[-1]['blockHash']:
-                            print("anyway the same")
+                            d("anyway the same")
                             m_cfg['checkingChain'] = False
                             return setOK("Thank you for the notification.")
                         yoursBetter = blockInfo['cumulativeDifficulty'] > m_info['cumulativeDifficulty']
                         if yoursBetter is False:
                             yoursBetter = res['difficulty'] > m_Blocks[-1]['difficulty']
                         if yoursBetter is False:
-                            print("same block difficulty")
+                            d("same block difficulty")
                             #we are confirmed same same in all, so lets roll the deterministic dice
                             #by crossing the two inputs instead of checking umber of TX or value etc.,
                             #all of which could lead to easier rigging than dice
@@ -221,13 +223,15 @@ class blockchain:
                                 lstDice = lstDice + lst
                             while indexMy == indexYou:
                                 lstDice = lstDice+dice
-                                print("roll the dice...")
+                                d("roll the dice...")
                                 dice = sha256StrToHex(lstDice)[0]
+                                d(str(dice))
                                 indexMy = m_Blocks[-1]['blockHash'].index(dice)
                                 indexYou = res['blockHash'].index(dice)
+                                d(str(indexMy) + " vs " + str(indexYou))
                                 if (indexYou > indexMy):
                                     yoursBetter = True
-
+                            d("dice said yourBetter :" + str(yoursBetter))
                         if yoursBetter is True:
                             if res['prevBlockHash'] != m_Blocks[-1]['prevBlockHash']:
                                 print("hashes different need to settle backtrack")
@@ -236,10 +240,10 @@ class blockchain:
                             restor = m_Blocks[-1]
                             confirmRevertBalances(restor['transactions'])
                             del m_Blocks[-1]
-                            err = self.checkAndAddBlock(res, False)
+                            err = self.checkAndAddBlock(res, True)
                             if len(err) > 0:
                                print("something was wrong, restore own previous block")
-                               self.checkAndAddBlock(restor, False)
+                               self.checkAndAddBlock(restor, True)
                                m_cfg['checkingChain'] = False
                                return errMsg("Invalid block received")
                         else:
@@ -350,6 +354,7 @@ class blockchain:
         m_BufferMinerCandidates.clear()
         if isAlert is True:
             self.asynchNotifyPeers()
+        m_info['blockHash'] = m_Blocks[-1]['blockHash']
         self.status['getMissingBlocks'] = False
         return ""
 

@@ -48,7 +48,7 @@ def finalise(host, peer, port, type):
     m_cfg['canTrack'] = useVis
 
     if isBCNode():
-        c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer("",-1,False,{},1)
+        c_blockchainNode.c_blockchainHandler.getMissingBlocksFromPeer("", -1, False, {}, 1)
         initPendingTX()
     elif isMiner():
         initMiner(host)
@@ -76,8 +76,8 @@ def main(typeIn):
 
 def init(parser):
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
-    parser.add_argument('-hip', '--host', default="127.0.0.2", help='hostname/IP')
-    parser.add_argument('-con', '--connect', default="4", help='list of 127.0.0.x or full url peers to send messages')
+    parser.add_argument('-hip', '--host', default="127.0.0.92", help='hostname/IP')
+    parser.add_argument('-con', '--connect', default="2", help='list of 127.0.0.x or full url peers to send messages')
     parser.add_argument('-cID', '--chainID', default="", help='identify net by genesis blockHash')
     parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: PDPCCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')

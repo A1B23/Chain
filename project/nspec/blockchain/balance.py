@@ -109,7 +109,7 @@ def confirmRevertBalances(txList):
     #balances updated, re-install actual TX into pending list
     for tx in txList:
         #special case for coinbase, because the miner fee is not an actual transaction to restore!
-        if tx != defAdr:
+        if tx['from'] != defAdr:
             if tx['transactionDataHash'] not in m_pendingTX:
                 m_pendingTX[tx['transactionDataHash']] = tx
     m_info['confirmedTransactions'] = m_info['confirmedTransactions'] - len(txList)

@@ -41,7 +41,7 @@ m_cfg = {
     "peerDrop": 5, # how often can a peer not reply when checked
     "maxWrong": 3, # how many wrong type replies do we accept before we drop and move to avoid
     "newPeer": [],
-    "peersCheckDelay": 20, # TODO how many second to wait to check all peers again
+    "peersCheckDelay": 45, # TODO how many second to wait to check all peers again
     # 0 means all commands accepted, POST blocks against get
     # 1 means we are reloading the entire blocks at startup, so until this is finished, no reply
     # 2 means we are checking for peers again... default for starting up

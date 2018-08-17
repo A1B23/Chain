@@ -60,7 +60,6 @@ class chainInterface:
             }
             return setOK(response)
         elif urlID.startswith('info'):
-            # TODO better info please
             return setOK(m_info)
 
         # identify your url and then proceed
@@ -79,7 +78,7 @@ class chainInterface:
         # linkInfo is a json object containing the information from the URL
         urlID = url[1:6]
         if urlID == "trans":
-            return receivedNewTransaction(json, request.url_root, True)
+            return receivedNewTransaction(json, True)
 
         if (urlID == "peers") and (url == "/peers/notify-new-block"):
             return c_blockchainNode.c_blockchainHandler.receivedBlockNotificationFromPeer(json)

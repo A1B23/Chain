@@ -231,7 +231,7 @@ class wallet:
                 #TODO should we compare all replies??? Not really??? Just take first one...
                 for xx in resps:
                     if len(xx) != 0:
-                        return setOK(xx.json())
+                        return xx[0].text, xx[0].status_code
                 return errMsg("No peer reachable, please retry again or check peer settings...")
             return errMsg("Payment/transfer failed due to parameter for keys")
         except Exception:

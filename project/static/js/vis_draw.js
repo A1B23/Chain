@@ -1,3 +1,10 @@
+diffCol = ['black', 'orange', 'red', ',magenta', 'cyan', 'blue', 'purple'];
+
+function hintinit() {
+    allhint = { 'b': [] };
+}
+
+
 function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     collectSizeRotate();
@@ -75,13 +82,11 @@ function drawNode(typ, dom, node, cols) {
         }
         return true;
     }
-    //console.log("draw node end false");
     return false;
 }
 
-allhint = { 'b': "", 'nb': "" }
+
 function annotateNode(typ, dom, node, cols) {
-    //console.log("draw node");
     var n = nodes[typ];
     if (n.hasOwnProperty(dom)) {
         var item = n[dom]
@@ -94,33 +99,30 @@ function annotateNode(typ, dom, node, cols) {
                 ipa = typ + "/" + ipa.substring(pos + 1);
             }
         }
+        ctx.fillStyle = "black"
         ctx.fillText(ipa, node.x - node.size / 2, node.y - node.size / 3);
         var hint = ""
         if (typ.startsWith("B") || typ.startsWith("*B")) {
             var cfg = item['cfg']
-            hint += "b:" + cfg['chainHeight']
-            hint += " / p:" + cfg['pendTX']
-            var c = cfg['lastHash']
+            hint += "" + (cfg['chainHeight']-1) + " / X:" + cfg['pendTX']
+            var c = cfg['blockHash']
             var i = 0;
             while ((i < c.length) && (c[i] == "0")) {
                 i++;
             }
-            hint += " / d:" + i + " / h:" + "..." + cfg['lastHash'].substring(cfg['lastHash'].length - 5)
-            if ((allhint['b'].length>0) && (allhint['b'] != hint)) {
-                ctx.fillStyle = "orange";
+            hint += " / d:" + i + " (..." + c.substring(c.length - 7)+")"
+            var idx = allhint['b'].indexOf(hint);
+            if (idx < 0) {
+                allhint['b'].push(hint);
+                idx = allhint['b'].length - 1;
             }
-            if (allhint['nb'].length ==0) {
-                allhint['nb'] = hint;
-            }
+            ctx.fillStyle = diffCol[Math.min(diffCol.length-1,idx)];
         }
         if (hint.length > 0) {
             ctx.fillText(hint, node.x - node.size * 2 / 3 - hint.length, node.y - 1.5 * node.size);
         }
-        ctx.fillStyle = "black";
-        //console.log("draw node end true");
         return true;
     }
-    //console.log("draw node end false");
     return false;
 }
 
@@ -131,6 +133,7 @@ function drawLines() {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
+                    ctx.lineWidth = 1;
                     for (var peer in nodes[typ][dom]['shareToPeers']) {
                         drawFrom = nodes[typ][dom]['draw'];
                         drawTo = getXY(peer);
@@ -138,7 +141,6 @@ function drawLines() {
                         if (nodes[typ][dom]['ping'] == false) {
                             ctx.strokeStyle = 'orange';
                         }
-                        ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(drawFrom.x-1, drawFrom.y + 1);
                         ctx.lineTo(drawTo.x+1, drawTo.y - 1);
@@ -147,6 +149,7 @@ function drawLines() {
                         ctx.strokeStyle = '#32CD32';
                         arrow(drawFrom, drawTo,3);
                     }
+                    ctx.lineWidth = 3;
                     for (var peer in nodes[typ][dom]['activePeers']) {
                         drawFrom = nodes[typ][dom]['draw'];
                         drawTo = getXY(peer);
@@ -154,7 +157,6 @@ function drawLines() {
                         if (nodes[typ][dom]['ping'] == false) {
                             ctx.strokeStyle = 'orange';
                         }
-                        ctx.lineWidth = 3;
                         ctx.beginPath();
                         ctx.moveTo(drawFrom.x, drawFrom.y);
                         ctx.lineTo(drawTo.x, drawTo.y);
@@ -186,9 +188,9 @@ function drawAllNodes() {
 
 function annotateAllNodes() {
     var dx = 0;
-    ctx.fillStyle = "black";
-    ctx.font = "10px _sans";
+    ctx.font = "11px _sans";
     ctx.textBaseline = "top";
+    hintinit();
     for (var typ in nodes) {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
@@ -199,36 +201,22 @@ function annotateAllNodes() {
             }
         }
     }
-    for (var keys in allhint) {
-        if (allhint.hasOwnProperty(keys)) {
-            if (keys.startsWith("n")) {
-                allhint[keys[1]] = allhint[keys]
-                allhint[keys] = ""
-            }
-        }
-    }
 }
 
 
 function drawArrow(fromx, fromy, tox, toy, size) {
-    //variables to be used when creating the arrow
     var angle = Math.atan2(toy - fromy, tox - fromx);
     var start = tox - size * Math.cos(angle - m7);
     var end = toy - size * Math.sin(angle - m7);
 
-    //starting a new path from the head of the arrow to one of the sides of the point
     ctx.beginPath();
     ctx.moveTo(tox, toy);
     ctx.lineTo(start, end);
 
-    //path from the side point of the arrow, to the other side point
     ctx.lineTo(tox - size * Math.cos(angle + m7), toy - size * Math.sin(angle + m7));
-
-    //path from the side point back to the tip of the arrow, and then again to the opposite side point
     ctx.lineTo(tox, toy);
     ctx.lineTo(start,end);
 
-    //draws the paths created above
     ctx.lineWidth = 5;
     ctx.stroke();
     ctx.fill();
@@ -252,10 +240,11 @@ function calcSlope(typ,dom,type, drawFrom) {
 }
 
 
-
 function calcCoords() {
     var sradx = Math.trunc((getWidth() * .45) / rings.length);
+    var srdx23 = (sradx * 2 / 3);
     var srady = Math.trunc((getHeight() * .45) / rings.length);
+    var srdy23 = (srady * 2 / 3);
 
     var center_x = getWidth() >> 1;
     var center_y = getHeight() >> 1;
@@ -264,9 +253,10 @@ function calcCoords() {
         r = rings[ring];
         var radiusx = sradx * (ring + 1);
         var radiusy = srady * (ring + 1);
-        var size = (sradx * 2 / 3) * (setSizes[ring] / 100);
-        size = Math.min(size, (srady * 2 / 3) * (setSizes[ring] / 100));
-        var r360 = (360 / r.length);
+        var r360 = (setSizes[ring] / 100);
+        var size = srdx23 * r360;
+        size = Math.min(size, srdy23 * r360);
+        r360 = (360 / r.length);
         for (var rr = 0; rr < r.length; rr++) {
             var angle = (r360 * rr + rot[ring]) * p180;
             var x = center_x + radiusx * Math.cos(angle);

@@ -175,7 +175,7 @@ def receivedNewTransaction(trans, share):
             #TODO do we still need this 'fromPeer'?
             c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn)
             return jsonify(response), 201 #201 as per slide 38
-        return #nothing returmed, nothing sent
+        return  # nothing returned, nothing sent
     return errMsg(colErr)
 
 
@@ -187,5 +187,5 @@ def initPendingTX():
             if (m_cfg['activePeers'][peer]['active'] == True):
                 txList, ret = c_peer.sendGETToPeer(peer+"/transactions/pending")
                 for tx in txList:
-                    receivedNewTransaction(tx, "", False)
+                    receivedNewTransaction(tx,  False)
                 break

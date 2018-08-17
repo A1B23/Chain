@@ -1,4 +1,4 @@
-from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode
+from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode, d
 from threading import Thread
 from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
 from project.nspec.blockchain.modelBC import m_Blocks
@@ -316,10 +316,12 @@ class peers:
                 return {'wrongType': True}
 
             if isBCNode():
-                if (m_cfg['chainLoaded'] is True) and (reply['blocksCount'] > len(m_Blocks)):
-                    #ignore the return data from the situational check as here is primarily peer
-                    # and informing the blockmanager about potential peers is secondary here
-                    project.classes.c_blockchainNode.c_blockchainHandler.checkChainSituation('info', reply)
+                if m_cfg['chainLoaded'] is True:
+                    if (reply['blocksCount'] > len(m_Blocks)) or (reply['blockHash'] != m_Blocks[-1]['blockHash']):
+                        # ignore the return data from the situational check as here is primarily peer
+                        # and informing the blockmanager about potential peers is secondary here
+                        d("info showed longer block or different hash")
+                        project.classes.c_blockchainNode.c_blockchainHandler.checkChainSituation('info', reply)
             return reply
         except Exception:
             return {'fail': True}

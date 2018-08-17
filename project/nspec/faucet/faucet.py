@@ -54,7 +54,7 @@ class faucet:
     def checkLimit(self, json):
         try:
             fee = json['fee']
-            if fee != 10:   #miminum permitted so
+            if fee < 10:   #miminum permitted so
                 return "Invalid fee"
             total = fee + json['amount']
             addrN = json['source'][0]
@@ -64,7 +64,7 @@ class faucet:
             src = json['walletSrc']
             for k in project.classes.c_walletInterface.doSelect("SELECT " + json['receiver'][0]+" FROM Wallet WHERE WName='" + src + "' AND User='" + src + "'"):
                 if k == json['receiver'][1]:
-                    return "Invalid recipient reference" #no payment to faucet itself, which just drains the funds
+                    return "No faucet to faucet transfer" #no payment to faucet itself, which just drains the funds
 
             maxTotal = project.classes.c_walletInterface.doSelect("SELECT KName FROM Wallet WHERE WName='" + src + "' AND User='" + src + "' AND address='"+addr+"'")
             if json['walletPW'] != maxTotal[0].split("#")[2]:

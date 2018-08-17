@@ -21,6 +21,7 @@ function collected(jsonIn, data) {
     drawCanvas();
 }
 
+var def = ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'];
 function drawAllComs() {
     var lenc = comNodes.length;
     ctx.save();
@@ -29,7 +30,6 @@ function drawAllComs() {
     ctx.shadowOffsetX = 5;
     ctx.shadowOffsetY = 5;
     var m2 = Math.PI * 2;
-    var def = ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'];
     var cols = 0;
     for (var com = 0; com < lenc; com++) {
         var item = comNodes[com];
@@ -62,14 +62,15 @@ function drawAllComs() {
     ctx.fillStyle = "black";
     ctx.font = "10px _sans";
     ctx.textBaseline = "top";
-
+    var skl = (skip.length > 1) || (skip[0].length > 0);
     for (var com = 0; com < lenc; com++) {
         var item = comNodes[com];
         if (item.hasOwnProperty('delta')) {
             showit = true;
-            if ((skip.length > 1) || (skip[0].length > 0)) { 
+            if (skl) { 
+                var sktr = skip[cn].trim();
                 for (var cn = 0; cn < skip.length; cn++) {
-                    if ((skip[cn].trim().length > 0) && (item.show.startsWith(skip[cn].trim()))) {
+                    if ((sktr.length > 0) && (item.show.startsWith(sktr))) {
                         showit = false;
                         break;
                     }
@@ -84,11 +85,12 @@ function drawAllComs() {
 
 function collectRegex(regex) {
     $("#csusp").prop("disabled", false);
+    var sets = { 'active': true, 'pattern': regex };
     for (var typ in nodes) {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
-                    doPOSTCfg(dom + "/visualCfg", { 'active': true, 'pattern': regex });
+                    doPOSTCfg(dom + "/visualCfg", sets);
                 }
             }
         }
@@ -100,11 +102,12 @@ function collectSuspend() {
         collectPause();
     }
     $("#csusp").prop("disabled", true);
+    var sets = { 'active': false, 'pattern': "" };
     for (var typ in nodes) {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
-                    doPOSTCfg(dom + "/visualCfg",  { 'active': false, 'pattern': "" });
+                    doPOSTCfg(dom + "/visualCfg",  sets);
                 }
             }
         }

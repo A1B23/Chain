@@ -75,7 +75,7 @@ def addCfg(m_ret):
         if m_cfg['chainInit'] is False:
             m_ret['chainHeight'] = len(m_Blocks)
             m_ret['pendTX'] = len(m_pendingTX)
-            m_ret['lastHash'] = m_Blocks[-1]['blockHash']
+            m_ret['blockHash'] = m_Blocks[-1]['blockHash']
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):
     missing = []
