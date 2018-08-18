@@ -119,9 +119,7 @@ def confirmRevertBalances(txList):
 def getBalance(address):
     if len(address) == len(defAdr):
         ret = deepcopy(m_TemplateSingleBalance)
-        found = False
         if address in m_AllBalances:
-            found = True
             ret['confirmedBalance'] = m_AllBalances[address]['curBalance']
 
         for tx in m_pendingTX:
@@ -135,9 +133,7 @@ def getBalance(address):
                 found = True
                 ret['pendingBalance'] = ret['pendingBalance'] - (m_pendingTX[tx]['value']+m_pendingTX[tx]['fee'])()
 
-        if found is True:
-            return setOK(ret)
-        return setOK("No entry found")
+        return setOK(ret)  # slides say if valid address but no TX, return 0 balance, not error!
     return errMsg("Invalid address", 404)
 
 

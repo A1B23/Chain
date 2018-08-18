@@ -85,6 +85,7 @@ class blockChainNode:
         candidateMiner['rewardAddress'] = minerAddress
         minerSpecificBlock['minedBy'] = minerAddress
         fees = minBlockReward
+        bindex = len(m_Blocks)
         for tx in m_candidateBlock['transactions']:
             if len(tx) > 0:    #otherwise it is empty coinbase
                 fees = fees + tx['fee']
@@ -92,15 +93,15 @@ class blockChainNode:
                 if fees != minBlockReward:
                     return errMsg("Invalid minimum CoinBase fee TX in block", 404)
         coinBase = deepcopy(m_coinBase)
-        candidateMiner['index'] = len(m_Blocks)
-        coinBase['minedInBlockIndex'] = candidateMiner['index']
+        candidateMiner['index'] = bindex
+        coinBase['minedInBlockIndex'] = bindex
         minerSpecificBlock['index'] = candidateMiner['index']
         candidateMiner['expectedReward'] = fees
         coinBase['value'] = fees
         coinBase['to'] = minerAddress
         coinBase['dateCreated'] = getTime()
         coinBase['transactionDataHash'] = sha256ToHex(m_transaction_order, coinBase)
-        minerSpecificBlock['transactions'].append(coinBase) #just overwrite first TX, miner gets money for empty as well
+        minerSpecificBlock['transactions'].insert(0, coinBase)
         candidateMiner['transactionsIncluded'] = len(minerSpecificBlock['transactions']) #inlcudes coinbase
 
         # now the block is done, hash it for miner

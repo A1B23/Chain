@@ -122,7 +122,8 @@ class blockchain:
     def prepareNewCandidateBlock(self):
         m_candidateBlock.clear()
         m_candidateBlock.update(deepcopy(m_static_emptyBlock)) # contains coinbase
-        m_candidateBlock['index'] = len(m_Blocks)
+        bindex = len(m_Blocks)
+        m_candidateBlock['index'] = bindex
         m_candidateBlock['prevBlockHash'] = m_Blocks[-1]['blockHash']
         m_BufferMinerCandidates.clear()
 
@@ -130,6 +131,8 @@ class blockchain:
         m_candidateBlock['transactions'].clear()
         for txh in m_pendingTX:
             dx = deepcopy(m_pendingTX[txh])
+            dx['minedInBlockIndex'] = bindex
+            dx['transferSuccessful'] = True
             m_candidateBlock['transactions'].append(dx)
 
     def handleChainBackTracking(self, res, source, blockInfo):
@@ -234,9 +237,9 @@ class blockchain:
                             d("dice said yourBetter :" + str(yoursBetter))
                         if yoursBetter is True:
                             if res['prevBlockHash'] != m_Blocks[-1]['prevBlockHash']:
-                                print("hashes different need to settle backtrack")
+                                d("hashes different need to settle backtrack")
                                 return self.handleChainBackTracking(res, source, blockInfo)
-                            print("!!!we conceeded, add peers block from "+peer)
+                            d("!!!we conceeded, add peers block from "+peer)
                             restor = m_Blocks[-1]
                             confirmRevertBalances(restor['transactions'])
                             del m_Blocks[-1]
@@ -253,28 +256,28 @@ class blockchain:
                         m_cfg['checkingChain'] = False
                         return setOK("Thank you for the notification.")
                     m_cfg['checkingChain'] = False
-                    print("The reply did not have the correct fields")
+                    d("The reply did not have the correct fields")
                     return errMsg("No proper reply, ignored")
             else:
-                print("local chain appears shorter anyway, so just ask for up to block "+str(blockInfo['blocksCount']))
+                d("local chain appears shorter anyway, so just ask for up to block "+str(blockInfo['blocksCount']))
                 #the peer claims to be ahead of us with at leats one block, so catch up until something happens
                 # easy case just add the new block on top, and each block is checked fully, no backtrack
                 res, stat = self.getNextBlock(peer,0)
                 if stat == 200:
                     #backtrack into the stack!!!
                     if res['prevBlockHash'] != m_Blocks[-1]['blockHash']:
-                        print("hashes different need to settle backtrack")
+                        d("hashes different need to settle backtrack")
                         self.asynchNotifyPeers()
                         return errMsg("Chain forked")
                     if source == 'notification':
-                        print("Sender want a reply, so process")
+                        d("Sender want a reply, so process")
                         err = self.getMissingBlocksFromPeer(blockInfo['nodeUrl'], blockInfo['blocksCount'], True, res)
                         m_cfg['checkingChain'] = False
                         if len(err) > 0:
                             return errMsg(err)
                         return setOK("Thank you for the notification.")
                     else:
-                        print("this is info internal, so create thread and don't care result")
+                        d("this is info internal, so create thread and don't care result")
                         threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'], blockInfo['blocksCount'], False, res))
                         threadx.start()
                 m_cfg['checkingChain'] = False
