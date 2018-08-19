@@ -10,7 +10,7 @@ from project.pclass import c_peer
 from copy import deepcopy
 import sys
 from time import sleep
-from flask import jsonify
+
 
 
 class blockchain:
@@ -21,7 +21,7 @@ class blockchain:
         response = {
           "message": "The chain was reset to its genesis block"
         }
-        return jsonify(response), 200
+        return setOK(response)
 
     def clearChainLoadGenesis(self):
         m_cfg['chainLoaded'] = False
@@ -174,7 +174,7 @@ class blockchain:
             if source == "notification":
                 if 'blockHash' in blockInfo: #PDPCCoin specific shortcut
                     if blockInfo['blockHash'] == m_Blocks[-1]['blockHash']:
-                        print("is the same, probably rebound...")
+                        d("is the same, probably rebound...")
                         return setOK("Thank you for the notification.")
             while m_cfg['checkingChain'] is True:
                 d("Already checking chain status, so complete the first one")
@@ -245,13 +245,13 @@ class blockchain:
                             del m_Blocks[-1]
                             err = self.checkAndAddBlock(res, True)
                             if len(err) > 0:
-                               print("something was wrong, restore own previous block")
+                               d("something was wrong, restore own previous block")
                                self.checkAndAddBlock(restor, True)
                                m_cfg['checkingChain'] = False
                                return errMsg("Invalid block received")
                         else:
                             self.asynchNotifyPeers()
-                            print("local copy maintained after all")
+                            d("local copy maintained after all")
                             i=0
                         m_cfg['checkingChain'] = False
                         return setOK("Thank you for the notification.")
@@ -306,10 +306,11 @@ class blockchain:
 
     def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry=2):
         if self.status['getMissingBlocks'] is True:
+            d("Already checking on missing blocks, return empty")
             return ""
         try:
             self.status['getMissingBlocks'] = True
-            print("Work on missing block"+peer)
+            d("Work on missing block"+peer)
             while True:
                 if (upLimit > 1) and (upLimit <= len(m_Blocks)):
                     self.status['getMissingBlocks'] = False
@@ -357,7 +358,6 @@ class blockchain:
         m_BufferMinerCandidates.clear()
         if isAlert is True:
             self.asynchNotifyPeers()
-        m_info['blockHash'] = m_Blocks[-1]['blockHash']
         self.status['getMissingBlocks'] = False
         return ""
 

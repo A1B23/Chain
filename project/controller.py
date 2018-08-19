@@ -1,6 +1,6 @@
 from project import app, render_template
-from flask import request, jsonify
-from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, addCfg
+from flask import request
+from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, addCfg, makeResp
 import json
 import requests
 from project.InterfaceLocking import mainInterface
@@ -46,7 +46,7 @@ def visualRelease(idx):
             m_Delay.remove(rel)
             if rel['asynchPOST'] is True:
                 requests.post(url=rel['url'], json=rel['json'], headers={'accept': 'application/json'})
-            return jsonify(rel), 200
+            return setOK(rel)
         return errMsg("Unexpected Release for "+str(id))
     except Exception:
         print("visualRelease Failed")
@@ -229,7 +229,7 @@ def index():
         'NodeType': m_info['type'],
         'info': "Requested URL/API is not available"
      }
-    return jsonify(response), 400
+    return errMsg(response, 400)
 
 ################## Wallet specific routes
 @app.route('/wallet/create', methods=['POST'])
@@ -315,7 +315,7 @@ def genesis_POST():
 ################## the following two are only for testing while developing peer module
 @app.route("/listNodes", methods=["GET"])
 def listNodes():
-    return jsonify(m_cfg['activePeers']), 200
+    return setOK(m_cfg['activePeers'])
 
 @app.route("/clrNode", methods=['POST'])
 def clrNode():

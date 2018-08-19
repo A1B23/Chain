@@ -59,7 +59,7 @@ class peers:
         for peer in self.randomOrderFor(m_cfg[type]):
             if m_cfg[type][peer]['active'] is True:
                 try:
-                    print("asynch: " + peer + url + str(jsonx))
+                    d("asynch: " + peer + url + str(jsonx))
                     self.doPOST(peer + url, jsonx)
                     cnt = cnt + 1
                     if cnt > m_cfg['minPeers']: # TODO do  more?
@@ -320,8 +320,11 @@ class peers:
                     if (reply['blocksCount'] > len(m_Blocks)) or (reply['blockHash'] != m_Blocks[-1]['blockHash']):
                         # ignore the return data from the situational check as here is primarily peer
                         # and informing the blockmanager about potential peers is secondary here
-                        d("info showed longer block or different hash")
+                        d("info showed longer block or different hash:" +str(reply['blocksCount']) +" "+ str(len(m_Blocks)) +" "+ reply['blockHash'] +" "+m_Blocks[-1]['blockHash'])
                         project.classes.c_blockchainNode.c_blockchainHandler.checkChainSituation('info', reply)
+                    if reply['blocksCount'] < len(m_Blocks):
+                        # we found a laggard, let him know we are further
+                        project.classes.c_blockchainNode.c_blockchainHandler.asynchNotifyPeers()
             return reply
         except Exception:
             return {'fail': True}
@@ -468,7 +471,7 @@ class peers:
                     m_cfg['checkingPeers'] = False
             except Exception:
                 i=0
-            sleep(m_cfg['peersCheckDelay']) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
+            sleep(m_cfg['peersCheckDelay']+random.randint(0, 10)-5) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
     def peersConnect(self, source, values):
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)

@@ -112,14 +112,20 @@ def checkSameFields(check, myReference, sameLen):
     return colErr
 
 
+def makeResp(data, code=200):
+    responsex = jsonify(data)
+    responsex.status_code = code
+    return responsex
+
+
 def errMsg(msg, code=400):
-    return jsonify({"errorMsg": msg}), code
+    return makeResp({"errorMsg": msg}, code)
 
 
 def setOK(data):
     if (isinstance(data, str)):
-        return jsonify({"message": data}), 200
-    return jsonify(data), 200
+        return makeResp({"message": data}, 200)
+    return makeResp(data, 200)
 
 
 def isSameChain(detail):

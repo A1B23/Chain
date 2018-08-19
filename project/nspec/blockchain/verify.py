@@ -4,8 +4,8 @@ from project.nspec.blockchain.modelBC import m_transaction, m_candidateBlock, m_
 from project.pclass import c_peer
 from project.nspec.wallet.transactions import get_public_address_from_publicKey
 from project.models import re_addr, re_pubKey, defAdr, defPub, defSig,m_transaction_order, m_cfg, m_info
+from project.utils import setOK
 from copy import deepcopy
-from flask import jsonify
 
 
 firstTime = [True]
@@ -174,7 +174,7 @@ def receivedNewTransaction(trans, share):
             # It goes from peer to peer until it reaches the entire network
             #TODO do we still need this 'fromPeer'?
             c_peer.sendAsynchPOSTToPeers("/transactions/send", passOn)
-            return jsonify(response), 201 #201 as per slide 38
+            return setOK(response, 201) #201 as per slide 38
         return  # nothing returned, nothing sent
     return errMsg(colErr)
 

@@ -47,7 +47,7 @@ class chainInterface:
                 'message': 'system loaded from: ' + str(linkInfo["file"]),
                 'date': getTime()
             }
-            return jsonify(response), 200
+            return setOK(response)
         elif urlID == "save/":
             sysout = c_blockchainNode.bufferSys()
             text_file = open(linkInfo["file"], "w")
@@ -60,6 +60,7 @@ class chainInterface:
             }
             return setOK(response)
         elif urlID.startswith('info'):
+            m_info['blockHash'] = m_Blocks[-1]['blockHash']
             return setOK(m_info)
 
         # identify your url and then proceed

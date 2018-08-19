@@ -1,4 +1,4 @@
-from project.utils import isBCNode, isWallet, isGenesis, isFaucet, checkRequiredFields, errMsg, setOK
+from project.utils import isBCNode, isWallet, isGenesis, isFaucet, checkRequiredFields, errMsg, setOK, d
 from project.nspec.blockchain.interface import chainInterface
 from project.nspec.wallet.interface import walletInterface
 from project.nspec.faucet.interface import faucetInterface
@@ -109,6 +109,7 @@ class mainInterface:
             if self.permittedURLPOST(url) is False:
                 return errMsg("This URL/API is invalid or not available. " + url)
 
+            d("Add delay url: '"+url +"' before we had "+str(len(m_isPOST)))
             m_isPOST.append(url)
 
             while (len(m_isPOST) > 1) or (m_cfg['chainInit'] is True):
@@ -127,8 +128,14 @@ class mainInterface:
             elif isGenesis():
                 ret = self.c_genesisInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
         except Exception:
-            print("POST exception caught")
+            d("*********************************************")
+            d("*********************************************")
+            print("POST exception caught, isPoststack "+str(len(m_isPOST)))
+            m_isPOST.clear()
+            d("*********************************************")
+            d("*********************************************")
 
         if url in m_isPOST:
-            m_isPOST.remove(url)  # maybe need to check for being there, then need to add random to URL
+            m_isPOST.remove(url)
+            d("Removed delay url: '" + url + "' back to " + str(len(m_isPOST)))
         return ret
