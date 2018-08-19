@@ -13,10 +13,13 @@ class mainInterface:
     c_walletInterface = walletInterface()
     c_faucetInterface = faucetInterface()
     c_genesisInterface = genesisInterface()
+    release = False
 
     def delay(self, url, type):
         # sleep a second or a loop etc
         print("....................Delay needed for: "+url + " type: "+str(type) + " stackGET: " + str(len(m_simpleLock)) + " stackPOST: " + str(len(m_isPOST)))
+        if (type != 1) and (self.release is True):
+            return False
         sleep(1)
         return True
 
@@ -46,7 +49,7 @@ class mainInterface:
                 return errMsg("This URL/API is invalid or not available. " + url)
             if "chainInit" not in m_cfg:
                 m_cfg['chainInit'] = False    # backward compatible
-            maxWait = 15
+            maxWait = 12
             while (len(m_isPOST) > 0) or (m_cfg['chainInit'] is True):
                 if url == "/info":  # this is needed for peers to cross reference each other
                     break
@@ -67,7 +70,11 @@ class mainInterface:
             elif isGenesis():
                 ret = self.c_genesisInterface.nodeSpecificGETNow(url, linkInfo)
         except Exception:
-            print("Oops, GET exception happened ....")
+            d("*********************************************")
+            d("*********************************************")
+            print("GET exception caught, isPoststack "+str(len(m_isPOST)))
+            d("*********************************************")
+            d("*********************************************")
 
         if url in m_simpleLock:
             m_simpleLock.remove(url)  # maybe need to check for being there, then need to add random to URL
@@ -119,6 +126,7 @@ class mainInterface:
                 if self.delay(url, 3) is False:
                     break   # for some reason we decide to ignore the loop
 
+            self.release = False
             if isBCNode():
                 ret = self.c_blockInterface.nodeSpecificPOSTNow(url, linkInfo, json, request)
             elif isWallet():
@@ -131,11 +139,11 @@ class mainInterface:
             d("*********************************************")
             d("*********************************************")
             print("POST exception caught, isPoststack "+str(len(m_isPOST)))
-            m_isPOST.clear()
             d("*********************************************")
             d("*********************************************")
 
         if url in m_isPOST:
             m_isPOST.remove(url)
             d("Removed delay url: '" + url + "' back to " + str(len(m_isPOST)))
+        self.release = True
         return ret

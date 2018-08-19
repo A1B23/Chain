@@ -6,6 +6,7 @@ import hashlib
 from flask import jsonify
 from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash, m_cfg
 from project.nspec.blockchain.modelBC import m_Blocks, m_pendingTX
+from project.nspec.miner.modelM import cfg
 
 #Call this for debuggin print to screen which needs to be removed at the end
 def d(mes):
@@ -76,6 +77,9 @@ def addCfg(m_ret):
             m_ret['chainHeight'] = len(m_Blocks)
             m_ret['pendTX'] = len(m_pendingTX)
             m_ret['blockHash'] = m_Blocks[-1]['blockHash']
+    if isMiner():
+        m_ret['nonceCnt'] = str(cfg['nonceCnt'])+"/(..."+cfg['blockHash'][0:6]+")/"+cfg['dateCreated']
+
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):
     missing = []

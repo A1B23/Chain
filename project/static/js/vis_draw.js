@@ -99,24 +99,27 @@ function annotateNode(typ, dom, node, cols) {
                 ipa = typ + "/" + ipa.substring(pos + 1);
             }
         }
-        ctx.fillStyle = "black"
+        ctx.fillStyle = "black";
         ctx.fillText(ipa, node.x - node.size / 2, node.y - node.size / 3);
-        var hint = ""
+        var hint = "";
         if (typ.startsWith("B") || typ.startsWith("*B")) {
-            var cfg = item['cfg']
-            hint += "" + (cfg['chainHeight']-1) + " / X:" + cfg['pendTX']
-            var c = cfg['blockHash']
+            var cfg = item['cfg'];
+            hint += "" + (cfg['chainHeight'] - 1) + " / X:" + cfg['pendTX'];
+            var c = cfg['blockHash'];
             var i = 0;
             while ((i < c.length) && (c[i] == "0")) {
                 i++;
             }
-            hint += " / d:" + i + " (..." + c.substring(c.length - 7)+")"
+            hint += " / d:" + i + " (..." + c.substring(c.length - 7) + ")"
             var idx = allhint['b'].indexOf(hint);
             if (idx < 0) {
                 allhint['b'].push(hint);
                 idx = allhint['b'].length - 1;
             }
-            ctx.fillStyle = diffCol[Math.min(diffCol.length-1,idx)];
+            ctx.fillStyle = diffCol[Math.min(diffCol.length - 1, idx)];
+        } else if (typ.startsWith("M") || typ.startsWith("*M")) {
+            var cfg = item['cfg']
+            hint += "" + cfg['nonceCnt'];
         }
         if (hint.length > 0) {
             ctx.fillText(hint, node.x - node.size * 2 / 3 - hint.length, node.y - 1.5 * node.size);

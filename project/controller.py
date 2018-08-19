@@ -1,6 +1,6 @@
 from project import app, render_template
 from flask import request
-from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, addCfg, makeResp
+from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, addCfg
 import json
 import requests
 from project.InterfaceLocking import mainInterface
@@ -8,7 +8,7 @@ import project.classes
 from project.pclass import c_peer
 from copy import deepcopy
 from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
-from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates, m_Blocks
+from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates
 import re
 
 c_MainIntf = mainInterface()

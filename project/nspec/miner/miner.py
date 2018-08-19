@@ -5,7 +5,7 @@ import time
 import random
 from threading import Thread
 from project.nspec.blockchain.modelBC import m_candidateMiner, minBlockReward
-from project.utils import checkRequiredFields, getFutureTime
+from project.utils import checkRequiredFields, getFutureTime, d
 from project.models import defHash, m_cfg
 from project.nspec.miner.modelM import cfg, newCandidate
 from project.pclass import c_peer
@@ -36,67 +36,69 @@ def getCandidate():
 def isDataValid(resp_text):
     m, l, f = checkRequiredFields(resp_text, m_candidateMiner, [], True)
     if (len(m) > 0) or (l != 0):
-        print("required fields not matched")
+        d("required fields not matched")
         return False
 
     #TODO shoul dthis be further limited to half of zero and at least 5???
     if (resp_text['difficulty'] >= len(cfg['zero_string'])) or (resp_text['difficulty'] < 0):
-        print("Difficulty not possible")
+        d("Difficulty not possible")
         return False
 
     if (resp_text['rewardAddress'] != cfg['address']) or (resp_text['index'] <= 0):
-        print("Wrong reward address")
+        d("Wrong reward address")
         return False
 
     if len(defHash) != len(resp_text['blockDataHash']):
-        print("Wrong Hash length in blockDataHash"+resp_text['blockDataHash'])
+        d("Wrong Hash length in blockDataHash"+resp_text['blockDataHash'])
         return False
 
     if resp_text['expectedReward'] < minBlockReward:
-        print("Wrong Hash or too low expectedRewards: " + str(resp_text['expectedReward']))
+        d("Wrong Hash or too low expectedRewards: " + str(resp_text['expectedReward']))
         return False
 
     if resp_text['transactionsIncluded'] <= 0:
-        print("No transaction at all")
+        d("No transaction at all")
         return False
 
     return True
 
 
 def changeNonceDate():
-    print("change nonce")
+    d("change nonce")
     cfg['countSame'] = 0
     #TODO how to realistically estimate solution date, what are permitted differences?
     newCandidate['dateCreated'] = getFutureTime((newCandidate['difficulty']-4)*(newCandidate['difficulty']-4)*10)
+    cfg['dateCreated'] = newCandidate['dateCreated']
     newCandidate['fixDat'] = newCandidate['blockDataHash'] + "|" + newCandidate['dateCreated'] + "|"
     newCandidate['nonce'] = random.randint(0, cfg['maxNonce'] - 1)  # avoid that each miner starts at same level
-    print("Start Nonce " + str(newCandidate['nonce']))
-    print("nonce done")
+    d("Start Nonce " + str(newCandidate['nonce']))
+    d("nonce done")
     return
 
 
 def pull():
     try:
-        print("asking")
+        d("asking")
         cfg['pulling'] = True
         resp_text = getCandidate()
-        print("got "+str(resp_text))
+        d("got "+str(resp_text))
         if "peerError" in resp_text:
-            print("Peer error, sleep")
+            d("Peer error, sleep")
             sleep(3)
             return
         if isDataValid(resp_text) is False:
             # no point to waste time and effort on this invalid/incomplete candidate
-            print("Invalid node block data detected, ignored....")
+            d("Invalid node block data detected, ignored....")
             sleep(3)
             return
-        print("ok check, miner was idle "+str(cfg['done']))
+        d("ok check, miner was idle "+str(cfg['done']))
         if cfg['blockHash'] != resp_text['blockDataHash']:
-            print("new block data")
+            d("new block data")
             cfg['done'] = True #stop any ongoing looping
 
         if cfg['done'] is True:
-            print("prepare block data for miner whenever miner is ready, even if we already have it all set")
+            d("prepare block data for miner whenever miner is ready, even if we already have it all set")
+            cfg['nonceCnt']
             cfg['blockHash'] = resp_text['blockDataHash']
             newCandidate['blockDataHash'] = resp_text['blockDataHash']
             newCandidate['difficulty'] = resp_text['difficulty']
@@ -110,7 +112,7 @@ def pull():
                 changeNonceDate()
         cfg['pulling'] = False
     except Exception:
-        print("No/Invalid peer reply, retry....")
+        d("No/Invalid peer reply, retry....")
         sleep(5)  # no peer, give a bit of time to recover, keep the 'pulling' flag to avoid waste of calc power
         # we keep the pulling flag, as without peer no point to churn CPUf
     return
@@ -141,12 +143,12 @@ def doMine():
         cfg['done'] = True
         cfg['pulling'] = True
         if m_cfg['mode'] == "Y":
-            print("Enter m <return> to (re-)start mining, candidate changed or new:")
+            d("Enter m <return> to (re-)start mining, candidate changed or new:")
             choice = 0
             while True:
                 try:
                     if choice > 0:
-                        print("Invalid request: "+sel)
+                        d("Invalid request: "+sel)
                     choice = choice + 1
                     sel = input().lower()
                     if sel == 'm':
@@ -163,13 +165,14 @@ def doMine():
                         if (secs >= 0) and (secs < 60):
                             break
                 except Exception:
-                    print("Invalid input: "+sel)
+                    d("Invalid input: "+sel)
             cfg['mineSend'] = sel
         while cfg['pulling'] is True:
             sleep(1)
         cfg['done'] = False
         candidate = deepcopy(newCandidate)
         target = cfg['zero_string'][:candidate['difficulty']]
+        cfg['nonceCnt']=0
         try:
             count = 0
             # show progress of nonce finding
@@ -179,15 +182,16 @@ def doMine():
                 candidate['nonce'] = candidate['nonce'] + 1
                 if candidate['nonce'] >= cfg['maxNonce']:
                     candidate['nonce'] = 0
-                    print("wrap around encountered")
+                    d("wrap around encountered")
                 count = count + 1
                 show = show + 1
                 if show > 25000:
-                    print(str(count) + " "+str(candidate['nonce']))
+                    cfg['nonceCnt'] = show
+                    d(str(count) + " "+str(candidate['nonce']))
                     show = 0
 
                 if count >= cfg['maxNonceTry']:
-                    print("Max trial number reached, get new date")
+                    d("Max trial number reached, get new date")
                     cfg['waitAck'] = True
                     changeNonceDate()
                     candidate = deepcopy(newCandidate)
@@ -201,6 +205,7 @@ def doMine():
 
             cfg['done'] = True
             if cfg['foundSolution'] is True:
+                cfg['nonceCnt'] = show
                 # After finding a hashcode, now submit the mined block by POST
                 # Data for POST
                 ndata = {
@@ -216,7 +221,7 @@ def doMine():
                         if cfg['mineSend'][0] == "d":
                             sel = int(cfg['mineSend'][1:])
                             while int(time.mktime(datetime.datetime.now().timetuple())) < sel:
-                                print("Wait to send due to delay...")
+                                d("Wait to send due to delay...")
                                 sleep(1)
                         elif cfg['mineSend'][0] == "s":
                             sel = int(cfg['mineSend'][1:])
@@ -226,7 +231,7 @@ def doMine():
                                     break
                                 else:
                                     isLower = (datetime.datetime.now().second <= sel)
-                                print("Wait to send due seconds check..." + str(isLower))
+                                d("Wait to send due seconds check..." + str(isLower))
                                 sleep(1)
                     except Exception:
                         print("send control invalid: "+cfg['mineSend'])
@@ -240,13 +245,13 @@ def doMine():
                         sent = True
                         break
                 if (sent is True) and (resp.status_code == 200):
-                    print("MINING SUCCESS (" + str(count) + " tries): " + resp.text)
+                    d("MINING SUCCESS (" + str(count) + " tries): " + resp.text)
                 else:
-                    print("MINING FAILED: ", resp.text)
+                    d("MINING FAILED: ", resp.text)
             else:
-                print("No solution found or new block came in")
+                d("No solution found or new block came in")
         except Exception:
-            print("Exception occurred... clear and refresh candidate")
+            d("Exception occurred... clear and refresh candidate")
 
 
 def initMiner(IP):
