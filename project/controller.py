@@ -132,6 +132,11 @@ def getBlockHash(hfrom, hto, hcnt):
     linkInfo = {"from": hfrom, "to": hto, 'cnt': hcnt}
     return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
 
+@app.route('/blockBalances/<int:hto>', methods=['GET'])
+def getBlockBalances(hto):
+    linkInfo = {"to": hto}
+    return c_MainIntf.nodeSpecificGET(request.path, linkInfo)
+
 @app.route('/transactions/<TXHash>', methods=["GET"])
 def transactions_hash(TXHash):
     linkInfo = {"TXHash": TXHash}
@@ -175,7 +180,7 @@ def peers_connect():
     try:
         values = request.get_json()
         #TODO clean json
-        return c_peer.peersConnect(request.path, values)
+        return c_peer.peersConnect(request.host, values)
     except Exception:
         return errMsg("JSON not decodeable")
 

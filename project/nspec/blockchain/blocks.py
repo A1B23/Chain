@@ -1,5 +1,6 @@
-from project.nspec.blockchain.verify import verifyBlockAndAllTX
+from project.nspec.blockchain.verify import verifyBlockAndAllTX, verifyBlockAndAllTXOn
 from project.nspec.blockchain.balance import m_AllBalances, confirmUpdateBalances, confirmRevertBalances
+from project.nspec.blockchain.balance import updateTempBalance, setBalanceTo
 from threading import Thread
 from project.models import useNet, m_info, m_cfg
 from project.nspec.blockchain.modelBC import m_Blocks, m_genesisSet, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
@@ -10,7 +11,6 @@ from project.pclass import c_peer
 from copy import deepcopy
 import sys
 from time import sleep
-
 
 
 class blockchain:
@@ -38,7 +38,7 @@ class blockchain:
         m_info['confirmedTransactions'] = len(m_genesisSet[useNet]['transactions'])
         m_info['pendingTransactions'] = 0
 
-        err = verifyBlockAndAllTX(m_genesisSet[useNet], True)
+        err = verifyBlockAndAllTX(m_genesisSet[useNet])
         if len(err) > 0:
             print("Ooops, it appears that the genesis Block is not correct, please fix...  "+err)
             sys.exit(-1)
@@ -135,11 +135,98 @@ class blockchain:
             dx['transferSuccessful'] = True
             m_candidateBlock['transactions'].append(dx)
 
-    def handleChainBackTracking(self, res, source, blockInfo):
-        #TODO think of a way to handle this after the initial simple cases worked
-        self.resetChain()
+    def handleChainBackTracking(self, peer):
+        try:
+            ret = self.handleBackTracking(peer)
+        except Exception:
+            d("Major issue in backtracking, stopped back tracking")
+            ret = errMsg("Exception raised, invalid peer claim")
         m_cfg['checkingChain'] = False
-        return setOK("Reset my chain")
+        return ret
+
+    def balanceWrong(self):
+        return errMsg(d("Oh oh, balances oif same chains are different, fork unrepairable"))
+
+    def handleBackTracking(self, peer):
+        # now we now there is a chain fork, as some hash link is different at the end of our chain
+        # we may have no block yet, or the blocks are same index yet conflict hash, but ut was decided
+        # by length of chain or by roll of dice that the other chain has won, if it can remain consistent
+        # 1. find first/deepest different block by binary increased range
+        knownDiffIdx = len(m_Blocks)-1
+        srchLen = 1
+        start = knownDiffIdx
+        hlen = len(defHash)
+        while True:
+            fromBlock = start-srchLen
+            if fromBlock < 0:
+                fromBlock = 0
+            url = "/blocks/hash/"+str(fromBlock)+"/"+str(fromBlock + srchLen-1)+"/0"
+            try:
+                res, stat = c_peer.sendGETToPeer(peer + url)
+            except Exception:
+                return errMsg(d("Unsupported block claimed "))
+
+            if stat != 200:
+                return errMsg(d("Unsupported/Invalid block claimed"))
+            if len(res) != srchLen:
+                return errMsg(d("Insufficient data received"))
+
+            idx, hash = res[0]
+            if (idx != fromBlock) or (len(hash) != hlen):
+                return errMsg(d("Invalid answer to block: "+idx))
+            if hash == m_Blocks[fromBlock]['blockHash']:
+                break
+            if fromBlock <= 0:
+                return errMsg(d("Different chain must be assumed"))
+            srchLen = srchLen * 2
+            start = fromBlock
+
+        # 2. find the first block which is different, big data would call for binary search....
+        for indx in range(1, len(res)):
+            idx, hash = res[indx]
+            if len(hash) != hlen:
+                return errMsg(d("Invalid answer to block: "+idx))
+            if hash != m_Blocks[fromBlock+indx]['blockHash']:
+                knownDiffIdx = fromBlock+indx
+                break
+
+        # 3. up to the different block, our balances must be equal else we are totally out of synch
+        myBal = {}
+        self.getBalanceFromToBlock(0, knownDiffIdx-1, myBal)
+        try:
+            yourBal, stat = c_peer.sendGETToPeer(peer + "/blockBalances/" + str(knownDiffIdx-1))
+        except Exception:
+            return errMsg(d("Unsupported blockBalance"))
+
+        if stat != 200:
+            return errMsg(d("Unsupported blockBalance"))
+
+        if len(myBal) != len(yourBal):
+            return self.balanceWrong()
+
+        for chk in myBal:
+            if (chk not in yourBal) or (myBal[chk] != yourBal[chk]):
+                return self.balanceWrong()
+
+        # 4. save current status in case the other chain has faults
+        tempBlocks = m_Blocks[knownDiffIdx:]
+        del m_Blocks[knownDiffIdx:]
+        if len(m_pendingTX) > 0:
+            tmpTx = m_pendingTX[0:]
+            m_pendingTX.clear()
+        setBalanceTo(myBal, knownDiffIdx-1)
+        d("All saved and ok, no get all the blocks...")
+
+        # TODO current difficult must be adjusted
+        ret = self.getBlocksFromPeer(peer, -1, False, {}, 2, False)
+
+        #TODO how to insert now the old pending TX, would be nice to not just skip them
+        # but as a lot has changed, some may not be valid anymore, so need to test them
+        if ret != "":
+            # TODO arg, must restore
+            return errMsg(d("Invalid blocks received, loading aborted"))
+
+        return setOK("Thank you for the notification.")
 
     def asynchNotifyPeers(self):
         try:
@@ -169,7 +256,7 @@ class blockchain:
             peer = blockInfo['nodeUrl']
             if blockInfo['blocksCount'] < len(m_Blocks):
                 d("stay with local chain anyway as it is longer than for " + peer)
-                #TODO asycnhc inform the lagging peer!!
+                self.asynchNotifyPeers()
                 return errMsg("Notified chain shorter than local current, current is:" + str(len(m_Blocks)))
             if source == "notification":
                 if 'blockHash' in blockInfo: #PDPCCoin specific shortcut
@@ -208,6 +295,7 @@ class blockchain:
                             d("anyway the same")
                             m_cfg['checkingChain'] = False
                             return setOK("Thank you for the notification.")
+                        #TODO make sure we really want/need to include difficulty in this decision
                         yoursBetter = blockInfo['cumulativeDifficulty'] > m_info['cumulativeDifficulty']
                         if yoursBetter is False:
                             yoursBetter = res['difficulty'] > m_Blocks[-1]['difficulty']
@@ -228,17 +316,17 @@ class blockchain:
                                 lstDice = lstDice+dice
                                 d("roll the dice...")
                                 dice = sha256StrToHex(lstDice)[0]
-                                d(str(dice))
+                                d("Dice value:"+str(dice))
                                 indexMy = m_Blocks[-1]['blockHash'].index(dice)
                                 indexYou = res['blockHash'].index(dice)
                                 d(str(indexMy) + " vs " + str(indexYou))
                                 if (indexYou > indexMy):
                                     yoursBetter = True
-                            d("dice said yourBetter :" + str(yoursBetter))
+                            d("dice said yoursBetter :" + str(yoursBetter))
                         if yoursBetter is True:
                             if res['prevBlockHash'] != m_Blocks[-1]['prevBlockHash']:
                                 d("hashes different need to settle backtrack")
-                                return self.handleChainBackTracking(res, source, blockInfo)
+                                return self.handleChainBackTracking(peer)
                             d("!!!we conceeded, add peers block from "+peer)
                             restor = m_Blocks[-1]
                             confirmRevertBalances(restor['transactions'])
@@ -260,15 +348,14 @@ class blockchain:
                     return errMsg("No proper reply, ignored")
             else:
                 d("local chain appears shorter anyway, so just ask for up to block "+str(blockInfo['blocksCount']))
-                #the peer claims to be ahead of us with at leats one block, so catch up until something happens
+                # the peer claims to be ahead of us with at leats one block, so catch up until something happens
                 # easy case just add the new block on top, and each block is checked fully, no backtrack
-                res, stat = self.getNextBlock(peer,0)
+                res, stat = self.getNextBlock(peer, 0)
                 if stat == 200:
-                    #backtrack into the stack!!!
+                    # backtrack into the stack!!!
                     if res['prevBlockHash'] != m_Blocks[-1]['blockHash']:
                         d("hashes different need to settle backtrack")
-                        self.asynchNotifyPeers()
-                        return errMsg("Chain forked")
+                        return self.handleChainBackTracking(peer)
                     if source == 'notification':
                         d("Sender want a reply, so process")
                         err = self.getMissingBlocksFromPeer(blockInfo['nodeUrl'], blockInfo['blocksCount'], True, res)
@@ -281,7 +368,7 @@ class blockchain:
                         threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'], blockInfo['blocksCount'], False, res))
                         threadx.start()
                 m_cfg['checkingChain'] = False
-                return errMsg("Invalid block received")
+                return errMsg("Invalid block received")  # for info this is ignored anyway
         except Exception:
             m_cfg['checkingChain'] = False
             return errMsg("Processing error occurred")
@@ -294,18 +381,22 @@ class blockchain:
         try:
             res, stat = c_peer.sendGETToPeer(peer + url)
         except Exception:
-            print("peer failed" + peer)
-            return "Unsupported block claimed by " + peer, 400
+            d("peer failed" + peer)
+            return "Block not available at " + peer, -1  # do not change it is checked outside
         if stat == 200:
-            print("got peer block as requested with OK")
+            d("got peer block as requested with OK")
             m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
             if len(m) == 0:
                 if res['index'] == len(m_Blocks)+offset:
                     return res, stat
-        return "Unsupported block claimed by " + peer, 400
+        return "Block not available/valid at " + peer, -1  # do not chnage it is checked outside
 
     def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry=2):
-        if self.status['getMissingBlocks'] is True:
+        return self.getBlocksFromPeer(peer,upLimit,isAlert,gotBlock,retry,True)
+
+
+    def getBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry, isCheck):
+        if isCheck and (self.status['getMissingBlocks'] is True):
             d("Already checking on missing blocks, return empty")
             return ""
         try:
@@ -333,7 +424,7 @@ class blockchain:
                         m_cfg['checkingChain'] = False
                         return "Invalid block received"
                 else:
-                    if (stat == 400) and ('errorMsg' in res) and ('or not exist' in res['errorMsg']):
+                    if stat == -1:  # special signal telling us no more blocks there
                         m_cfg['checkingChain'] = False
                         self.status['getMissingBlocks'] = False
                         return ""
@@ -372,6 +463,7 @@ class blockchain:
 
         return errMsg("Invalid block structure")
 
+
     def verifyThenAddBlock(self, block):
         try:
             #TODO test this, it was only checking for lower before!!!
@@ -380,7 +472,7 @@ class blockchain:
         except Exception:
             return "Invalid block"
         # check structure of block and TX, but not yet the balances
-        err = verifyBlockAndAllTX(block, False)
+        err = verifyBlockAndAllTX(block)
         if len(err) > 0:
             return err
 
@@ -421,13 +513,37 @@ class blockchain:
             if (hfrom < 0) or (hfrom >= len(m_Blocks)) or (hto < hfrom) or \
                     (hlength < 0) or (hlength > len(defHash)):
                 return errMsg("Inconsistent request")
-            repl = {}
+            repl = []
             if hlength == 0:
                 hlength = len(defHash)
             for x in range(hfrom, hto+1):
                 if x >= len(m_Blocks):
                     break
-                repl.update({""+str(x): m_Blocks[x]['blockDataHash'][0:hlength]})
+                repl.append([x, m_Blocks[x]['blockHash'][0:hlength]])
             return setOK(repl)
         except Exception:
             return errMsg("Invalid parameters")
+
+    def getBlockBalances(self, para):
+        bal = {}
+        err = self.getBalanceFromToBlock(0, para['to'], bal)
+        if err != "":
+            return errMsg(err)
+        return setOK(bal)
+
+
+    def getBalanceFromToBlock(self, startBlock, lastBlock, calcBal):
+        if (startBlock < 0) or (lastBlock > len(m_Blocks)-1):
+            return "invalid range"
+
+        for idx in range(startBlock, lastBlock+1):
+            blk = m_Blocks[idx]
+            # check structure of block and TX, but not yet the balances
+            err = verifyBlockAndAllTXOn(blk, False)
+            if len(err) > 0:
+                return err
+
+            if updateTempBalance(blk['transactions'], calcBal) is False:
+                return "Block rejected, invalid TX detected in block: " + idx
+
+        return ""

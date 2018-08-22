@@ -7,12 +7,26 @@ from copy import deepcopy
 def addNewRealBalance(addr, blockNo):
     m_AllBalances.update({addr: createNewBalance(blockNo)})
 
+
 def createNewBalance(blockNo):
     newInfo = deepcopy(m_staticBalanceInfo)
     #newInfo['curBalance'] = 0
     newInfo['createdInBlock'] = blockNo
     #newInfo['confirm'] = {}
     return newInfo
+
+
+def setBalanceTo(newBal,blockNo):
+    delThem = []
+    for b in m_AllBalances:
+        if (b not in newBal) or (m_AllBalances[b]['createdInBlock'] > blockNo):
+            delThem.append(b)
+        else:
+            m_AllBalances[b]['curBalance'] = newBal[b]
+
+
+    for b in delThem:
+        m_AllBalances.pop(b)
 
 
 def updateTempBalance(txList, tempBalance):
@@ -30,6 +44,7 @@ def updateTempBalance(txList, tempBalance):
         else:
             tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
     return True
+
 
 def updateConfirmedBalance(txList, isGenesis):
     tempBalance = {}
@@ -66,6 +81,7 @@ def updateConfirmedBalance(txList, isGenesis):
 
         tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
     return tempBalance
+
 
 def confirmUpdateBalances(txList, isGenesis):
     # entering here we know the structure of the TX are all ok, so settle only balances

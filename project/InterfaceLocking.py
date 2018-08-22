@@ -53,6 +53,8 @@ class mainInterface:
             while (len(m_isPOST) > 0) or (m_cfg['chainInit'] is True):
                 if url == "/info":  # this is needed for peers to cross reference each other
                     break
+                if url.startswith("/blockBalances"):  # this is needed for peers to cross reference each other
+                    break
                 if self.delay(url, 1) is False:
                     break   # for some reason we decide to ignore the lock
                 maxWait = maxWait - 1

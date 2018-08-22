@@ -169,6 +169,7 @@
         <div class="tab subtab balTab">
             <button class="tablinks balTab" onclick="openTab(event, 'balTab', 'balAll'); doDirect('balances', 'BX');">All non-zero balances</button>
             <button class="tablinks balTab" onclick="openTab(event, 'balTab', 'balAddr')">by address</button>
+            <button class="tablinks balTab" onclick="openTab(event, 'balTab', 'balSum')">upToBlocks</button>
         </div>
         <div id="balAll" class="tabcontent balTab">
             <div id="optionsBX"></div>
@@ -179,13 +180,19 @@
             <div id="optionsBA"></div>
             <span id="resultBA">Command results....</span>
         </div>
+        <div id="balSum" class="tabcontent balTab">
+            Provide upper block<input type="text" id="paramBS" value="" size="40"><button class="tablinks balTab" onclick="JavaScript:doParameter('blockBalances/?', 'BS');">Submit</button><br />
+            <div id="optionsBS"></div>
+            <span id="resultBS">Command results....</span>
+        </div>
     </div>
 
     <div id="Query" class="tabcontent maintab">
         <div class="tab subtab qTab">
             <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerDat');doDirect('peers','PE')">Peers</button>
-            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerList');doDirect('listNodes','PL')">PeerInfo</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerList');doDirect('listNodes','PL')">Peer-Info</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'setPeer')">Add Peer</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'cfg');doDirect('cfg','PC')">CfgInfo</button>
 
         </div>
@@ -200,6 +207,11 @@
         <div id="peerList" class="tabcontent qTab">
             <div id="optionsPL"></div>
             <span id="resultPL">Command results....</span>
+        </div>
+        <div id="setPeer" class="tabcontent qTab">
+            Peer full URL: <input type="text" id="paramPI" value='{"peerUrl": "http://127.0.0.3:5555"}' size="55">
+            <button class="tablinks txTab" onclick="JavaScript: document.getElementById('resultPI').innerHTML=''; doPOST('peers/connect', 'resultPI', 'paramPI');">Submit</button><br />
+            <span id="resultPI">Command results....</span>
         </div>
         <div id="cfg" class="tabcontent qTab">
             <div id="optionsPC"></div>
@@ -351,6 +363,7 @@
         }
 
         function doDirect(url, ext) {
+            // TODO insert a try catch
             var id = "#result" + ext;
             var repl = doGETSynch(url);
             var json = repl[0];

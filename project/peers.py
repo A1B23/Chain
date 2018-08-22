@@ -230,29 +230,30 @@ class peers:
             return False
         return self.isPeerAliveAndValid(peer, reply)
 
-    def addPeer(self, url, addCheck):
-        #TODO when node receives packet form peer and is lacking peers, why is the sender not taken in?
-        pos = url.index("//")
-        try:
-            pos = url.index("/", pos+2)
-            url = url[0:pos]
-        except Exception:
-            pos=-1
-
-        for x in m_cfg['peers']:
-            if url.startswith(x):
-                return False
-        if url not in m_cfg['peers']:
-            # TODO this may need to be made more sophisticated, same url without http is still a loop
-            if url != m_info['nodeUrl']:
-                m_cfg['peers'][url] = deepcopy(m_peerInfo)
-                m_info['peers'] = len(m_cfg['peers'])
-                reply = self.suitableReply(url)
-                if len(reply) == 0:
-                    return False
-                valid = ((not addCheck) or self.isPeerAliveAndValid(url, reply))
-                return valid
-        return False
+    # def addPeer(self, url, addCheck):
+    #     #TODO when node receives packet form peer and is lacking peers, why is the sender not taken in?
+    #     pos = url.index("//")
+    #     try:
+    #         pos = url.index("/", pos+2)
+    #         url = url[0:pos]
+    #     except Exception:
+    #         pos=-1
+    #
+    #     for x in m_cfg['peers']:
+    #         if url.startswith(x):
+    #             return False
+    #     if url not in m_cfg['peers']:
+    #         # TODO this may need to be made more sophisticated, same url without http is still a loop
+    #         if url != m_info['nodeUrl']:
+    #             m_cfg['peers'][url] = deepcopy(m_peerInfo)
+    #             m_info['peers'] = len(m_cfg['peers'])
+    #             #TODO doe snot exist anymore, is this routine called at all
+    #             reply = self.suitableReply(url)
+    #             if len(reply) == 0:
+    #                 return False
+    #             valid = ((not addCheck) or self.isPeerAliveAndValid(url, reply))
+    #             return valid
+    #     return False
 
     def registerPotentialPeer(self, nodes, port,source="startup"):
         for x in nodes.split(','):
@@ -379,10 +380,7 @@ class peers:
             if peer in m_cfg['peerAvoid']:
                 remOption.append(peer)
                 continue
-            cnt = 0
-            for peerx in m_cfg['activePeers']:
-                if peerx['active'] is True:
-                    cnt = cnt + 1
+            cnt = self.cntPeers('activePeers')
             if cnt > m_cfg[minOrMax]:
                 return
 
@@ -399,10 +397,7 @@ class peers:
                     if peer in m_cfg['peerAvoid']:
                         remOption.append(peer)
                         continue
-                    cnt = 0
-                    for peerx in m_cfg['activePeers']:
-                        if peerx['active'] is True:
-                            cnt = cnt + 1
+                    cnt = self.cntPeers('activePeers')
                     if cnt > m_cfg[minOrMax]:
                         for peer in remOption:
                             if peer in m_cfg[type]:
@@ -415,12 +410,17 @@ class peers:
                 del m_cfg[type][peer]
         return
 
-    def manageType(self, type, minOrMax):
+    def cntPeers(self,type):
         cnt = 0
-        isMin = minOrMax.startswith("min")
-        for peer in m_cfg['activePeers']:
-            if peer['active'] is True:
+        for peer in m_cfg[type]:
+            if m_cfg[type][peer]['active'] is True:
                 cnt = cnt + 1
+        return cnt
+
+
+    def manageType(self, type, minOrMax):
+        cnt = self.cntPeers('activePeers')
+        isMin = minOrMax.startswith("min")
         if cnt >= m_cfg['maxPeers']:
             return True
 
@@ -429,10 +429,7 @@ class peers:
 
         self.tryToAchieveMaxPeerActiveUsing(type, minOrMax)
 
-        cnt = 0
-        for peer in m_cfg['activePeers']:
-            if peer['active'] is True:
-                cnt = cnt + 1
+        cnt = self.cntPeers('activePeers')
 
         if cnt >= m_cfg['maxPeers']:
             return True
@@ -471,7 +468,15 @@ class peers:
                     m_cfg['checkingPeers'] = False
             except Exception:
                 i=0
-            sleep(m_cfg['peersCheckDelay']+random.randint(0, 10)-5) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
+
+            slp = m_cfg['peersCheckDelay']+random.randint(0, 10)-5
+            cnt = self.cntPeers('activePeers') + self.cntPeers("shareToPeers")
+            if cnt == 0:
+                slp = 5
+            elif cnt < m_cfg['maxPeers']:
+                slp =int(slp/2)
+
+            sleep(slp) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
 
     def peersConnect(self, source, values):
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)

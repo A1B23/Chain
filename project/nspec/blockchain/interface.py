@@ -16,6 +16,8 @@ class chainInterface:
             else:
                 if url.startswith("/blocks/hash"):
                     return c_blockchainNode.c_blockchainHandler.getBlockHash(linkInfo)
+                if url.startswith("/blockBal"):
+                    return c_blockchainNode.c_blockchainHandler.getBlockBalances(linkInfo)
                 return c_blockchainNode.c_blockchainHandler.getJSONBlockByNumber((int) (linkInfo['blockNumber']))
 
         elif urlID == "minin":

@@ -11,6 +11,7 @@ from project.nspec.miner.modelM import cfg
 #Call this for debuggin print to screen which needs to be removed at the end
 def d(mes):
     print(mes)
+    return mes
 
 
 def jsonToStr(jsonDict):
@@ -22,6 +23,7 @@ def jsonToStr(jsonDict):
 def sha256ToHex(ref, data):
     return sha256StrToHex(putDataInOrder(ref, data))
 
+
 def sha256StrToHex(toHashStr):
     return hashlib.sha256(toHashStr.encode("utf8")).hexdigest()
 
@@ -31,10 +33,12 @@ def getTime():
     timestamp = timestamp[:timestamp.index(".")+4] + "Z"
     return timestamp
 
+
 def getFutureTime(deltaInSecs):
     timestamp = (datetime.datetime.now() + datetime.timedelta(seconds=deltaInSecs)).isoformat()
     timestamp = timestamp[:timestamp.index(".")+4] + "Z"
     return timestamp
+
 
 def genNodeID():
     timestamp = (time.time() * 10000)
@@ -45,14 +49,18 @@ def genNodeID():
     # still need to sha over it and return
     return hex_string[0:len(defNodeID)]
 
+
 def checkType(asSet, type):
     return (asSet == type) or (asSet == "*"+type)
+
 
 def isMiner():
     return checkType(m_info['type'], "Miner")
 
+
 def isGenesis():
     return checkType(m_info['type'], "Genesis")
+
 
 def isWallet():
     return checkType(m_info['type'], "Wallet")
@@ -61,8 +69,10 @@ def isWallet():
 def isBCNode():
     return checkType(m_info['type'], "BCNode")
 
+
 def isABCNode(ref):
     return checkType(ref, "BCNode")
+
 
 def isFaucet():
     return checkType(m_info['type'],"Faucet")
@@ -71,6 +81,7 @@ def isFaucet():
 def isExplorer():
     return checkType(m_info['type'], "Explorer")
 
+
 def addCfg(m_ret):
     if isBCNode():
         if m_cfg['chainInit'] is False:
@@ -78,48 +89,49 @@ def addCfg(m_ret):
             m_ret['pendTX'] = len(m_pendingTX)
             m_ret['blockHash'] = m_Blocks[-1]['blockHash']
     if isMiner():
-        m_ret['nonceCnt'] = str(cfg['nonceCnt'])+"/(..."+cfg['blockHash'][0:6]+")/"+cfg['dateCreated']
+        m_ret['nonceCnt'] = str(cfg['nonceCnt']) + "/(..."+cfg['blockHash'][0:6]+")/" + \
+                            cfg['dateCreated'][cfg['dateCreated'].index("T")+1:-1]
 
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):
     missing = []
     fails = []
     for chk in myReference:
-        if not chk in check:
+        if chk not in check:
             missing.append(str(chk))
             if chk in mandatoryList:
                 fails.append(chk)
-                if (shortenManadatory):
+                if shortenManadatory is True:
                     break  # one false is enough in this case.... stop
         else:
             if chk in mandatoryList:
-                if (check[chk] != myReference[chk]):
+                if check[chk] != myReference[chk]:
                     fails.append(chk)
-                    if (shortenManadatory):
-                        break       #one false is enough in this case.... stop
+                    if shortenManadatory is True:
+                        break       # one false is enough in this case.... stop
 
     return missing, (len(check) - len(myReference)), fails
 
 
 def checkSameFields(check, myReference, sameLen):
-    colErr=""
+    colErr = ""
     for chk in myReference:
         if not chk in check:
-            if (colErr != ""):
+            if colErr != "":
                 colErr = colErr + " and "
             colErr = colErr + "'" + chk + "'"
-    if (colErr != ""):
+    if colErr != "":
         colErr = "Invalid structure: field " + colErr + " is missing"
     if sameLen:
-        if (len(check) != len(myReference)):
+        if len(check) != len(myReference):
             colErr = colErr + " Invalid number of fields in transaction"
     return colErr
 
 
 def makeResp(data, code=200):
-    responsex = jsonify(data)
-    responsex.status_code = code
-    return responsex
+    respx = jsonify(data)
+    respx.status_code = code
+    return respx
 
 
 def errMsg(msg, code=400):
@@ -127,7 +139,7 @@ def errMsg(msg, code=400):
 
 
 def setOK(data):
-    if (isinstance(data, str)):
+    if isinstance(data, str):
         return makeResp({"message": data}, 200)
     return makeResp(data, 200)
 
@@ -157,7 +169,7 @@ def addItems(item, element):
 
 
 def putDataInOrder(order, data):
-    #We deliberately ignore additional data in the data structure, if any present
+    # We deliberately ignore additional data in the data structure, if any present
     ret = "{"
     for item in order:
         if (item in data):
@@ -170,6 +182,7 @@ def putDataInOrder(order, data):
 def makeMinerHash(candidate):
     data = candidate['blockDataHash'] + "|" + candidate['dateCreated'] + "|" + str(candidate['nonce'])
     return hashlib.sha256(data.encode("utf8")).hexdigest()
+
 
 def makeBlockDataHash(TXBlock, isGenesis):
     # now the block is done, hash it for miner
@@ -184,7 +197,7 @@ def makeBlockDataHash(TXBlock, isGenesis):
                     forHash = forHash + putDataInOrder(m_txorderForBlockHash, tx)
                 forHash = forHash + "],"
             else:
-                #genesis block skips a few fields, others must have
+                # genesis block skips a few fields, others must have
                 if (isGenesis is False):
                     if (txs in TXBlock):
                         forHash = forHash + addItems(txs, TXBlock[txs])

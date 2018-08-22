@@ -13,6 +13,7 @@ cfg = {
     'foundSolution': False,
     'maxNonceTry': 2147483640/2, # same as maxNonce/2, in case we see a possibility/need to limit tries
     'mineSend': 0,
-    'nonceCnt': 0
+    'nonceCnt': 0,
+    'dateCreated': "0T0"
 
 }

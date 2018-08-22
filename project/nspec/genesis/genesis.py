@@ -123,7 +123,8 @@ class genesis:
             gen["nonce"] = 0
             gen["difficulty"] = 0
             gen["blockHash"] = makeMinerHash(gen)
-            ret = verifyBlockAndAllTX(gen, True)
+            gen["index"] = 0
+            ret = verifyBlockAndAllTX(gen)
             if len(ret) > 0:
                 return errMsg(ret)
             ret = updateConfirmedBalance(gen['transactions'], True)

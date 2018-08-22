@@ -3,10 +3,9 @@ from project.nspec.blockchain.modelBC import m_stats, m_completeBlock, m_Blocks,
 from project.nspec.blockchain.modelBC import m_transaction, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.pclass import c_peer
 from project.nspec.wallet.transactions import get_public_address_from_publicKey
-from project.models import re_addr, re_pubKey, defAdr, defPub, defSig,m_transaction_order, m_cfg, m_info
+from project.models import re_addr, re_pubKey, defAdr, defPub, defSig, m_transaction_order, m_cfg, m_info
 from project.utils import setOK
 from copy import deepcopy
-
 
 firstTime = [True]
 
@@ -24,14 +23,14 @@ def verifyBasicTX(trans, isCoinBase, ref):
         if (l != 1) or ("transactionDataHash" not in trans):
             colErr = colErr + " Invalid number of fields in transaction"
     if colErr == "":  # final checks
-        if (len(trans['senderSignature']) != 2):
+        if len(trans['senderSignature']) != 2:
             colErr = colErr + " Invalid number of elements in 'senderSignature' field"
         else:
             if (len(trans['senderSignature'][0]) != len(trans['senderSignature'][0])) or\
                     (len(trans['senderSignature'][0]) != len(defSig)):
                     colErr = colErr + " Invalid 'senderSignature' length"
             else:
-                if isCoinBase is True:
+                if isCoinBase:
                     if (trans['senderSignature'][0] != defSig) or (trans['senderSignature'][1] != defSig):
                         colErr = colErr + "Invalid senderSignature"
                 else:
@@ -40,7 +39,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
     if not isinstance(trans['fee'], int):
         colErr = colErr + "Fees must be integer, you sent: " + str(trans['fee'])
     else:
-        if isCoinBase is True:
+        if isCoinBase:
             if trans['fee'] != 0:
                 colErr = colErr + "Coinbase fee should be zero, you sent: " + str(trans['fee'])
         else:
@@ -50,9 +49,9 @@ def verifyBasicTX(trans, isCoinBase, ref):
         colErr = colErr + "Value must be integer, you sent: " + str(trans['value'])
     else:
         # slide 39 confirm that 0 value transactions are allowed
-        if (trans['value'] < 0):
+        if trans['value'] < 0:
             colErr = colErr + "Minimum value 0 micro-coins, you sent: " + str(trans['value'])
-    if isCoinBase is True:
+    if isCoinBase:
         # TODO complete other coinbase checks
         colErr = colErr + verifyPubKey(trans['senderPubKey'], True)
         if trans['from'] != defAdr:
@@ -64,7 +63,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
     return colErr
 
 def isUniqueTXInBlocks(hash):
-    #As there is no reliable element to prevent replay attacks, we must scan entire chain
+    # As there is no reliable element to prevent replay attacks, we must scan entire chain
     # to check a TX has never been used before
     for b in m_Blocks:
         for tx in b['transactions']:
@@ -85,7 +84,7 @@ def verifyAddr(addr, pubKey=""):
         colErr = verifyPubKey(pubKey, False)
         if len(colErr) != 0:
             return colErr
-        if (get_public_address_from_publicKey(pubKey) != addr):
+        if get_public_address_from_publicKey(pubKey) != addr:
             return "Invalid address-public key instance"
     return ""
 
@@ -104,44 +103,51 @@ def verifyPubKey(pubKey, isCoinBase):
     return ""
 
 
-def verifyBlockAndAllTX(block, isGenesis):
-    #make sure block has all fields an dthe corrcet chanId
+def verifyBlockAndAllTX(block):
+    if block['index'] != len(m_Blocks):
+        return "New block cannot be added to chain, wrong index: "
+    return verifyBlockAndAllTXOn(block,True)
+
+
+def verifyBlockAndAllTXOn(block,checkUnique):
+    # make sure block has all fields and the correct chanId
     m, l, f = checkRequiredFields(block, m_completeBlock, ['chainId'], False)
-    if (block['index']==0):
-        #special case for genesis bloc
-        if (len(m) != 1) or (m[0] != "prevBlockHash"):
+    isGenesis = (block['index'] == 0)
+    if isGenesis:
+        # special case for genesis bloc
+        if (len(m) != 1) or (m[0] != "prevBlockHash") or (l != -1) or (len(f) > 0):
             return "Invalid Genesis block, should only not have 'prevBlockHash' but says "+str(m)
-        m.clear()
     else:
-        if (len(m) == 0):
-            if (block['prevBlockHash'] != m_Blocks[-1]['blockHash']):
+        if len(m) == 0:
+            if block['prevBlockHash'] != m_Blocks[block["index"]-1]['blockHash']:
                 return "Block hash does not match previous block hash "
         else:
             return "Missing field(s): "+str(m)
 
+        if (l != 0) or (len(f) > 0):
+            return "Invalid block fields"
+
     #TODO check the hash of the blockhash!
     #blockHash = sha256ToHex(m_Miner_order, block) or use the update as we need to inlccude each TX below!!!
 
-    #TODO check the blocks time is greater than the last one
-    # check the index of the block is correct, skip else and abort
-    if (block['index'] == len(m_Blocks)):
-        isCoinBase = True   #Setting otrue here ensures that there is at least a conbase there and not skipped
-        for trans in block['transactions']:
-            ret = verifyBasicTX(trans, isCoinBase, m_staticTransactionRef)
-            #TODO add TX to block has!
-            if (len(ret)>0):
-                return ret #error case
-            # we only ned to check block hashes as here we have no pending TXs
-            if isUniqueTXInBlocks(trans['transactionDataHash']) == False:
-                return "Duplicate TX detected"
-            isCoinBase = isGenesis  #geneis block verification only has coinbase like entries
+
+    isCoinBase = True   # Setting true here ensures that there is at least a coinbase there and not skipped
+    for trans in block['transactions']:
+        ret = verifyBasicTX(trans, isCoinBase, m_staticTransactionRef)
+        #TODO add TX to block has!
+        if (len(ret)>0):
+            return ret
+        # we only ned to check block hashes as here we have no pending TXs
+        if (checkUnique is True) and (isUniqueTXInBlocks(trans['transactionDataHash']) is False):
+            return "Duplicate TX detected"
+        isCoinBase = isGenesis  # genesis block verification only has coinbase like entries
 
     return ""
 
 
 def receivedNewTransaction(trans, share):
     # Checks for missing / invalid fields / invalid field values
-    colErr = verifyBasicTX(trans, False, m_transaction) #such can never be coinbase, so False!
+    colErr = verifyBasicTX(trans, False, m_transaction)  # such can never be coinbase, so False!
 
     if colErr == "":
         trx = deepcopy(trans)
@@ -160,7 +166,7 @@ def receivedNewTransaction(trans, share):
             return errMsg("TX is duplicate of TX in existing block")
 
 
-        #Puts the transaction in the "pending transactions" pool
+        # Puts the transaction in the "pending transactions" pool
         m_pendingTX.update({trans['transactionDataHash']: deepcopy(trans)})
         trans["transferSuccessful"] = True
         trans["minedInBlockIndex"] = len(m_Blocks)
@@ -169,7 +175,7 @@ def receivedNewTransaction(trans, share):
         response = {"transactionDataHash": hash}
 
         m_BufferMinerCandidates.clear()
-        if (share):
+        if share is True:
             # Sends the transaction to all peer nodes through the REST API
             # It goes from peer to peer until it reaches the entire network
             #TODO do we still need this 'fromPeer'?
@@ -180,11 +186,11 @@ def receivedNewTransaction(trans, share):
 
 
 def initPendingTX():
-    if (firstTime[0] == True):
+    if firstTime[0] is True:
         firstTime[0] = False
         #TODO do the same with sendingPeers
         for peer in m_cfg['activePeers']:
-            if (m_cfg['activePeers'][peer]['active'] == True):
+            if m_cfg['activePeers'][peer]['active'] is True:
                 txList, ret = c_peer.sendGETToPeer(peer+"/transactions/pending")
                 for tx in txList:
                     receivedNewTransaction(tx,  False)
