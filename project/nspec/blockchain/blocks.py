@@ -49,13 +49,14 @@ class blockchain:
             print("Ooops, it appears that the genesis Block is not correct, please fix... " + err)
             sys.exit(-1)
         m_Blocks.append(deepcopy(m_genesisSet[useNet]))
+        m_cfg['chainLoaded'] = True
 
     def initChain(self,onePeer="", fetchAll=False, hashFetch=False):
         self.clearChainLoadGenesis()
 
         if fetchAll is False:
             # get the blocks one by one, due to size or whatever (later maybe even only getting the hashes!
-            threadx = Thread(target=self.getMissingBlocksFromPeer,args=(onePeer, -1, False,{}))
+            threadx = Thread(target=self.getMissingBlocksFromPeer,args=(onePeer, -1, False, {}))
             threadx.start()
             return
         else:
@@ -383,6 +384,7 @@ class blockchain:
         except Exception:
             d("peer failed" + peer)
             return "Block not available at " + peer, -1  # do not change it is checked outside
+
         if stat == 200:
             d("got peer block as requested with OK")
             m, l, f = checkRequiredFields(res, m_genesisSet[0], [], False)
@@ -393,7 +395,6 @@ class blockchain:
 
     def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry=2):
         return self.getBlocksFromPeer(peer,upLimit,isAlert,gotBlock,retry,True)
-
 
     def getBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry, isCheck):
         if isCheck and (self.status['getMissingBlocks'] is True):
@@ -463,7 +464,6 @@ class blockchain:
 
         return errMsg("Invalid block structure")
 
-
     def verifyThenAddBlock(self, block):
         try:
             #TODO test this, it was only checking for lower before!!!
@@ -530,7 +530,6 @@ class blockchain:
         if err != "":
             return errMsg(err)
         return setOK(bal)
-
 
     def getBalanceFromToBlock(self, startBlock, lastBlock, calcBal):
         if (startBlock < 0) or (lastBlock > len(m_Blocks)-1):

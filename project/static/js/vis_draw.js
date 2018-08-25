@@ -1,7 +1,7 @@
 diffCol = ['black', 'orange', 'red', ',magenta', 'cyan', 'blue', 'purple'];
 
 function hintinit() {
-    allhint = { 'b': [] };
+    allhint = { 'b': [] , 'm': []};
 }
 
 
@@ -100,6 +100,7 @@ function annotateNode(typ, dom, node, cols) {
             }
         }
         ctx.fillStyle = "black";
+        ctx.font = "10px _sans";
         ctx.fillText(ipa, node.x - node.size / 2, node.y - node.size / 3);
         var hint = "";
         if (typ.startsWith("B") || typ.startsWith("*B")) {
@@ -111,15 +112,11 @@ function annotateNode(typ, dom, node, cols) {
                 i++;
             }
             hint += " / d:" + i + " (..." + c.substring(c.length - 7) + ")"
-            var idx = allhint['b'].indexOf(hint);
-            if (idx < 0) {
-                allhint['b'].push(hint);
-                idx = allhint['b'].length - 1;
-            }
-            ctx.fillStyle = diffCol[Math.min(diffCol.length - 1, idx)];
+            setColorNode('b', hint);
         } else if (typ.startsWith("M") || typ.startsWith("*M")) {
             var cfg = item['cfg']
             hint += "" + cfg['nonceCnt'];
+            setColorNode('m', hint);
         }
         if (hint.length > 0) {
             ctx.fillText(hint, node.x - node.size * 2 / 3 - hint.length, node.y - 1.5 * node.size);
@@ -127,6 +124,21 @@ function annotateNode(typ, dom, node, cols) {
         return true;
     }
     return false;
+}
+
+function setColorNode(type, hint) {
+
+    if (type == 'b') {
+        ctx.font = "12px _sans";
+        var idx = allhint[type].indexOf(hint);
+        if (idx < 0) {
+            allhint[type].push(hint);
+            idx = allhint[type].length - 1;
+        }
+        ctx.fillStyle = diffCol[Math.min(diffCol.length - 1, idx)];
+    } else if (type == 'm') {
+        ctx.font = "italic 11px _sans";
+    }
 }
 
 function drawLines() {
@@ -191,7 +203,6 @@ function drawAllNodes() {
 
 function annotateAllNodes() {
     var dx = 0;
-    ctx.font = "11px _sans";
     ctx.textBaseline = "top";
     hintinit();
     for (var typ in nodes) {

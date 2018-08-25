@@ -135,7 +135,6 @@
         <div id="createWallet" class="tabcontent walletTab">
             Provide new wallet name <br />
             <input type="text" id="walletName" value="" size="20"><br />
-            <input type="checkbox" id="quickSelWallet"> Auto-Select wallet for use
             <br />
             How many keys to be created immediately (min 1):<br />
             <select id="numKeys" class="options">
@@ -571,9 +570,6 @@
             $("#wallets").val("");
             $('#selWallet').val("__clr");
             $('#walletName').val("");
-            $("#quickSelWallet").removeAttr("checked");
-            $("#quickSelWallet").prop("checked", false);
-            $("#quickSelWallet").attr("checked", false);
             updateStateInfo();
         }
 
@@ -616,7 +612,6 @@
 
         function createWallet() {
             var name = $("#walletName").val();
-            var xxsel = document.getElementById("quickSelWallet").checked;
             closeWallet();
             if (name.length > 0) {
                 var dat = getKeyInput(name, "")
@@ -627,12 +622,7 @@
                 var json = repl[0];
                 var code = repl[1];
                 if (code == 200) {
-                    if (xxsel === true) {
-                        // careful json changes here!!
-                        prepareSelectWallet();
-                        useWallet(name, true);
-                    }
-                    doAlert("Creation of wallet " + h(name) + " succeded.", 9)
+                    doAlert("Creation of wallet " + h(name) + " succeded. To use, go 'Select Wallet'", 9)
                 }
                 else {
                     doAlert("Creation not successful, Node said: " + h(json.message), 0)

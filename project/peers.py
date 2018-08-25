@@ -1,4 +1,4 @@
-from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode, d
+from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode, d, getValidURL
 from threading import Thread
 from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
 from project.nspec.blockchain.modelBC import m_Blocks
@@ -7,7 +7,6 @@ from time import sleep
 import random
 import requests
 import json
-from urllib.parse import urlparse
 import project.classes
 
 
@@ -15,12 +14,21 @@ class peers:
     skipDoubleCheck = []
     #TODO when we receive info etc. from an unknonw node and outr count is below needd
     # then why does the peer list not take it as new node???
+
     def makeDelay(self, url, json, isAsyncPost):
-        if m_cfg['canTrack'] is True:
-            if (m_visualCFG['active'] is True) and (m_visualCFG['pattern'].search(url)):
-                id = random.randint(1, 1000000)
-                m_Delay.append({"delayID": id, "url": url, "json": json, "asynchPOST": isAsyncPost})
-                return id
+        try:
+            if m_cfg['canTrack'] is True:
+                if (m_visualCFG['active'] is True):
+                    urlc= url
+                    if url.startswith("http"):
+                        urlc = url.index("//")
+                        urlc = url[urlc+3:]
+                    if m_visualCFG['pattern'].search(urlc):
+                        id = random.randint(1, 1000000)
+                        m_Delay.append({"delayID": id, "url": url, "json": json, "asynchPOST": isAsyncPost})
+                        return id
+        except Exception:
+            i=0
         return -1
 
     def visualDelay(self, myDelay):
@@ -49,8 +57,9 @@ class peers:
 
     def doGET(self, url,fastTrack=False):
         #normal is used to skip visual to get maxPeers, but show for minPeers!
-        parsed_uri = urlparse(url)
-        domain = '{uri.scheme}://{uri.netloc}{uri.path}'.format(uri=parsed_uri)
+        # at this point we have to assume the url is corrcet syntax
+        #parsed_uri = urlparse(url)
+        domain = getValidURL(url, False)
         if fastTrack is False:
             self.visualDelay(self.makeDelay(domain, {}, False))
         return requests.get(url=domain, headers={'accept': 'application/json'})
@@ -282,12 +291,10 @@ class peers:
         ks = next(iter(m_cfg['peerOption'].keys()))
         return ks
 
-    def addPeerOption(self, newURL, source, dest="peerOption"):
-        try:
-            result = urlparse(newURL)
-            newURL = result.scheme+"://"+result.netloc
-        except Exception:
-            return "Invalid url structure"
+    def addPeerOption(self, newInURL, source, dest="peerOption"):
+        newURL = getValidURL(newInURL, True)
+        if newURL == "":
+            return "Invalid URL: "+newInURL
 
         if (newURL != m_info['nodeId']) and (newURL not in m_cfg['peerOption']):
             if (newURL in m_cfg['activePeers']) or (newURL in m_cfg['shareToPeers']):
@@ -482,11 +489,16 @@ class peers:
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)
         if len(m) > 0:
             return errMsg("Missing field 'peerUrl' ")
-        err = self.addPeerOption(values['peerUrl'], source)
+        url = values['peerUrl']
+        newURL = getValidURL(url, True)
+        if newURL == "":
+            return errMsg("Invalid URL: "+url)
+
+        err = self.addPeerOption(url, source)
         if len(err) == 0:
             return setOK("Connection to peer registered")
         if err.startswith("Already connected"):
-            return errMsg("Already connected to peer: " + values['peerUrl'], 409)
+            return errMsg("Already connected to peer: " + url, 409)
         return errMsg(err)
 
     def listPeers(self):

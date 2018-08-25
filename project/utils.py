@@ -3,6 +3,8 @@ import random
 import json
 import datetime
 import hashlib
+import re
+from urllib.parse import urlparse
 from flask import jsonify
 from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash, m_cfg
 from project.nspec.blockchain.modelBC import m_Blocks, m_pendingTX
@@ -206,6 +208,42 @@ def makeBlockDataHash(TXBlock, isGenesis):
         return ret
     except Exception:
         return "fail to create block data hash"
+
+
+def getValidURL(url, upToNetLoc):
+    try:
+        parsed_uri = urlparse(url)
+        if upToNetLoc is True:
+            domain = '{uri.scheme}://{uri.netloc}'.format(uri=parsed_uri)
+        else:
+            domain = '{uri.scheme}://{uri.netloc}{uri.path}'.format(uri=parsed_uri)
+        if (not url.startswith(domain)) or (parsed_uri.query != "") or (parsed_uri.netloc == "") or ((upToNetLoc is False) and (parsed_uri.path == "")):
+            return ""
+
+
+        regex = re.compile(
+            r'^(?:http)s?://'  # http:// or https://
+            r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+            r'localhost|'  # localhost...
+            r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+            r'(?::\d+)?'  # optional port
+            r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+        res = re.match(regex, domain)
+        if res is None:
+            return ""
+        regex = re.compile(
+            r'^(?:http)s?://'  # http:// or https://
+            r'(?P<IP>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})', re.IGNORECASE)
+        res = re.match(regex, domain)
+        if res is not None:
+            for tst in res.group("IP").split("."):
+                tst = int(tst)
+                if (tst < 0) or (tst > 255):
+                    return ""
+        return domain
+    except Exception:
+        return ""
 
 
 
