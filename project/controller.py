@@ -1,6 +1,6 @@
 from project import app, render_template
 from flask import request
-from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, addCfg
+from project.utils import setOK, errMsg, isBCNode, isWallet, isGenesis, isFaucet, isMiner, addCfg
 import json
 import requests
 from project.InterfaceLocking import mainInterface
@@ -98,7 +98,7 @@ def debug():
     response.append(m_info)
     response.append(m_pendingTX)
     response.append(m_BufferMinerCandidates)
-    return jsonify(response), 200
+    return setOK(response)
 
 @app.route('/debug/reset-chain', methods=["GET"])
 def debug_resetChain():
@@ -226,6 +226,8 @@ def index():
         return render_template("TabWallet" + addOn + ".html")
     if isFaucet():
         return render_template("TabFaucet" + addOn + ".html")
+    if isMiner():
+        return render_template("TabMiner" + addOn + ".html")
     if isGenesis():
         project.classes.c_genesisInterface.initGenesis()
         return render_template("TabGenesis" + addOn + ".html")
@@ -234,7 +236,7 @@ def index():
         'NodeType': m_info['type'],
         'info': "Requested URL/API is not available"
      }
-    return errMsg(response, 400)
+    return errMsg(response)
 
 ################## Wallet specific routes
 @app.route('/wallet/create', methods=['POST'])

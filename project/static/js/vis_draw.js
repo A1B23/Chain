@@ -9,7 +9,9 @@ function drawCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     collectSizeRotate();
     calcCoords();
-    drawGrid();
+    if (document.getElementById('useGrid').checked) { 
+        drawGrid();
+    }
     drawLines();
     ctx.save();
     ctx.shadowColor = '#555';
@@ -100,8 +102,8 @@ function annotateNode(typ, dom, node, cols) {
             }
         }
         ctx.fillStyle = "black";
-        ctx.font = "10px _sans";
-        ctx.fillText(ipa, node.x - node.size / 2, node.y - node.size / 3);
+        ctx.font = "bold 10px _sans";
+        ctx.fillText(ipa, node.x - node.size / 2, node.y + node.size*1.2);
         var hint = "";
         if (typ.startsWith("B") || typ.startsWith("*B")) {
             var cfg = item['cfg'];
@@ -142,14 +144,15 @@ function setColorNode(type, hint) {
 }
 
 function drawLines() {
+
     var drawFrom = 0
     var drawTo = 0;
     for (var typ in nodes) {
         if (nodes.hasOwnProperty(typ)) {
             for (var dom in nodes[typ]) {
                 if (nodes[typ].hasOwnProperty(dom)) {
-                    ctx.lineWidth = 1;
                     for (var peer in nodes[typ][dom]['shareToPeers']) {
+                        ctx.lineWidth = .5;
                         drawFrom = nodes[typ][dom]['draw'];
                         drawTo = getXY(peer);
                         ctx.strokeStyle = '#00FF7F';
@@ -157,14 +160,14 @@ function drawLines() {
                             ctx.strokeStyle = 'orange';
                         }
                         ctx.beginPath();
-                        ctx.moveTo(drawFrom.x-1, drawFrom.y + 1);
-                        ctx.lineTo(drawTo.x+1, drawTo.y - 1);
+                        ctx.moveTo(drawFrom.x - 1, drawFrom.y + 1);
+                        ctx.lineTo(drawTo.x + 1, drawTo.y - 1);
                         ctx.stroke();
                         ctx.closePath();
                         ctx.strokeStyle = '#32CD32';
-                        arrow(drawFrom, drawTo,3);
+                        arrow(drawFrom, drawTo, 3);
                     }
-                    ctx.lineWidth = 3;
+                    ctx.lineWidth = .2;
                     for (var peer in nodes[typ][dom]['activePeers']) {
                         drawFrom = nodes[typ][dom]['draw'];
                         drawTo = getXY(peer);
@@ -222,7 +225,7 @@ function drawArrow(fromx, fromy, tox, toy, size) {
     var angle = Math.atan2(toy - fromy, tox - fromx);
     var start = tox - size * Math.cos(angle - m7);
     var end = toy - size * Math.sin(angle - m7);
-
+    //ctx.strokeStyle = "red";
     ctx.beginPath();
     ctx.moveTo(tox, toy);
     ctx.lineTo(start, end);
@@ -233,6 +236,7 @@ function drawArrow(fromx, fromy, tox, toy, size) {
 
     ctx.lineWidth = 5;
     ctx.stroke();
+    ctx.closePath();
     ctx.fill();
 }
 

@@ -105,8 +105,8 @@
     ChainRef: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">Set</button>
     <br />All values are measured in micro-coins
     <div class="tab maintab">
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Faucet')">Set faucet TX</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'genTX')">Set approved TX</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Faucet')">Faucet Params</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'genTX')">Pre-approvedd values</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','genGX')">Genesis Block/Data</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
 
@@ -219,7 +219,7 @@
                     }
                     ret = handlePOST("setID", data);
                     if (ret[0] == 200) {
-                        $("#login").text("x")
+                        $("#login").hide();
                     }
                 }
             } else {

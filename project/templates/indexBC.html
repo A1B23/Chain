@@ -100,8 +100,10 @@
 <body>
     <script type="text/javascript" src="{{ url_for('static', filename='js/GET_POST.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/vis_tablify.js') }}"></script>
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/GET_POST.js"></script>
+    <script src="../static/js/vis_tablify.js"></script>
 
     <div class="tab maintab">
         <button class="tablinks maintab" onclick="openTab(event, 'maintab', 'Block')">Block</button>
@@ -129,7 +131,7 @@
             <span id="resultBN">Command results....</span>
         </div>
         <div id="blockHash" class="tabcontent blockTab">
-            First block: <input type="text" id="paramBHF" value="" size="5"> 
+            First block: <input type="text" id="paramBHF" value="" size="5">
             Last block: <input type="text" id="paramBHT" value="" size="5">
             HashLength: <input type="text" id="paramBHL" value="" size="5">
             <button class="tablinks txTab" onclick="JavaScript: doParameter('blocks/hash/?/?/?', 'BHF,BHT,BHL');">Submit</button><br />
@@ -229,129 +231,6 @@
 
 
     <script>
-        function tablify(jsonList, order, level, pref, horizontal) {
-
-            var res = "";
-            var th = "";
-            var useorder = [];
-            var suborder = [];
-            if (order.length == 0) {
-                if (typeof jsonList[0] === "string") {
-                    // special case
-                    for (var det = 0; det < jsonList.length; det++) {
-                        res = res + jsonList[det] + "<br />"
-                    }
-                    return res;
-                }
-                for (var key in jsonList[0]) {
-                    if (jsonList[0].hasOwnProperty(key)) {
-                        order.push(pref + key);
-                        useorder.push(key);
-                    }
-                }
-            } else {
-                for (var i = 0; i < order.length; i++) {
-                    var spl = order[i].split(":::");
-                    if (useorder.indexOf(spl[0]) < 0) {
-                        useorder.push(spl[0]);
-                    }
-                    if (spl.length > 1) {
-                        var sorder = "";
-                        for (var j = 1; j < spl.length; j++) {
-                            sorder = sorder + spl[j] + ":::";
-                        }
-                        suborder.push(sorder.substring(0, sorder.length - 3));
-                    }
-                }
-            }
-
-            var col = "style='background-color:#87CEFA'";
-            switch (level) {
-                case 0:
-                    col = "style='background-color:#87CEFA'";
-                    break;
-                case 1:
-                    col = "style='background-color:#6495ED'";
-                    break;
-                case 2:
-                    col = "style='background-color:#B0E0E6'";
-                    break;
-
-            }
-            if (horizontal) {
-                for (var i = 0; i < useorder.length; i++) {
-                    th = th + "<th " + col + ">" + useorder[i] + "</th>";
-                }
-            }
-            for (var cnt = 0; cnt < jsonList.length; cnt++) {
-                if (horizontal) {
-                    res = res + "<tr><td>" + (cnt + 1) + "</td>";
-                }
-                for (var det = 0; det < useorder.length; det++) {
-                    if (jsonList[cnt].hasOwnProperty(useorder[det])) {
-                        if (!horizontal) {
-                            res = res + "<tr><td " + col + ">" + useorder[det] + "</td>";
-                        }
-                        if (jsonList[cnt][useorder[det]] instanceof Array) {
-                            res = res + "<td>";
-                            var wasEmpty = (suborder.length == 0);
-                            res = res + tablify(jsonList[cnt][useorder[det]], suborder, level + 1, pref + useorder[det] + ":::", horizontal) + "</td>";
-                            if (wasEmpty) {
-                                order.push.apply(order, suborder);
-                                suborder = [];
-                            }
-                        } else {
-                            if ((typeof jsonList[cnt][useorder[det]] != "string") &&
-                                (typeof jsonList[cnt][useorder[det]] != "boolean") &&
-                                (typeof jsonList[cnt][useorder[det]] != "number"))   {
-                                res = res + "<td>";
-                                var wasEmpty = (suborder.length == 0);
-                                res = res + tablify([jsonList[cnt][useorder[det]]], suborder, level + 1, pref + useorder[det] + ":::", horizontal) + "</td>";
-                                if (wasEmpty) {
-                                    order.push.apply(order, suborder);
-                                    suborder = [];
-                                }
-                            } else {
-                                res = res + "<td>" + jsonList[cnt][useorder[det]] + "</td>";
-                            }
-                        }
-                    }
-                    if (!horizontal) {
-                        res = res + "</tr>";
-                    }
-                }
-                if (horizontal) {
-                    res = res + "</tr>";
-                }
-
-            }
-            if (horizontal) {
-                res = "<table border='1'><th>#</th>" + th + res + "</table>";
-            } else {
-                res = "<table border='1'>" + res + "</table>";
-            }
-            return res;
-        }
-
-        function breakup(json) {
-            return "<pre>" + JSON.stringify(json, null, 2) + "</pre>";
-        }
-
-
-        function addCheckBoxes(id, options) {
-            options.sort();
-            var parentElement = document.getElementById(id);
-
-            for (var count = 0; count < options.length; count++) {
-                var newCheckBox = document.createElement('input');
-                newCheckBox.type = 'checkbox';
-                newCheckBox.id = id + 'opt' + count;
-                newCheckBox.classList.add(id + 'opt');
-                newCheckBox.value = options[count]
-                parentElement.appendChild(newCheckBox);
-                parentElement.appendChild(document.createTextNode(options[count] + " "));
-            }
-        }
 
         function doParameter(url, extIn) {
             var pars = extIn.split(",")
@@ -363,45 +242,13 @@
             doDirect(url, ext);
         }
 
-        function setPeer(out,data,use) {
+        function setPeer(out, data, use) {
             document.getElementById(out).innerHTML = "";
             document.getElementById(use).value = '{ "peerUrl": "' + document.getElementById(data).value + '" }';
             doPOST('peers/connect', out, use);
         }
 
-        function doDirect(url, ext) {
-            // TODO insert a try catch
-            var id = "#result" + ext;
-            var repl = doGETSynch(url);
-            var json = repl[0];
-            var code = repl[1];
-            if (code == 200) {
-                var opts = []
-                var addOptions = true;
-                $(".options" + ext + "opt").each(function () {
-                    addOptions = false;
-                    if ($(this).is(':checked')) {
-                        opts.push($(this).val());
-                    }
-                });
-                if (document.getElementById("useTable").checked) {
-                    var horizontal = document.getElementById("useHorizontal").checked
-                    if (json instanceof Array) {
-                        $(id).html(tablify(json, opts, 0, "", horizontal));
-                    } else {
-                        $(id).html(tablify([json], opts, 0, "", horizontal));
-                    }
-                    if (addOptions) {//first time
-                        addCheckBoxes("options" + ext, opts)
-                    }
-                } else {
-                    $(id).html(breakup(json));
-                }
-            } else {
-                $(id).text("Command rejected with reason: " + JSON.stringify(json));
-            }
-        }
-
+ 
         /*
         * Tab Manager
         */

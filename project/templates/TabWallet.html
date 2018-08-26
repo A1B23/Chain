@@ -99,8 +99,10 @@
 <body>
     <script type="text/javascript" src="{{ url_for('static', filename='js/GET_POST.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/vis_tablify.js') }}"></script>
     <script src="../static/js/jquery-3.3.1.min.js"></script>
     <script src="../static/js/GET_POST.js"></script>
+    <script src="../static/js/vis_tablify.js"></script>
 
     User: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">LogIn</button>
     <br />Current State: <span id="state">No wallet selected</span><br />
@@ -112,7 +114,7 @@
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Payment')">Payment</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">ChainConfig</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">NodeInfo</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','safeBalance')">safeBalance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
 
@@ -123,7 +125,7 @@
             <span id='alertText'></span>
         </div>
     </div>
-
+    Output as JSON or <input type="checkbox" id="useTable">Table <input type="checkbox" id="useHorizontal">HorizontalViewTable<br />
     <div id="Wallets" class="tabcontent maintab">
         <div class="tab subtab walletTab">
             <button class="tablinks walletTab" onclick="openTab(event, 'walletTab', 'createWallet')">Create Wallet</button>
@@ -207,32 +209,35 @@
     </div>
 
     <div id="Peers" class="tabcontent maintab">
-        <div class="tab subtab peertab">
-            <button class="tablinks peertab" onclick="openTab(event, 'peertab', 'checkPeer')">Check Peer connection</button>
-            <button class="tablinks peertab" onclick="openTab(event, 'peertab','managePeer')">Manage Peers</button>
-            <button class="tablinks peertab" onclick="openTab(event, 'peertab','infon')">Info</button>
+        <div class="tab subtab qTab">
+            <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerDat');doDirect('peers','PE')">Peers</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerList');doDirect('listNodes','PL')">Peer-Info</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'setPeer')">Add Peer</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'cfg');doDirect('cfg','PC')">CfgInfo</button>
+
         </div>
-        <div id="checkPeer" class="tabcontent peertab">
-            <button type="button" onClick="JavaScript:doGET('peers','responseN')" style="background-color:#b6ff00"> /peers</button>
-            <button type="button" onClick="document.getElementById('responseN').value=''">Reset Log</button>
-            <br /><button type="button" onClick="JavaScript:doGET('listNodes','responseN')" style="background-color:#5e5858"> /listNodes [additional API]</button>
-            <br /><textarea id="responseN" cols="50" rows="12"></textarea>
+        <div id="nInfo" class="tabcontent qTab">
+            <div id="optionsNI"></div>
+            <span id="resultNI">Command results....</span>
         </div>
-        <div id="managePeer" class="tabcontent peertab">
-            Add a new
-            <button type="button" onClick="JavaScript:doPOST('peers/connect','replyDataN','POSTDataN')" style="background-color:#b6ff00">/peers/connect</button>
-            <button type="button" onClick="document.getElementById('replyDataN').value=''">Reset Log</button>
-            <br />
-            Place data for commands in here:
-            <br />
-            <textarea id="POSTDataN" cols="50" rows="5">{"peerUrl":"http://127.0.0.1:5555"}</textarea>
-            <textarea id="replyDataN" cols="50" rows="5"></textarea>
+        <div id="peerDat" class="tabcontent qTab">
+            <div id="optionsPE"></div>
+            <span id="resultPE">Command results....</span>
         </div>
-        <div id="infon" class="tabcontent peertab">
-            Set and check the peer(s) with which you want to connect. <br />
-            All communication will be attempted with all peers. Currently only the first reply is taken as corrcet data,
-            but in future may consider if they reply <u>differently</u> then
-            the majority data to be shown, with an indication that some nodes disagree..
+        <div id="peerList" class="tabcontent qTab">
+            <div id="optionsPL"></div>
+            <span id="resultPL">Command results....</span>
+        </div>
+        <div id="setPeer" class="tabcontent qTab">
+            Peer full URL: <input type="text" id="paramPR" value='http://127.0.0.?:5555' size="55">
+            <input type="hidden" id="paramPI" value='http://127.0.0.?:5555' size="55">
+            <button class="tablinks txTab" onclick="JavaScript: setPeer('resultPI', 'paramPR','paramPI');">Submit</button><br />
+            <span id="resultPI">Command results....</span>
+        </div>
+        <div id="cfg" class="tabcontent qTab">
+            <div id="optionsPC"></div>
+            <span id="resultPC">Command results....</span>
         </div>
     </div>
 
@@ -448,8 +453,6 @@
                 <li>Check pending transactions </li>
             </ul>
         </p>
-        <button class="keys" onclick="JavaScript:getInfo()">Refresh Wallet Node info</button><br />
-        <span id="infoResult"></span>
     </div>
 
 
@@ -481,44 +484,6 @@
                 initState();
                 $('#login').text('LogIn');
             }
-        }
-
-        function getInfo() {
-            var repl = doGETSynch("info");
-            var json = repl[0];
-            var code = repl[1];
-            if (code == 200) {
-                $("#infoResult").html(tablify([json], []));
-            }
-            else {
-                doAlert("Wallet node not replying or not configured " + JSON.stringify(json));
-            }
-        }
-
-        function tablify(jsonList, order) {
-            var res = "";
-            var th = "";
-            if (order.length == 0) {
-                for (var key in jsonList[0]) {
-                    if (jsonList[0].hasOwnProperty(key)) {
-                        order.push(key);
-                    }
-                }
-            }
-            for (var i = 0; i < order.length; i++) {
-                th = th + "<th>" + order[i] + "</th>";
-            }
-            for (var cnt = 0; cnt < jsonList.length; cnt++) {
-                res = res + "<tr><td>" + (cnt + 1) + "</td>";
-                for (var det = 0; det < order.length; det++) {
-                    if (jsonList[cnt].hasOwnProperty(order[det])) {
-                        res = res + "<td>" + jsonList[cnt][order[det]] + "</td>";
-                    }
-                }
-                res = res + "</tr>";
-            }
-            res = "<table border='1'><th>#</th>" + th + res + "</table>"
-            return res;
         }
 
         function toClipBoard(id) {
@@ -1020,6 +985,7 @@
                 doAlert(JSON.stringify(json), 0);
             }
         }
+
 
 
         /*

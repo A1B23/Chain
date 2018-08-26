@@ -3,6 +3,40 @@
         return 5555;
     }
 
+function doDirect(url, ext) {
+    // TODO insert a try catch
+    var id = "#result" + ext;
+    var repl = doGETSynch(url);
+    var json = repl[0];
+    var code = repl[1];
+    if (code == 200) {
+        var opts = []
+        var addOptions = true;
+        $(".options" + ext + "opt").each(function () {
+            addOptions = false;
+            if ($(this).is(':checked')) {
+                opts.push($(this).val());
+            }
+        });
+        if (document.getElementById("useTable").checked) {
+            var horizontal = document.getElementById("useHorizontal").checked
+            if (json instanceof Array) {
+                $(id).html(tablify(json, opts, 0, "", horizontal));
+            } else {
+                $(id).html(tablify([json], opts, 0, "", horizontal));
+            }
+            if (addOptions) {//first time
+                addCheckBoxes("options" + ext, opts)
+            }
+        } else {
+            $(id).html(breakup(json));
+        }
+    } else {
+        $(id).text("Command rejected with reason: " + JSON.stringify(json));
+    }
+}
+
+
 function doPOSTSynch(url, updateField, data) {
     port = getPort();
     if (port < 1024) {

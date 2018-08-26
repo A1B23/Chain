@@ -22,6 +22,12 @@ function collected(jsonIn, data) {
 }
 
 var def = ['rgb(0,0,255)', 'rgb(0,255,255)', 'rgb(0,0,0)'];
+img = new Image();
+img.onload = function () {
+    //ctx.drawImage(img, 0, 0, img.width, img.height, node.x, node.y, nodesize, nodesize);
+}
+img.src = "test.jpg";
+isNode = true;
 function drawAllComs() {
     var lenc = comNodes.length;
     ctx.save();
@@ -35,22 +41,28 @@ function drawAllComs() {
         var item = comNodes[com];
         if (item.hasOwnProperty('delta')) {
             var node = item.delta;
-            var gr = ctx.createRadialGradient(node.x, node.y, node.size / 4, node.x, node.y, node.size);
-            cols = def;
-            for (var spec in animCol) {
-                if (item.show.startsWith(spec)) {
-                    cols = animCol[spec];
-                    break;
+            var nodesize = (maxIter - item.iter / 2) * node.size * 1.2 / maxIter;
+            if (isNode == true) {
+                var gr = ctx.createRadialGradient(node.x, node.y, nodesize / 4, node.x, node.y, nodesize);
+                cols = def;
+                for (var spec in animCol) {
+                    if (item.show.startsWith(spec)) {
+                        cols = animCol[spec];
+                        break;
+                    }
                 }
+                gr.addColorStop(0, cols[0]);
+                gr.addColorStop(0.5, cols[1]);
+                gr.addColorStop(1, cols[2]);
+                ctx.fillStyle = gr;
+                //ctx.beginPath();
+                //ctx.arc(node.x, node.y, nodesize, 0, m2, false);
+                //ctx.closePath();
+                //ctx.fill();
+                ctx.fillRect(node.x-nodesize, node.y-nodesize, nodesize*2, nodesize*2);
+            } else { 
+                ctx.drawImage(img, 0, 0, img.width, img.height, node.x, node.y, nodesize, nodesize);
             }
-            gr.addColorStop(0, cols[0]);
-            gr.addColorStop(0.5, cols[1]);
-            gr.addColorStop(1, cols[2]);
-            ctx.fillStyle = gr;
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, node.size, 0, m2, false);
-            ctx.closePath();
-            ctx.fill();
         }
     }
     ctx.restore();
@@ -68,8 +80,8 @@ function drawAllComs() {
         if (item.hasOwnProperty('delta')) {
             showit = true;
             if (skl) { 
-                var sktr = skip[cn].trim();
                 for (var cn = 0; cn < skip.length; cn++) {
+                    var sktr = skip[cn].trim();
                     if ((sktr.length > 0) && (item.show.startsWith(sktr))) {
                         showit = false;
                         break;
@@ -77,6 +89,13 @@ function drawAllComs() {
                 }
             }
             if (showit) {
+                if (item.iter > maxIter/2) {
+                    ctx.fillStyle = "black";
+                    ctx.font = "10px _sans";
+                } else {
+                    ctx.fillStyle = "#666600";
+                    ctx.font = "bold "+Math.min(15,maxIter/2-item.iter+10)+"px _sans";
+                }
                 ctx.fillText(item.show, item.delta.x, item.delta.y + (item.delta.toRight ? -item.delta.size * 2 : item.delta.size));
             }
         }
