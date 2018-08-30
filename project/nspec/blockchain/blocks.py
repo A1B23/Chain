@@ -51,7 +51,7 @@ class blockchain:
         m_Blocks.append(deepcopy(m_genesisSet[useNet]))
         m_cfg['chainLoaded'] = True
 
-    def initChain(self,onePeer="", fetchAll=False, hashFetch=False):
+    def initChain(self, onePeer="", fetchAll=False, hashFetch=False):
         self.clearChainLoadGenesis()
 
         if fetchAll is False:

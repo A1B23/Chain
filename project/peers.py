@@ -18,13 +18,12 @@ class peers:
     def makeDelay(self, url, json, isAsyncPost):
         try:
             if m_cfg['canTrack'] is True:
-                if (m_visualCFG['active'] is True):
+                if m_visualCFG['active'] is True:
                     urlc= url
                     if url.startswith("http"):
-                        urlc = url.index("//")
-                        urlc = url[urlc+3:]
+                        urlc = url[url.index("//")+3:]
                     if m_visualCFG['pattern'].search(urlc):
-                        id = random.randint(1, 1000000)
+                        id = random.randint(100, 10000000)
                         m_Delay.append({"delayID": id, "url": url, "json": json, "asynchPOST": isAsyncPost})
                         return id
         except Exception:
@@ -51,11 +50,11 @@ class peers:
             except Exception:  # means no ,m_Delay
                 myDelay = -1
 
-    def doPOST(self, url, json):
-        self.visualDelay(self.makeDelay(url, json, False))
-        return requests.post(url=url, json=json, headers={'accept': 'application/json'})
+    def doPOST(self, url, data):
+        self.visualDelay(self.makeDelay(url, data, False))
+        return requests.post(url=url, json=data, headers={'accept': 'application/json'})
 
-    def doGET(self, url,fastTrack=False):
+    def doGET(self, url, fastTrack=False):
         #normal is used to skip visual to get maxPeers, but show for minPeers!
         # at this point we have to assume the url is corrcet syntax
         #parsed_uri = urlparse(url)
@@ -64,58 +63,82 @@ class peers:
             self.visualDelay(self.makeDelay(domain, {}, False))
         return requests.get(url=domain, headers={'accept': 'application/json'})
 
-    def asPost(self, type, url, jsonx, cnt):
-        for peer in self.randomOrderFor(m_cfg[type]):
-            if m_cfg[type][peer]['active'] is True:
+    # def asAsycnhPostOld(self, ptype, url, data, cnt):
+    #     for peer in self.randomOrderFor(m_cfg[ptype]):
+    #         if m_cfg[ptype][peer]['active'] is True:
+    #             try:
+    #                 d("asynch: " + peer + url + str(data))
+    #                 self.doPOST(peer + url, data)
+    #                 cnt = cnt + 1
+    #                 if cnt > m_cfg['minPeers']: # TODO do  more?
+    #                     break
+    #             except Exception:
+    #                 m_cfg[ptype][peer]['numberFail'] = m_cfg[ptype][peer]['numberFail'] + 1
+    #
+    #     return cnt
+
+    def asAsychPost(self, ptype, url, data, sent):
+        gotID = []
+        for peer in self.randomOrderFor(m_cfg[ptype]):
+            if m_cfg[ptype][peer]['active'] is True:
                 try:
-                    d("asynch: " + peer + url + str(jsonx))
-                    self.doPOST(peer + url, jsonx)
-                    cnt = cnt + 1
-                    if cnt > m_cfg['minPeers']: # TODO do  more?
+                    d("asynch: " + peer + url + str(data))
+                    # self.doPOST(peer + url, data)
+                    gotID.append(self.makeDelay(peer + url, data, False))
+                    sent = sent + 1
+                    if sent > m_cfg['minPeers']: # TODO do  more?
                         break
                 except Exception:
-                    m_cfg[type][peer]['numberFail'] = m_cfg[type][peer]['numberFail'] + 1
+                    m_cfg[ptype][peer]['numberFail'] = m_cfg[ptype][peer]['numberFail'] + 1
+        for idDelay in gotID:
+            if idDelay >= 100:
+                try:
+                    self.visualDelay(idDelay)
+                    requests.post(url=url, json=data, headers={'accept': 'application/json'})
+                except Exception:
+                    sent = sent - 1
+            else:
+                sent = sent - 1
+        return sent
 
-        return cnt
-
-    def asynchPOST(self, url, jsonx):
+    def asynchPOST(self, url, data):
         if url[0] != "/":
             url = "/"+url
-        cnt = self.asPost('activePeers', url, jsonx, 0)
-        if cnt < m_cfg['minPeers']:
-            self.asPost('shareToPeers', url, jsonx, cnt)
+        sent = self.asAsychPost('activePeers', url, data, 0)
+        if sent < m_cfg['minPeers']:
+            self.asAsynchPost('shareToPeers', url, data, sent)
 
-    def sendAsynchPOSTToPeers(self, url, jsonx):
-        thread = Thread(target=self.asynchPOST, args=(url, jsonx))
+    def sendAsynchPOSTToPeers(self, url, data):
+        thread = Thread(target=self.asynchPOST, args=(url, data))
         #TODO after some time, clear this buffer, maybe as part of checking peers availability?
         #TODO or alternatively by the size/len of it???
         #TODO cut the buffer short if POST is too long???
-        m_peerSkip.append({"url": url, "json": jsonx})
+        m_peerSkip.append({"url": url, "json": data})
         thread.start()
 
-    def postPeers(self, list, url, jsonx, cnt):
+    def postPeers(self, useList, url, data, cnt):
         response = []
-        for peer in self.randomOrderFor(m_cfg[list]):
-            if m_cfg[list][peer]['active'] is True:
+        for peer in self.randomOrderFor(m_cfg[useList]):
+            if m_cfg[useList][peer]['active'] is True:
                 try:
-                    ret = self.doPOST(url=peer + url, json=jsonx)
+                    ret = self.doPOST(url=peer + url, json=data)
                     response.append(ret)
                     cnt = cnt + 1
-                    m_cfg[list][peer]['active'] = True
+                    m_cfg[useList][peer]['active'] = True
                     if cnt > m_cfg['minPeers']:  # TODO do more?
                         break
                 except Exception:
-                    m_cfg[list][peer]['numberFail'] = m_cfg[list][peer]['numberFail'] + 1
+                    m_cfg[useList][peer]['numberFail'] = m_cfg[useList][peer]['numberFail'] + 1
         return response
 
-    def sendPOSTToPeers(self, url, jsonx):
-        m_peerSkip.append({"url": url, "json": jsonx})
+    def sendPOSTToPeers(self, url, data):
+        m_peerSkip.append({"url": url, "json": data})
         response = []
         if url[0] != "/":
             url = "/"+url
-        response.append(self.postPeers('activePeers', url, jsonx, 0))
+        response.append(self.postPeers('activePeers', url, data, 0))
         if (len(response) < m_cfg['minPeers']) or (len(response[0]) == 0):
-            response.append(self.postPeers('shareToPeers', url, jsonx, len(response)))
+            response.append(self.postPeers('shareToPeers', url, data, len(response)))
         return response
 
     def randomOrderFor(self, dictx):
@@ -185,17 +208,17 @@ class peers:
         x = rep.status_code
         return dat, x
 
-    def getPeers(self, type, url, cnt):
+    def getPeers(self, peerType, url, cnt):
         response = []
-        for peer in self.randomOrderFor(m_cfg[type]):
-            if m_cfg[type][peer]['active'] is True:
+        for peer in self.randomOrderFor(m_cfg[peerType]):
+            if m_cfg[peerType][peer]['active'] is True:
                 try:
                     response.append(self.sendGETToPeer(url=peer+url))
                     cnt = cnt + 1
                     if cnt >= m_cfg['minPeers']:
                         break
                 except Exception:
-                    m_cfg[type][peer]['numberFail'] = m_cfg[type][peer]['numberFail'] + 1
+                    m_cfg[peerType][peer]['numberFail'] = m_cfg[peerType][peer]['numberFail'] + 1
         return response
 
     def sendGETToPeers(self, url):
@@ -214,9 +237,9 @@ class peers:
                     response.append[tx]
         return response
 
-    def ensureBCNode(self, type):
+    def ensureBCNode(self, peerType):
         # peers can actually only be BCNode, all else make no sense
-        return isABCNode(type)
+        return isABCNode(peerType)
 
     def isPeerAliveAndValid(self, peer, reply):
         try:
@@ -239,32 +262,7 @@ class peers:
             return False
         return self.isPeerAliveAndValid(peer, reply)
 
-    # def addPeer(self, url, addCheck):
-    #     #TODO when node receives packet form peer and is lacking peers, why is the sender not taken in?
-    #     pos = url.index("//")
-    #     try:
-    #         pos = url.index("/", pos+2)
-    #         url = url[0:pos]
-    #     except Exception:
-    #         pos=-1
-    #
-    #     for x in m_cfg['peers']:
-    #         if url.startswith(x):
-    #             return False
-    #     if url not in m_cfg['peers']:
-    #         # TODO this may need to be made more sophisticated, same url without http is still a loop
-    #         if url != m_info['nodeUrl']:
-    #             m_cfg['peers'][url] = deepcopy(m_peerInfo)
-    #             m_info['peers'] = len(m_cfg['peers'])
-    #             #TODO doe snot exist anymore, is this routine called at all
-    #             reply = self.suitableReply(url)
-    #             if len(reply) == 0:
-    #                 return False
-    #             valid = ((not addCheck) or self.isPeerAliveAndValid(url, reply))
-    #             return valid
-    #     return False
-
-    def registerPotentialPeer(self, nodes, port,source="startup"):
+    def registerPotentialPeer(self, nodes, port, source="startup"):
         for x in nodes.split(','):
             if len(x) > 0:
                 newNode=""
@@ -337,7 +335,7 @@ class peers:
         except Exception:
             return {'fail': True}
 
-    def available(self, peer, type, fastTrack=False):
+    def available(self, peer, peerType, fastTrack=False):
         remOption = []
         retry = []
         try:
@@ -346,18 +344,18 @@ class peers:
             reply = {'fail': True}
         if ("wrongType" in reply) or ("wrongID" in reply) or ("fail" in reply) or ("wrongChain" in reply):  # not suitable or no reply
             # give five chances, as it was supposed to be correct as per recommendation and some small error
-            m_cfg[type][peer]['wrongType'] = m_cfg[type][peer]['wrongType'] + 1
+            m_cfg[peerType][peer]['wrongType'] = m_cfg[peerType][peer]['wrongType'] + 1
             if "fail" not in reply:
-                if m_cfg[type][peer]['wrongType'] > m_cfg['maxWrong']:
+                if m_cfg[peerType][peer]['wrongType'] > m_cfg['maxWrong']:
                     remOption.append(peer)
                     m_cfg['peerAvoid'].append(peer)
                     if peer in m_cfg['activePeers']:
                         del m_cfg['activePeers'][peer]
                     if peer in m_cfg['shareToPeers']:
                         del m_cfg['shareToPeers'][peer]
-                if (type != 'activePeers') and (peer in m_cfg['activePeers']):
+                if (peerType != 'activePeers') and (peer in m_cfg['activePeers']):
                     m_cfg['activePeers'][peer]['active'] = False
-                if (type != 'shareToPeers') and (peer in m_cfg['shareToPeers']):
+                if (peerType != 'shareToPeers') and (peer in m_cfg['shareToPeers']):
                     m_cfg['shareToPeers'][peer]['active'] = False
             else:
                 retry.append(peer)
@@ -380,10 +378,10 @@ class peers:
             self.skipDoubleCheck.append(peer)
         return retry, remOption
 
-    def tryToAchieveMaxPeerActiveUsing(self, type, minOrMax):
+    def tryToAchieveMaxPeerActiveUsing(self, peerType, minOrMax):
         remOption = []
         retry = []
-        for peer in self.randomOrderFor(m_cfg[type]):
+        for peer in self.randomOrderFor(m_cfg[peerType]):
             if peer in m_cfg['peerAvoid']:
                 remOption.append(peer)
                 continue
@@ -393,7 +391,7 @@ class peers:
 
             #double check prevents asking the same node twice for nin and then max
             if peer not in self.skipDoubleCheck:
-                retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
+                retr, remO = self.available(peer, peerType, minOrMax == 'maxPeers')
                 retry.extend(retr)
                 remOption.extend(remO)
 
@@ -407,25 +405,25 @@ class peers:
                     cnt = self.cntPeers('activePeers')
                     if cnt > m_cfg[minOrMax]:
                         for peer in remOption:
-                            if peer in m_cfg[type]:
-                                del m_cfg[type][peer]
+                            if peer in m_cfg[peerType]:
+                                del m_cfg[peerType][peer]
                         return
-                    retr, remO = self.available(peer, type, minOrMax == 'maxPeers')
+                    retr, remO = self.available(peer, peerType, minOrMax == 'maxPeers')
                     remOption.extend(remO)
         for peer in remOption:
-            if peer in m_cfg[type]:
-                del m_cfg[type][peer]
+            if peer in m_cfg[peerType]:
+                del m_cfg[peerType][peer]
         return
 
-    def cntPeers(self,type):
+    def cntPeers(self, peerType):
         cnt = 0
-        for peer in m_cfg[type]:
-            if m_cfg[type][peer]['active'] is True:
+        for peer in m_cfg[peerType]:
+            if m_cfg[peerType][peer]['active'] is True:
                 cnt = cnt + 1
         return cnt
 
 
-    def manageType(self, type, minOrMax):
+    def manageType(self, peerType, minOrMax):
         cnt = self.cntPeers('activePeers')
         isMin = minOrMax.startswith("min")
         if cnt >= m_cfg['maxPeers']:
@@ -434,7 +432,7 @@ class peers:
         if (isMin is True) and (cnt >= m_cfg['minPeers']):
             return True
 
-        self.tryToAchieveMaxPeerActiveUsing(type, minOrMax)
+        self.tryToAchieveMaxPeerActiveUsing(peerType, minOrMax)
 
         cnt = self.cntPeers('activePeers')
 
