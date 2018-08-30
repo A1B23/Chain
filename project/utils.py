@@ -140,10 +140,10 @@ def errMsg(msg, code=400):
     return makeResp({"errorMsg": msg}, code)
 
 
-def setOK(data):
+def setOK(data, code=200):
     if isinstance(data, str):
-        return makeResp({"message": data}, 200)
-    return makeResp(data, 200)
+        return makeResp({"message": data}, code)
+    return makeResp(data, code)
 
 
 def isSameChain(detail):

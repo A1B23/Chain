@@ -1,7 +1,7 @@
 from project.nspec.wallet.transactions import generate_private_key, private_key_hex_to_int, private_key_to_public_key
 from project.nspec.wallet.transactions import get_pub_key_compressed, public_key_compressed_to_address,helper_sha256
 from project.pclass import c_peer
-from project.models import m_transaction_order
+from project.models import m_transaction_order, defSig
 from pycoin.ecdsa import generator_secp256k1, sign
 from project.utils import setOK, errMsg, putDataInOrder, getTime
 import sqlite3
@@ -93,14 +93,11 @@ class wallet:
     def listAllWallets(self, user):
         return self.doSelect("SELECT DISTINCT WName from Wallet WHERE User='"+user+"'")
 
-
     def hasWallet(self,wallet):
         return (len(self.doSelect("SELECT DISTINCT WName from Wallet WHERE WName='"+wallet+"'")) > 0)
 
-
     def getAllWallets(self,user):
         return setOK({"walletList": self.listAllWallets(user)})
-
 
     def doSelect(self, cmd):
         with closing(sqlite3.connect(m_db['DATABASE'])) as con:
@@ -126,7 +123,6 @@ class wallet:
             else:
                 return errMsg(respText['errorMsg'], respCode)
         return errMsg("Invalid parameters provided")
-
 
     def getAllKeys(self, params):
         wal = 'unidentified'
@@ -162,7 +158,6 @@ class wallet:
         except Exception:
             return errMsg("Collecting keys for wallet " + wal + " failed.")
 
-
     def getDataFor(self, keyRef, wallet, limit, user):
         cmd = "SELECT "
         if (limit == ""):
@@ -179,7 +174,6 @@ class wallet:
             cmd = cmd + "KName='" + keyRef[1]
         cmd = cmd + "' AND User='" + user + "'"
         return self.doSelect(cmd)
-
 
     def payment(self, params):
         try:
@@ -237,7 +231,6 @@ class wallet:
         except Exception:
             return errMsg("Payment/transfer failed due to parameter error")
 
-
     def signTx(self, priv_key_hex, receiver_addr, msg, value,fee, pub_addr, pub_key_compressed):
         timestamp = getTime()
         transaction = {"from": pub_addr, "to": receiver_addr, "value": value, "fee": fee,
@@ -246,10 +239,14 @@ class wallet:
         # Hash and sign
         tran_hash = helper_sha256(putDataInOrder(m_transaction_order, transaction))
         tran_signature = sign(generator_secp256k1, private_key_hex_to_int(priv_key_hex), tran_hash)
-        tran_signature_str = (str(hex(tran_signature[0]))[2:], str(hex(tran_signature[1]))[2:])
-
+        sig1 = str(hex(tran_signature[0]))[2:]
+        sig2 = str(hex(tran_signature[1]))[2:]
+        while len(sig1) < len(defSig):
+            sig1 = "0"+sig1
+        while len(sig2) < len(defSig):
+            sig2 = "0"+sig2
         # Signed txn has appended signature; hash is not appended, but may be verified when receiving reply
-        transaction["senderSignature"] = tran_signature_str
+        transaction["senderSignature"] = [sig1, sig2]
         return transaction, hex(tran_hash)[2:]
 
     def getAllBalance(self, params):
@@ -268,7 +265,6 @@ class wallet:
         bal['confirmedBalance'] = bal['confirmedBalance'] + val['confirmedBalance']
         bal['pendingBalance'] = bal['pendingBalance'] + val['pendingBalance']
         # bal['safeBalance'] = bal['safeBalance'] + val['safeBalance']
-
 
     def getWalletBalance(self, params):
         try:

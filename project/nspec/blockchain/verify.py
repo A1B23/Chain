@@ -26,9 +26,12 @@ def verifyBasicTX(trans, isCoinBase, ref):
         if len(trans['senderSignature']) != 2:
             colErr = colErr + " Invalid number of elements in 'senderSignature' field"
         else:
-            if (len(trans['senderSignature'][0]) != len(trans['senderSignature'][0])) or\
+            # len0 = len(trans['senderSignature'][0])
+            # len1 = len(trans['senderSignature'][1])
+            # len2 = len(defSig)
+            if (len(trans['senderSignature'][0]) != len(trans['senderSignature'][1])) or\
                     (len(trans['senderSignature'][0]) != len(defSig)):
-                    colErr = colErr + " Invalid 'senderSignature' length"
+                    colErr = colErr + " Invalid/Unpadded 'senderSignature' length"
             else:
                 if isCoinBase:
                     if (trans['senderSignature'][0] != defSig) or (trans['senderSignature'][1] != defSig):
@@ -62,6 +65,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
 
     return colErr
 
+
 def isUniqueTXInBlocks(hash):
     # As there is no reliable element to prevent replay attacks, we must scan entire chain
     # to check a TX has never been used before
@@ -72,8 +76,8 @@ def isUniqueTXInBlocks(hash):
     return True
 
 
-def verifyAddr(addr, pubKey=""):
-    #First is actually a duplicate of second pattern, but refines the reply
+def verifyAddr(addr, pubKey = ""):
+    # First is actually a duplicate of second pattern, but refines the reply
     if len(addr) != len(defAdr):
         return "Invalid address length"
     if addr == defAdr:
@@ -87,6 +91,7 @@ def verifyAddr(addr, pubKey=""):
         if get_public_address_from_publicKey(pubKey) != addr:
             return "Invalid address-public key instance"
     return ""
+
 
 def verifyPubKey(pubKey, isCoinBase):
     if len(pubKey) != len(defPub):
@@ -162,7 +167,7 @@ def receivedNewTransaction(trans, share):
         if hash in m_pendingTX:
             return errMsg("TX is duplicate of in pending TX")
 
-        if isUniqueTXInBlocks(hash) == False:
+        if isUniqueTXInBlocks(hash) is False:
             return errMsg("TX is duplicate of TX in existing block")
 
 

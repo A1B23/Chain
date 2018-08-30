@@ -451,7 +451,7 @@
                     $('#' + id).val(val);
                 }
             } else {
-                doAlert("selection poulation failed", 0);
+                doAlert("selection population failed", 0);
             }
         }
 
@@ -534,11 +534,12 @@
             var repl = doPOSTSynch("wallet/transfer", null, params);
             var json = repl[0];
             var code = repl[1];
-            if (code == 200) {
+            if ((code == 201) && ('transactionDataHash' in jsond)) {
+                hash = jsond['transactionDataHash'];
                 doAlert("Tx succeeded " + hash, 8);
                 $("#TxHash").text(hash);
             } else {
-                doAlert(JSON.stringify(json), 0);
+                doAlert(JSON.stringify(jsodn), 0);
             }
         }
 
