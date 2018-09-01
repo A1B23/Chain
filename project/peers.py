@@ -63,48 +63,25 @@ class peers:
             self.visualDelay(self.makeDelay(domain, {}, False))
         return requests.get(url=domain, headers={'accept': 'application/json'})
 
-    # def asAsycnhPostOld(self, ptype, url, data, cnt):
-    #     for peer in self.randomOrderFor(m_cfg[ptype]):
-    #         if m_cfg[ptype][peer]['active'] is True:
-    #             try:
-    #                 d("asynch: " + peer + url + str(data))
-    #                 self.doPOST(peer + url, data)
-    #                 cnt = cnt + 1
-    #                 if cnt > m_cfg['minPeers']: # TODO do  more?
-    #                     break
-    #             except Exception:
-    #                 m_cfg[ptype][peer]['numberFail'] = m_cfg[ptype][peer]['numberFail'] + 1
-    #
-    #     return cnt
 
-    def asAsychPost(self, ptype, url, data, sent):
-        gotID = []
+    def asAsynchPost(self, ptype, url, data, cnt):
         for peer in self.randomOrderFor(m_cfg[ptype]):
             if m_cfg[ptype][peer]['active'] is True:
                 try:
                     d("asynch: " + peer + url + str(data))
-                    # self.doPOST(peer + url, data)
-                    gotID.append(self.makeDelay(peer + url, data, False))
-                    sent = sent + 1
-                    if sent > m_cfg['minPeers']: # TODO do  more?
+                    self.doPOST(peer + url, data)
+                    cnt = cnt + 1
+                    if cnt > m_cfg['minPeers']:
                         break
                 except Exception:
                     m_cfg[ptype][peer]['numberFail'] = m_cfg[ptype][peer]['numberFail'] + 1
-        for idDelay in gotID:
-            if idDelay >= 100:
-                try:
-                    self.visualDelay(idDelay)
-                    requests.post(url=url, json=data, headers={'accept': 'application/json'})
-                except Exception:
-                    sent = sent - 1
-            else:
-                sent = sent - 1
-        return sent
+
+        return cnt
 
     def asynchPOST(self, url, data):
         if url[0] != "/":
             url = "/"+url
-        sent = self.asAsychPost('activePeers', url, data, 0)
+        sent = self.asAsynchPost('activePeers', url, data, 0)
         if sent < m_cfg['minPeers']:
             self.asAsynchPost('shareToPeers', url, data, sent)
 
@@ -121,7 +98,7 @@ class peers:
         for peer in self.randomOrderFor(m_cfg[useList]):
             if m_cfg[useList][peer]['active'] is True:
                 try:
-                    ret = self.doPOST(url=peer + url, json=data)
+                    ret = self.doPOST(peer + url, data)
                     response.append(ret)
                     cnt = cnt + 1
                     m_cfg[useList][peer]['active'] = True
@@ -204,8 +181,11 @@ class peers:
     def sendGETToPeer(self, url):
         # This routine must not have try/except as except is signal to caller
         rep = self.doGET(url=url)
-        dat = json.loads(rep.text)
         x = rep.status_code
+        if x == 500:
+            dat = {"ErrMessagePeer": "Failed peer attempt using"+url}
+        else:
+            dat = json.loads(rep.text)
         return dat, x
 
     def getPeers(self, peerType, url, cnt):
@@ -233,8 +213,8 @@ class peers:
         else:
             response = resp
             if len(resp) < m_cfg['minPeers']:
-                for tx in (self.getPeers('shareToPeers', url, len(resp))):
-                    response.append[tx]
+                for tx in self.getPeers('shareToPeers', url, len(resp)):
+                    response.append(tx)
         return response
 
     def ensureBCNode(self, peerType):

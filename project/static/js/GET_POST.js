@@ -86,10 +86,11 @@ function doGETSynch(url) {
         var xhttp = new XMLHttpRequest();
         xhttp.open("GET", url, false);
         xhttp.send();
-        //if (xhttp.status == 200) {
+        if (xhttp.status != 500) {
             json = JSON.parse(xhttp.responseText)
-        //} else {
-        //    json = JSON.parse(xhr.responseText);
+        } else {
+            json = JSON.parse("No peer available...");
+        }
     }
     return [json, xhttp.status];
 }
@@ -189,4 +190,10 @@ function doPOST(url, updateField, getField) {
             inDat = inDat.replace("{" + toReplace + "}", repl);
         }
         return inDat;
-    }
+}
+
+function setPeer(out, data, use) {
+    document.getElementById(out).innerHTML = "";
+    document.getElementById(use).value = '{ "peerUrl": "' + document.getElementById(data).value + '" }';
+    doPOST('peers/connect', out, use);
+}

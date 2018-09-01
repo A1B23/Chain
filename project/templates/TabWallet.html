@@ -104,7 +104,7 @@
     <script src="../static/js/GET_POST.js"></script>
     <script src="../static/js/vis_tablify.js"></script>
 
-    User: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">LogIn</button>
+    User: <input type="text" id="userName" value="" size="20"> <button class="keys" id="login" onclick="JavaScript: logUser(event)" style="background-color:#ef12b4">SetUser</button>
     <br />Current State: <span id="state">No wallet selected</span><br />
     All values and payments are measured in micro-coins
 
@@ -362,7 +362,7 @@
     <div id="Balance" class="tabcontent maintab">
         <div class="tab subtab baltab">
             <button class="tablinks baltab" onclick="openTab(event, 'baltab', 'walletBal')">Wallet Balance</button>
-            <button class="tablinks baltab" onclick="openTab(event, 'baltab','totalBal')">Total Balance</button>
+            <button class="tablinks baltab" onclick="openTab(event, 'baltab', 'totalBal'); getBalanceWallets()">Total Balance</button>
             <button class="tablinks baltab" onclick="openTab(event, 'baltab','infob')">Info</button>
         </div>
         <div id="walletBal" class="tabcontent baltab">
@@ -379,7 +379,7 @@
             <span id="balResult"></span>
         </div>
         <div id="totalBal" class="tabcontent baltab">
-            <button class="keys" onclick="JavaScript:getBalanceWallets()">Show balance for all my Wallets</button><br />
+            Total balance over all wallets:<br />
             <span id="balAllResult"></span>
         </div>
         <div id="infob" class="tabcontent baltab">
@@ -461,9 +461,9 @@
         * State Management
         */
         $(".alert").css("display", "none");
+        user = "";
         initState();
 
-        user = "";
 
         function h(message) {
             return "<u>" + message + "</u>";
@@ -471,19 +471,21 @@
 
 
         function logUser(event) {
-            if ($("#login").text() == "LogIn") {
+            if ($("#login").text() == "SetUser") {
                 user = $("#userName").val().trim();
                 if (user.length > 0) {
-                    $('#login').text('LogOut');
+                    initState();
+                    // $('#login').text('LogOut');
                     $("#userName").val("***");
                 }
-            } else {
-                openTab(event, 'maintab', 'Info');
-                $("#userName").val("");
-                user = '';
-                initState();
-                $('#login').text('LogIn');
             }
+            //else {
+            //   openTab(event, 'maintab', 'Info');
+            //    $("#userName").val("");
+            //    user = '';
+            //    initState();
+            //    $('#login').text('SetUser');
+            //}
         }
 
         function toClipBoard(id) {
@@ -531,11 +533,15 @@
         }
 
         function initState() {
+            $("#userName").val("***")
             state = { "wallet": "", "key": "" };
             $("#wallets").val("");
             $('#selWallet').val("__clr");
             $('#walletName').val("");
+            populateSelOptions("selWallet", []);
             updateStateInfo();
+            openTab(null, 'maintab', 'Wallets')
+            openTab(null, 'walletTab', 'selectWallet')
         }
 
         function updateStateInfo() {
@@ -745,7 +751,7 @@
                 doAlert("Tx succeeded " + hash, 8);
                 $("#TxHash").text(hash);
             } else {
-                doAlert(JSON.stringify(jsodn), 0);
+                doAlert(JSON.stringify(jsond), 0);
             }
         }
 
@@ -1017,11 +1023,13 @@
                 tablinks[i].className = tablinks[i].className.replace(" active", "");
             }
             document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
+            if (evt != null) {
+                evt.currentTarget.className += " active";
+            }
             if (tabName === "Balance") {
                 //document.getElementById('paddressb').value = document.getElementById('paddressb').value + "x"
             } else if (tabName === "selectWallet") {
-                prepareSelectWallet("selWallet", true);
+                prepareSelectWallet("selWallet", false);
             } else if (tabName === "walletBal") {
                 prepareSelectWallet("balWallet", false);
             } else if (tabName === "walletTX") {

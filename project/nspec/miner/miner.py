@@ -236,12 +236,12 @@ def doMine():
                     except Exception:
                         print("send control invalid: "+cfg['mineSend'])
                 for peer in m_cfg['activePeers']:
-                    resp = c_peer.doPOST(url=peer + "/mining/submit-mined-block", json=ndata)
+                    resp = c_peer.doPOST(peer + "/mining/submit-mined-block", ndata)
                     sent = True
                     break
                 if sent is False:
                     for peer in m_cfg['shareToPeers']:
-                        resp = c_peer.doPOST(url=peer + "/mining/submit-mined-block", json=ndata)
+                        resp = c_peer.doPOST(peer + "/mining/submit-mined-block", ndata)
                         sent = True
                         break
                 if (sent is True) and (resp.status_code == 200):

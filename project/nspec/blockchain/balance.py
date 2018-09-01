@@ -55,10 +55,15 @@ def updateConfirmedBalance(txList, isGenesis):
         if not afrom in tempBalance:
             if not afrom in m_AllBalances:
                 if isGenesis is False:
-                    #TODO this needs to be tested after we removde free coins for all
-                   txList[tx]["transferSuccessful"] = False
-                   if isGenesis is True:
-                        return {}
+                   tx["transferSuccessful"] = False
+                   #TODO below, damn nakov chain definition inconsistency
+                   # this is a weakness in the nakov chain definition that ther miner can cheat as
+                   # the miner already got the money no one has
+                   # but I cannot redefine the entire system, so I go along with it
+                   # the problem is that if balance is checked upon submit, then there is no transferSuccessful == false
+                   # because it will have to be outright rejected, but instruction was to include unsuccessful
+                   # in the change, so balance check is not possible/suitable
+                   txList[0]
                    continue #TODO continue or error??
                 if afrom != defAdr:
                     return {}
@@ -147,7 +152,7 @@ def getBalance(address):
             if m_pendingTX[tx]['from'] == address:
                 #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
                 found = True
-                ret['pendingBalance'] = ret['pendingBalance'] - (m_pendingTX[tx]['value']+m_pendingTX[tx]['fee'])()
+                ret['pendingBalance'] = ret['pendingBalance'] - (m_pendingTX[tx]['value']+m_pendingTX[tx]['fee'])
 
         return setOK(ret)  # slides say if valid address but no TX, return 0 balance, not error!
     return errMsg("Invalid address", 404)

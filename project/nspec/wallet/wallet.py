@@ -257,6 +257,8 @@ class wallet:
                 val, respCode = self.collectKeyBalance(key)
                 if respCode == 200:
                     self.sumBalance(bal, val)
+                else:
+                    return errMsg(val, respCode)
             return setOK(bal)
         except Exception:
             return errMsg("Seems to have peer issues....")

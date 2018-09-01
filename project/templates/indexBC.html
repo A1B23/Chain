@@ -242,13 +242,7 @@
             doDirect(url, ext);
         }
 
-        function setPeer(out, data, use) {
-            document.getElementById(out).innerHTML = "";
-            document.getElementById(use).value = '{ "peerUrl": "' + document.getElementById(data).value + '" }';
-            doPOST('peers/connect', out, use);
-        }
 
- 
         /*
         * Tab Manager
         */

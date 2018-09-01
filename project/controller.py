@@ -8,7 +8,8 @@ import project.classes
 from project.pclass import c_peer
 from copy import deepcopy
 from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
-from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates
+from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates, m_Blocks
+from project.nspec.blockchain.modelBC import m_AllBalances
 import re
 
 c_MainIntf = mainInterface()
@@ -37,6 +38,7 @@ def visualGet():
 def visualRelease(idx):
     try:
         found = False
+        rel = {}
         for item in m_Delay:
             if ('releaseID' in item) and (item['releaseID'] == idx):
                 rel = item
@@ -92,17 +94,17 @@ def get_info():
 
 @app.route('/debug', methods=["GET"])
 def debug():
-    #TODO update by type
-    response = []
-    response.append(m_cfg)
-    response.append(m_info)
-    response.append(m_pendingTX)
-    response.append(m_BufferMinerCandidates)
-    return setOK(response)
+    m_ret = {"cfg": deepcopy(m_cfg)}
+    addCfg(m_ret)
+    if isBCNode():
+        m_ret.update({"TX": deepcopy(m_pendingTX)})
+        m_ret.update({"minerCandidates": deepcopy(m_BufferMinerCandidates)})
+        m_ret.update({"balances": deepcopy(m_AllBalances)})
+        m_ret.update({"blocks": deepcopy(m_Blocks)})
+    return setOK(m_ret)
 
 @app.route('/debug/reset-chain', methods=["GET"])
 def debug_resetChain():
-    # TODO updat eby type
     # this is a very special case, as it is not GET but actually a POST issue
     m_isPOST.append("Reset Chain")
     while len(m_isPOST) > 1:
