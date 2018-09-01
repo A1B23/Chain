@@ -532,7 +532,7 @@
             }
             params['user'] = user;
             var repl = doPOSTSynch("wallet/transfer", null, params);
-            var json = repl[0];
+            var jsond = repl[0];
             var code = repl[1];
             if ((code == 201) && ('transactionDataHash' in jsond)) {
                 hash = jsond['transactionDataHash'];

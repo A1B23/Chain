@@ -37,7 +37,7 @@ class chainInterface:
                 return c_blockchainNode.c_tx.getTXForAddress(linkInfo['address'])
             else:
                 if "balance" in url:
-                    return getBalance(linkInfo['address'])
+                    return getBalanceRet(linkInfo['address'])
         elif urlID == "balan":
             return getAllBalances()
         elif urlID == "load/":

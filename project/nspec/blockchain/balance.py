@@ -10,9 +10,7 @@ def addNewRealBalance(addr, blockNo):
 
 def createNewBalance(blockNo):
     newInfo = deepcopy(m_staticBalanceInfo)
-    #newInfo['curBalance'] = 0
     newInfo['createdInBlock'] = blockNo
-    #newInfo['confirm'] = {}
     return newInfo
 
 
@@ -24,22 +22,24 @@ def setBalanceTo(newBal,blockNo):
         else:
             m_AllBalances[b]['curBalance'] = newBal[b]
 
-
     for b in delThem:
         m_AllBalances.pop(b)
 
 
-def updateTempBalance(txList, tempBalance):
+def updateTempBalance(txList, tempBalance, chkOnly=""):
     for tx in txList:
         afrom, ato, value, total, txhash = tx['from'], tx['to'], tx['value'], (tx['value']+tx['fee']), tx['transactionDataHash']
         # this can be called either during block setting up
         # or after receiving confirmed block
-        if not afrom in tempBalance:
+        if chkOnly != "":
+            if (chkOnly != afrom) and (chkOnly != ato):
+                continue
+        if afrom not in tempBalance:
             tempBalance.update({afrom: 0})
 
         tempBalance[afrom] = tempBalance[afrom] - total #reduce by value + fee
 
-        if not ato in tempBalance:
+        if ato not in tempBalance:
             tempBalance.update({ato: value})
         else:
             tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
@@ -52,8 +52,8 @@ def updateConfirmedBalance(txList, isGenesis):
         afrom, ato, value, total, txhash = tx['from'], tx['to'], tx['value'], (tx['value']+tx['fee']), tx['transactionDataHash']
         # this can be called either during block setting up
         # or after receiving confirmed block
-        if not afrom in tempBalance:
-            if not afrom in m_AllBalances:
+        if afrom not in tempBalance:
+            if afrom not in m_AllBalances:
                 if isGenesis is False:
                    tx["transferSuccessful"] = False
                    #TODO below, damn nakov chain definition inconsistency
@@ -63,28 +63,27 @@ def updateConfirmedBalance(txList, isGenesis):
                    # the problem is that if balance is checked upon submit, then there is no transferSuccessful == false
                    # because it will have to be outright rejected, but instruction was to include unsuccessful
                    # in the change, so balance check is not possible/suitable
-                   txList[0]
                    continue #TODO continue or error??
                 if afrom != defAdr:
                     return {}
                 addNewRealBalance(afrom, 0)
             tempBalance.update({afrom: m_AllBalances[afrom]['curBalance']})
 
-        #special case for coinbase needed
+        # special case for coinbase needed
         if (afrom != defAdr) and (tempBalance[afrom] < total):
-            return {} #indicate invalid block, as all TX are supposed to be ok at this stage
+            return {}  # indicate invalid block, as all TX are supposed to be ok at this stage
 
-        tempBalance[afrom] = tempBalance[afrom] - total #reduce by value + fee
+        tempBalance[afrom] = tempBalance[afrom] - total  # reduce by value + fee
 
-        if not ato in m_AllBalances:
+        if ato not in m_AllBalances:
             addNewRealBalance(ato, tx['minedInBlockIndex'])
-            #whatever the default, make sure to set 0
+            # whatever the default, make sure to set 0
             m_AllBalances[ato]['curBalance'] = 0
 
-        if not ato in tempBalance:
+        if ato not in tempBalance:
             tempBalance.update({ato: m_AllBalances[ato]['curBalance']})
 
-        tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
+        tempBalance[ato] = tempBalance[ato] + value  # add only value, fee went to  miner
     return tempBalance
 
 
@@ -123,39 +122,41 @@ def confirmRevertBalances(txList):
 
     # all tx in this block are valid, so update actual balances based on the results from checking
     for addr in updBalance:
-        #if (not addrTo in m_AllBalances):
-        #    addNewRealBalance(addr, blockIndex)
         m_AllBalances[addr]['curBalance'] = m_AllBalances[addr]['curBalance'] - (updBalance[addr] - m_AllBalances[addr]['curBalance'])
 
-    #balances updated, re-install actual TX into pending list
+    # balances updated, re-install actual TX into pending list
     for tx in txList:
-        #special case for coinbase, because the miner fee is not an actual transaction to restore!
+        # special case for coinbase, because the miner fee is not an actual transaction to restore!
         if tx['from'] != defAdr:
             if tx['transactionDataHash'] not in m_pendingTX:
                 m_pendingTX[tx['transactionDataHash']] = tx
     m_info['confirmedTransactions'] = m_info['confirmedTransactions'] - len(txList)
     return ""
 
+def getBalanceRet(address):
+    if len(address) == len(defAdr):
+        return setOK(getBalance(address))  # slides say if valid address but no TX, return 0 balance, not error!
+    return errMsg("Invalid address", 404)
+
 
 def getBalance(address):
-    if len(address) == len(defAdr):
-        ret = deepcopy(m_TemplateSingleBalance)
-        if address in m_AllBalances:
-            ret['confirmedBalance'] = m_AllBalances[address]['curBalance']
+    ret = deepcopy(m_TemplateSingleBalance)
+    if address in m_AllBalances:
+        ret['confirmedBalance'] = m_AllBalances[address]['curBalance']
 
-        for tx in m_pendingTX:
-            if m_pendingTX[tx]['to'] == address:
-                #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
-                found = True
-                ret['pendingBalance'] = ret['pendingBalance'] + m_pendingTX[tx]['value']
-            # The next might be outside spec, but makes sense to me, negative pending balance for spending
-            if m_pendingTX[tx]['from'] == address:
-                #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
-                found = True
-                ret['pendingBalance'] = ret['pendingBalance'] - (m_pendingTX[tx]['value']+m_pendingTX[tx]['fee'])
+    for tx in m_pendingTX:
+        if m_pendingTX[tx]['to'] == address:
+            #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
+            found = True
+            ret['pendingBalance'] = ret['pendingBalance'] + m_pendingTX[tx]['value']
+        # The next might be outside spec, but makes sense to me, negative pending balance for spending
+        if m_pendingTX[tx]['from'] == address:
+            #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
+            found = True
+            ret['pendingBalance'] = ret['pendingBalance'] - (m_pendingTX[tx]['value']+m_pendingTX[tx]['fee'])
 
-        return setOK(ret)  # slides say if valid address but no TX, return 0 balance, not error!
-    return errMsg("Invalid address", 404)
+    return ret
+
 
 
 def getAllBalances():

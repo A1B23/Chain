@@ -107,7 +107,7 @@ function annotateNode(typ, dom, node, cols) {
         var hint = "";
         if (typ.startsWith("B") || typ.startsWith("*B")) {
             var cfg = item['cfg'];
-            hint += "" + (cfg['chainHeight'] - 1) + " / X:" + cfg['pendTX'];
+            hint += "" + (cfg['chainHeight'] - 1) + " / #Tx:" + cfg['pendTX'];
             var c = cfg['blockHash'];
             var i = 0;
             while ((i < c.length) && (c[i] == "0")) {

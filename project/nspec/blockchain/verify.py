@@ -1,6 +1,7 @@
 from project.utils import checkRequiredFields, errMsg, sha256ToHex
 from project.nspec.blockchain.modelBC import m_stats, m_completeBlock, m_Blocks, m_staticTransactionRef
 from project.nspec.blockchain.modelBC import m_transaction, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
+from project.nspec.blockchain.balance import updateTempBalance, getBalance
 from project.pclass import c_peer
 from project.nspec.wallet.transactions import get_public_address_from_publicKey
 from project.models import re_addr, re_pubKey, defAdr, defPub, defSig, m_transaction_order, m_cfg, m_info
@@ -170,6 +171,9 @@ def receivedNewTransaction(trans, share):
         if isUniqueTXInBlocks(hash) is False:
             return errMsg("TX is duplicate of TX in existing block")
 
+        tmpBal = getBalance(trans['from'])
+        if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < trans['value']+trans['fee']:
+            return errMsg("Not enough balance")
 
         # Puts the transaction in the "pending transactions" pool
         m_pendingTX.update({trans['transactionDataHash']: deepcopy(trans)})

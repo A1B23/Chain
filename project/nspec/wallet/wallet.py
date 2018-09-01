@@ -253,7 +253,7 @@ class wallet:
         try:
             user = params['user']
             bal = deepcopy(m_balanceData)
-            for key in self.doSelect("SELECT address FROM Wallet WHERE User='" + user + "'"):
+            for key in self.doSelect("SELECT DISTINCT address FROM Wallet WHERE User='" + user + "'"):
                 val, respCode = self.collectKeyBalance(key)
                 if respCode == 200:
                     self.sumBalance(bal, val)
