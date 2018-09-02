@@ -21,7 +21,7 @@ if __name__ == "__main__":
         "/address/[0-9a-f]+/balance",
         "/peers",
         "/peers/connect",
-        "/listNodes",  # TODO test only
+        "/listNodes",
         "/mining/get-mining-job/[0-9a-f]+$",
         "/blocks/hash/[0-9]+/[0-9]+/[0-9]+"
     ])

@@ -111,7 +111,7 @@ class mainInterface:
                     if len(m) + len(f) == 0:
                         #TODO what text here?
                         return setOK("Acknowledge... ")
-            # TODO for bigger network, make this bigger as well?
+            # for bigger network, make this bigger as well?
             if len(m_peerSkip) > 10:
                 del m_peerSkip[0]
 

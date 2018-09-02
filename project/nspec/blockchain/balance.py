@@ -56,14 +56,14 @@ def updateConfirmedBalance(txList, isGenesis):
             if afrom not in m_AllBalances:
                 if isGenesis is False:
                    tx["transferSuccessful"] = False
-                   #TODO below, damn nakov chain definition inconsistency
+                   # below, nakov chain definition inconsistency, but we try to handle it
                    # this is a weakness in the nakov chain definition that ther miner can cheat as
                    # the miner already got the money no one has
                    # but I cannot redefine the entire system, so I go along with it
                    # the problem is that if balance is checked upon submit, then there is no transferSuccessful == false
                    # because it will have to be outright rejected, but instruction was to include unsuccessful
                    # in the change, so balance check is not possible/suitable
-                   continue #TODO continue or error??
+                   continue
                 if afrom != defAdr:
                     return {}
                 addNewRealBalance(afrom, 0)

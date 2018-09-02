@@ -181,7 +181,6 @@ def peers_connect():
     linkInfo = {}
     try:
         values = request.get_json()
-        #TODO clean json
         return c_peer.peersConnect(request.host, values)
     except Exception:
         return errMsg("JSON not decodeable")

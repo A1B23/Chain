@@ -20,7 +20,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
         else:
             colErr = colErr + "and '" + x + "'"
     if l != 0:
-        # TODO test only still unclear about data structure so for test accept both
+        # TODO still unclear about data structure so for test accept both
         if (l != 1) or ("transactionDataHash" not in trans):
             colErr = colErr + " Invalid number of fields in transaction"
     if colErr == "":  # final checks

@@ -12,8 +12,6 @@ import project.classes
 
 class peers:
     skipDoubleCheck = []
-    #TODO when we receive info etc. from an unknonw node and outr count is below needd
-    # then why does the peer list not take it as new node???
 
     def makeDelay(self, url, json, isAsyncPost):
         try:
@@ -259,8 +257,6 @@ class peers:
                 else:
                     newNode = x
 
-
-                #TODO add type parameter later as startup has more prio??
                 print("Supposed to connect to "+newNode)
                 err = self.addPeerOption(newNode, source, 'peerOption')
                 if len(err) > 0:
@@ -454,6 +450,7 @@ class peers:
             except Exception:
                 i=0
 
+            #time to sleep untilk next peer check depends on current situation
             slp = m_cfg['peersCheckDelay']+random.randint(0, 10)-5
             cnt = self.cntPeers('activePeers') + self.cntPeers("shareToPeers")
             if cnt == 0:
@@ -461,7 +458,7 @@ class peers:
             elif cnt < m_cfg['maxPeers']:
                 slp =int(slp/2)
 
-            sleep(slp) #TODO adjust to 60 after testing, controlled by 'peersCheck' in config
+            sleep(slp)
 
     def peersConnect(self, source, values):
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)

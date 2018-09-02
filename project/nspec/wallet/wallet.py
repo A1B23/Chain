@@ -1,4 +1,4 @@
-from project.nspec.wallet.transactions import generate_private_key, private_key_hex_to_int, private_key_to_public_key
+from project.nspec.wallet.transactions import generate_private_key_hex, private_key_hex_to_int, private_key_to_public_key
 from project.nspec.wallet.transactions import get_pub_key_compressed, public_key_compressed_to_address, helper_sha256
 from project.pclass import c_peer
 from project.models import m_transaction_order, defSig
@@ -11,11 +11,11 @@ import re
 from project.nspec.blockchain.verify import verifyAddr
 from copy import deepcopy
 
-
+#TODO for security, change all SQL to make them injection resistant!
 class wallet:
     def createKey(self, wal, name, user):
         # (wal,"prK","pK","@","*","000")
-        prk = generate_private_key()
+        prk = generate_private_key_hex()
         priv_key_int = private_key_hex_to_int(prk)
         pub_key = private_key_to_public_key(priv_key_int)
         pub_key_compressed = get_pub_key_compressed(pub_key)
@@ -93,10 +93,10 @@ class wallet:
     def listAllWallets(self, user):
         return self.doSelect("SELECT DISTINCT WName from Wallet WHERE User='"+user+"'")
 
-    def hasWallet(self,wallet):
+    def hasWallet(self, wallet):
         return (len(self.doSelect("SELECT DISTINCT WName from Wallet WHERE WName='"+wallet+"'")) > 0)
 
-    def getAllWallets(self,user):
+    def getAllWallets(self, user):
         return setOK({"walletList": self.listAllWallets(user)})
 
     def doSelect(self, cmd):
@@ -111,8 +111,11 @@ class wallet:
 
     def collectKeyBalance(self, addr):
         resps = c_peer.sendGETToPeers("address/" + addr + "/balance")
-        # TODO should we compare all replies??? Not really??? Just take first one?
-        return resps[0]
+        # to keep it simple, just return first valid reply
+        for rsp in resps:
+            if len(rsp) > 0:
+                return rsp
+        return resps[0]  # should not happen
 
     def getKeyBalance(self, params):
         keys = self.getDataFor([params['sel'], params['key']], params['wallet'], "", params['user'])
@@ -177,7 +180,6 @@ class wallet:
 
     def payment(self, params):
         try:
-            #TODO verify that params has all elements before processing
             fee = params['fee']
             value = params['amount']
             keyref = params['source']
@@ -218,20 +220,24 @@ class wallet:
                 if len(colErr) > 0:
                     return errMsg(colErr)
                 signedTX, TxExpectedHash = self.signTx(privKey, recAddress, msg, value, fee, senderAddr, senderPK)
-                #TODO do we want to verify the TX hash somehow after we received the reply from node?
+                TxExpectedHash = "1"+TxExpectedHash
                 resps = c_peer.sendPOSTToPeers("transactions/send", signedTX)
                 if len(resps) == 0:
                     return errMsg("No peer reachable, please retry again or check peer settings...")
-                #TODO should we compare all replies??? Not really??? Just take first one...
+                # to keep it simple, just take first valid reply as reference
                 for xx in resps:
                     if len(xx) != 0:
-                        return xx[0].text, xx[0].status_code
+                        # this should not happen but malicious node could try
+                        ret = xx[0].text
+                        if (xx[0].status_code == 201) and ('"'+TxExpectedHash+'"' not in ret):
+                            ret = '{"Alert": "Tx accepted with inconsistent hash, expected was: ' + TxExpectedHash+'", "NodeReply":'+ret+'}'
+                        return ret, xx[0].status_code
                 return errMsg("No peer reachable, please retry again or check peer settings...")
             return errMsg("Payment/transfer failed due to parameter for keys")
         except Exception:
             return errMsg("Payment/transfer failed due to parameter error")
 
-    def signTx(self, priv_key_hex, receiver_addr, msg, value,fee, pub_addr, pub_key_compressed):
+    def signTx(self, priv_key_hex, receiver_addr, msg, value, fee, pub_addr, pub_key_compressed):
         timestamp = getTime()
         transaction = {"from": pub_addr, "to": receiver_addr, "value": value, "fee": fee,
                        "dateCreated": timestamp, "data": msg, "senderPubKey": pub_key_compressed}
@@ -241,6 +247,7 @@ class wallet:
         tran_signature = sign(generator_secp256k1, private_key_hex_to_int(priv_key_hex), tran_hash)
         sig1 = str(hex(tran_signature[0]))[2:]
         sig2 = str(hex(tran_signature[1]))[2:]
+        # ensure standard length
         while len(sig1) < len(defSig):
             sig1 = "0"+sig1
         while len(sig2) < len(defSig):
@@ -321,9 +328,15 @@ class wallet:
         query = [l[i:i + 3] for i in range(0, len(l), 3)]
         for addrx in query:
             resps = c_peer.sendGETToPeers("address/" + addrx[0] + "/transactions")
-            # TODO should we compare all replies??? Not really??? Just take first one?
-            (text, code) = resps[0]
+            # to keep it simple, just take first one valid reply
+            code = 500
+            text = {}
+            for rsp in resps:
+                if len(rsp) != 0:
+                    (text, code) = rsp
+                    break
             if code == 200:
+                trxn = {}
                 if typep < 2:
                     trxn = {'address':addrx[0]}
                 elif typep < 4:

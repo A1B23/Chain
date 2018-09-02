@@ -8,16 +8,13 @@ if __name__ == "__main__":
         #TODO remove the ones not valid anymore
         "/cfg$",
         "/info$",
-        #"/info",  # TODO need to bring up???
         "/debug$",
         "/transactions/pending",
         "/transactions/confirmed",
         "/transactions/[0-9a-f]+$",
         "/balances",
-        #"/address/[0-9a-fA-F]+/transactions",
-        #"/address/[0-9a-fA-F]+/balance",
         "/peers",
-        "/listNodes",  # TODO test only
+        "/listNodes",
         "/address/[0-9a-zA-Z]+/balance$",
         "/wallet/list/wallet/[0-9a-zA-Z]+$",
         "/wallet/list/keys/s([pna]y)*/[0-9a-zA-Z]+/[0-9a-zA-Z]+$",

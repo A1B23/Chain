@@ -197,7 +197,7 @@ def doMine():
                     candidate = deepcopy(newCandidate)
                     count = 0
 
-                #this does not use the make minershash as it is optimised for fixDat to be faster
+                #this does not use the make miner-hash as it is optimised for fixDat to be faster
                 minedBlockHash = hashlib.sha256((candidate['fixDat'] + str(candidate['nonce'])).encode("utf8")).hexdigest()
 
                 if minedBlockHash[:candidate['difficulty']] == target:

@@ -284,7 +284,7 @@ class blockchain:
                     #get the actual block from peer
                     res, stat = self.getNextBlock(peer, -1)
                     if stat == 200:
-                        # TODO yoursbetter must not be based on the claim but based
+                        # yoursbetter must not be based on the claim but based
                         # on the block data and its difficulty versus my cumulative
                         # else an attacker might cheat with high claim but low delivery
                         # 0) we ignore your cumDiff
@@ -296,7 +296,7 @@ class blockchain:
                             d("anyway the same")
                             m_cfg['checkingChain'] = False
                             return setOK("Thank you for the notification.")
-                        #TODO make sure we really want/need to include difficulty in this decision
+                        # need to include difficulty in this decision
                         yoursBetter = blockInfo['cumulativeDifficulty'] > m_info['cumulativeDifficulty']
                         if yoursBetter is False:
                             yoursBetter = res['difficulty'] > m_Blocks[-1]['difficulty']

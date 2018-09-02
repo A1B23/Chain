@@ -45,9 +45,9 @@ def getFutureTime(deltaInSecs):
 def genNodeID():
     timestamp = (time.time() * 10000)
     hex_string = ""
-    for xx in range(1,int(len(defNodeID)/2)):
-        hex_string = hex_string+ '0x{:02x}'.format(int(random.randint(1000000, 9999999)))[2:]
-    hex_string=hex_string +'0x{:02x}'.format(int(timestamp))
+    for xx in range(1, int(len(defNodeID)/2)):
+        hex_string = hex_string + '0x{:02x}'.format(int(random.randint(1000000, 9999999)))[2:]
+    hex_string=hex_string + '0x{:02x}'.format(int(timestamp))
     # still need to sha over it and return
     return hex_string[0:len(defNodeID)]
 

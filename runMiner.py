@@ -8,7 +8,7 @@ if __name__ == "__main__":
         "/debug$",
         "/debug/reset-chain",
         "/peers",
-        "/listNodes",  # TODO test only
+        "/listNodes",  # new feature
         "/mining/get-mining-job/[0-9a-f]+$"
     ])
     main("Miner")

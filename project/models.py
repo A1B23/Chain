@@ -1,4 +1,4 @@
-#This file contains data models and references used by multiple player, like node, wallet
+# This file contains data models and references used by multiple player, like node, wallet
 # etc. The modules may have their own model data structures as well
 import re
 
@@ -25,7 +25,7 @@ m_peerInfo = {
 }
 
 m_TemplateSingleBalance = {
-  #"safeBalance": "not provided: this is a matter of user preference, it should be done by wallet, not the node",   #deviates from confirm count 6+
+  # "safeBalance": "not provided: this is a matter of user preference, it should be done by wallet, not the node",   #deviates from confirm count 6+
   "confirmedBalance": 0,
   "pendingBalance": 0
 }
@@ -34,14 +34,14 @@ m_TemplateSingleBalance = {
 m_cfg = {
     "activePeers": {},    # number of bilateral working peers
     "shareToPeers": {},    # number of bilateral working peers
-    "peerOption": {}, #uses peerInfo
+    "peerOption": {},  # uses peerInfo
     "peerAvoid": [],
     "maxPeers": -1,
     "minPeers": -1,
-    "peerDrop": 5, # how often can a peer not reply when checked
-    "maxWrong": 3, # how many wrong type replies do we accept before we drop and move to avoid
+    "peerDrop": 5,  # how often can a peer not reply when checked
+    "maxWrong": 3,  # how many wrong type replies do we accept before we drop and move to avoid
     "newPeer": [],
-    "peersCheckDelay": 45, # TODO how many second to wait to check all peers again
+    "peersCheckDelay": 45,  # default seconds to wait to check all peers again
     # 0 means all commands accepted, POST blocks against get
     # 1 means we are reloading the entire blocks at startup, so until this is finished, no reply
     # 2 means we are checking for peers again... default for starting up
@@ -58,7 +58,7 @@ m_cfg = {
 m_info = {
     "about": "not yet",
     "nodeId": "not yet",
-    "chainId": -1, # is set during init to th e genesis block hash
+    "chainId": -1,  # is set during init to th e genesis block hash
     "nodeUrl": "m",
     "peers": 0,
     "currentDifficulty": 5,
@@ -70,7 +70,7 @@ m_info = {
 }
 
 
-useNet=1
+useNet = 1
 
 #simple locking to prevent GET/POST collision
 m_simpleLock = []
@@ -89,7 +89,7 @@ m_permittedGET = [
     "/address/[0-9a-fA-F]+/transactions",
     "/address/[0-9a-fA-F]+/balance",
     "/peers",
-    "/listNodes",  # TODO test only
+    "/listNodes",
     "/mining/get-mining-job/[0-9a-fA-F]+$"
 ]
 
@@ -141,8 +141,7 @@ m_candidateMiner_order = [
     "transactions",
     "difficulty",
     "prevBlockHash",
-    "minedBy",
-    #"blockDataHash":"15cc5052fb3c307dd2bfc6bcaa057632250ee05104e4fb7cc75e59db1a92cefc",
+    "minedBy"
 ]
 
 m_Miner_order = [
@@ -151,8 +150,6 @@ m_Miner_order = [
     "nonce"
 ]
 
-#TODO block data has
-#Fields order: "index", "transactions", "difficulty", "prevBlockHash" (when exists), "minedBy"
 
 
 

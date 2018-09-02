@@ -76,8 +76,8 @@ def main(typeIn):
 
 def init(parser):
     parser.add_argument('-p', '--port', default=5555, type=int, help='port to listen on')
-    parser.add_argument('-hip', '--host', default="127.0.0.2", help='hostname/IP')
-    parser.add_argument('-con', '--connect', default="3", help='list of 127.0.0.x or full url peers to send messages')
+    parser.add_argument('-hip', '--host', default="127.0.0.92", help='hostname/IP')
+    parser.add_argument('-con', '--connect', default="2", help='list of 127.0.0.x or full url peers to send messages')
     parser.add_argument('-cID', '--chainID', default="", help='identify net by genesis blockHash')
     parser.add_argument('-nID', '--netID', default=1, type=int, help='identify net by pre-defined ID 0: Academy, 1: PDPCCoin')
     parser.add_argument('-miP', '--minPeers', default=1, type=int, help='minimum number of peers to maintain if posible')
@@ -140,7 +140,6 @@ def init(parser):
 
     # if we want to have navkov as peer for testing blocks enable next line can soon be removed
     # c_peer.setPeersAs("https://stormy-everglades-34766.herokuapp.com",80)
-    # TODO search for 'navkov has wrong nodeUrl info' and enable the modeUrl correction as well
     print(m_cfg)
     print(m_info)
     # maxBytes to small number, in order to demonstrate the generation of multiple log files (backupCount).
