@@ -38,7 +38,7 @@ function doDirect(url, ext) {
 
 
 function doPOSTSynch(url, updateField, data) {
-    port = getPort();
+    var port = getPort();
     if (port < 1024) {
         newContent = "Error: No Port";
     } else {
@@ -53,10 +53,10 @@ function doPOSTSynch(url, updateField, data) {
         xhr.open("POST", url, false);
         xhr.setRequestHeader("Content-Type", "application/json");
         xhr.send((typeof data == 'string')?data:JSON.stringify(data));
-        var json = { "message": "fail" };
+        var jsond = { "message": "fail" };
         if ((xhr.status == 200) || (xhr.status == 201)) {
-            text = xhr.responseText.replace(/\n/g, "");
-            json = JSON.parse(xhr.responseText);
+            var text = xhr.responseText.replace(/\n/g, "");
+            jsond = JSON.parse(xhr.responseText);
             if (updateField != null) {
                 var input = document.createElement("textarea");
                 input.value = text.replace(/",/g, "\",\r\n").replace(/],/g, "],\r\n");
@@ -65,40 +65,41 @@ function doPOSTSynch(url, updateField, data) {
                 document.getElementById(updateField).appendChild(input);
             }
         } else {
-            json = JSON.parse(xhr.responseText);
+            jsond = JSON.parse(xhr.responseText);
         }
         if (updateField != null) {
             document.getElementById(updateField).value = document.getElementById(updateField).value + text;
         }
-        return [json,xhr.status];
+        return [jsond,xhr.status];
     }
 }
 
 function doGETSynch(url) {
-    keep = ""
-    port = getPort();
+    var keep = ""
+    var port = getPort();
     var json = { "message": "fail" };
     if (port < 1024) {
-        newContent = "No Port";
+        var newContent = "No Port";
     } else {
         var url = fillURL(url);
         //url = getDomain() + ":" + port + "/" + url;
         var xhttp = new XMLHttpRequest();
         xhttp.open("GET", url, false);
         xhttp.send();
+        var jsond = "";
         if (xhttp.status != 500) {
-            json = JSON.parse(xhttp.responseText)
+            jsond = JSON.parse(xhttp.responseText)
         } else {
-            json = JSON.parse("No peer available...");
+            jsond = JSON.parse("No peer available...");
         }
     }
-    return [json, xhttp.status];
+    return [jsond, xhttp.status];
 }
 
 function doPOST(url, updateField, getField) {
         var port = getPort();
         if (port < 1024) {
-            newContent = "Error: No Port";
+            var newContent = "Error: No Port";
         } else {
             var url = fillURL(url);
             //var url = getDomain() + ":" + port + "/" + url;
@@ -140,10 +141,10 @@ function doPOST(url, updateField, getField) {
 
     // helper function for debugging the standard API calls to test, configure etc.
     function doGETCallback(url, callBack,callBackData) {
-        keep = ""
-        port = getPort();
+        var keep = ""
+        var port = getPort();
         if (port < 1024) {
-            newContent = "No Port";
+            var newContent = "No Port";
         } else {
             var url = fillURL(url);
             var xhttp = new XMLHttpRequest();
@@ -157,16 +158,17 @@ function doPOST(url, updateField, getField) {
         }
     }
     function doGET(url,updateField) {
-        keep = ""
-        port = getPort();
+        var keep = ""
+        var port = getPort();
         if (port < 1024) {
-            newContent = "No Port";
+            var newContent = "No Port";
         } else {
             var url = fillURL(url);
             //url = getDomain() + ":" + port + "/" + url;
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function () {
                 if (this.readyState == 4) {
+                    var text = ""
                     if (this.status == 200) {
                         text = this.responseText;
                     } else {
@@ -182,11 +184,10 @@ function doPOST(url, updateField, getField) {
 
     function fillURL(inDat) {
         var items = inDat.split("{");
-        //var test = inDat.match("/{.+}/g");
         for (var i = 1; i < items.length; i = i + 1) {
             var test = items[i].indexOf("}");
-            toReplace = items[i].substr(0, test);
-            repl = document.getElementById("p" + toReplace).value;
+            var toReplace = items[i].substr(0, test);
+            var repl = document.getElementById("p" + toReplace).value;
             inDat = inDat.replace("{" + toReplace + "}", repl);
         }
         return inDat;

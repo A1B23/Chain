@@ -180,7 +180,7 @@
         <div id="payPw"></div>
         <br />
         Maximum donation from this faucet: <span id="smax">0</span><br />
-        <input type="number" id="payAmount" value="100" min="100" size="20" max="100"> Payment amount<br />
+        <input type="number" id="payAmount" value="1000000" min="100" size="20" max="1000000"> Payment amount<br />
         <input type="text" id="payMes" value="" size="20"> (Optional) Provide any messsage to recipient<br />
 
         <br /><br />
@@ -535,7 +535,7 @@
             var jsond = repl[0];
             var code = repl[1];
             if ((code == 201) && ('transactionDataHash' in jsond)) {
-                hash = jsond['transactionDataHash'];
+                var hash = jsond['transactionDataHash'];
                 doAlert("Tx succeeded " + hash, 8);
                 $("#TxHash").text(hash);
             } else {
@@ -546,13 +546,13 @@
         function prepareSelection() {
             var vala = $('#selPayKeyA').find(":selected").val();
             var repl = doGETSynch("wallet/list/keys/sayny/" + state.wallet + "/" + user);
-            var json = repl[0];
+            var jsond = repl[0];
             var code = repl[1];
             if (code == 200) {
                 var ad = []
                 var na = []
-                for (var kk = 0; kk < json.keyList.length; kk++) {
-                    var kx = json.keyList[kk]
+                for (var kk = 0; kk < jsond.keyList.length; kk++) {
+                    var kx = jsond.keyList[kk]
                     var kxx = kx.split(":")
                     if (kxx[0] === "addr") {
                         ad.push(kxx[1])
@@ -563,7 +563,7 @@
                 populateSelOptions('selPayKeyA', ad, na);
                 $('#selPayKeyA').val(vala);
             } else {
-                doAlert("population of data failed " + JSON.stringify(json));
+                doAlert("population of data failed " + JSON.stringify(jsond));
             }
         }
 

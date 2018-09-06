@@ -131,7 +131,7 @@ class genesis:
             fin = {"balances": ret, "genesis": gen}
             fnam = "Genesis_"+m_data['chainRef']+".json"
             with open(fnam, 'w') as outfile:
-                outfile.write(json.dumps(fin, sort_keys=True, indent=42))
+                outfile.write(json.dumps(fin, sort_keys=True, indent=4))
             return setOK(fin)
         except Exception:
             #TODO clear database

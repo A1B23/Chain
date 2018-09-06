@@ -112,10 +112,10 @@ def verifyPubKey(pubKey, isCoinBase):
 def verifyBlockAndAllTX(block):
     if block['index'] != len(m_Blocks):
         return "New block cannot be added to chain, wrong index: "
-    return verifyBlockAndAllTXOn(block,True)
+    return verifyBlockAndAllTXOn(block, True)
 
 
-def verifyBlockAndAllTXOn(block,checkUnique):
+def verifyBlockAndAllTXOn(block, checkUnique):
     # make sure block has all fields and the correct chanId
     m, l, f = checkRequiredFields(block, m_completeBlock, ['chainId'], False)
     isGenesis = (block['index'] == 0)

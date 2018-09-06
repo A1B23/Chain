@@ -92,20 +92,30 @@ def confirmUpdateBalances(txList, isGenesis):
     # first we update the buffer info, and only if all pass
     # then update the actual balances involved
     # theoretically if it is our own block, all should be correct, but we check anyway
-    updBalance = updateConfirmedBalance(txList,isGenesis)
+    updBalance = updateConfirmedBalance(txList, isGenesis)
     if len(updBalance) == 0:
         return "Block rejected, invalid TX detected in: " + txList['transactionDataHash']
 
     # all tx in this block are valid, so update actual balances based on the results from checking
     for addr in updBalance:
-        #if (not addrTo in m_AllBalances):
-        #    addNewRealBalance(addr, blockIndex)
         m_AllBalances[addr]['curBalance'] = updBalance[addr]
 
-    #balances updated, remove TX from pending list
+    # balances updated, remove TX from pending list
     for tx in txList:
         if tx['transactionDataHash'] in m_pendingTX:
             del m_pendingTX[tx['transactionDataHash']]
+    # TODO test that now invalid Tx are correctly removed, as another block and new balances applied
+    remTx = []
+    for tx in m_pendingTX:
+        remTx.append(tx)
+        tmpBal = getBalance(tx['from'], remTx)
+        if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < tx['value'] + tx['fee']:
+            # Not enough balance anymore to keep the TX alive
+            del remTx[-1]
+
+    if len(remTx) != len(m_pendingTX):
+        m_pendingTX.clear()
+        m_pendingTX.extend(remTx)
 
     return ""
 
@@ -133,27 +143,28 @@ def confirmRevertBalances(txList):
     m_info['confirmedTransactions'] = m_info['confirmedTransactions'] - len(txList)
     return ""
 
+
 def getBalanceRet(address):
     if len(address) == len(defAdr):
         return setOK(getBalance(address))  # slides say if valid address but no TX, return 0 balance, not error!
     return errMsg("Invalid address", 404)
 
 
-def getBalance(address):
+def getBalance(address, refTX=m_pendingTX):
     ret = deepcopy(m_TemplateSingleBalance)
     if address in m_AllBalances:
         ret['confirmedBalance'] = m_AllBalances[address]['curBalance']
 
-    for tx in m_pendingTX:
-        if m_pendingTX[tx]['to'] == address:
+    for tx in refTX:
+        if refTX[tx]['to'] == address:
             #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
             found = True
-            ret['pendingBalance'] = ret['pendingBalance'] + m_pendingTX[tx]['value']
+            ret['pendingBalance'] = ret['pendingBalance'] + refTX[tx]['value']
         # The next might be outside spec, but makes sense to me, negative pending balance for spending
-        if m_pendingTX[tx]['from'] == address:
+        if refTX[tx]['from'] == address:
             #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
             found = True
-            ret['pendingBalance'] = ret['pendingBalance'] - (m_pendingTX[tx]['value']+m_pendingTX[tx]['fee'])
+            ret['pendingBalance'] = ret['pendingBalance'] - (refTX[tx]['value']+refTX[tx]['fee'])
 
     return ret
 
