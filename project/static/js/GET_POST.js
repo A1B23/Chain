@@ -194,7 +194,7 @@ function doPOST(url, updateField, getField) {
 }
 
 function setClrPeer(out, data, use, add) {
-    setClearPeer(out, data, use, document.getElementById(use).checked);
+    setClearPeer(out, data, use, document.getElementById(add).checked);
 }
 
 function setPeer(out, data, use) {

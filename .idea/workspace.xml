@@ -3,13 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="cebf9d2d-a62e-42e7-96a7-c7c6c47f10f3" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/initArgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/initArgs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/faucet/faucet.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/faucet/faucet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/peers.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/peers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/static/js/GET_POST.js" beforeDir="false" afterPath="$PROJECT_DIR$/project/static/js/GET_POST.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/templates/TabFaucet.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/TabFaucet.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/templates/TabWallet.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/TabWallet.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/templates/indexBC.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/indexBC.html" afterDir="false" />
     </list>
@@ -25,7 +20,7 @@
       <file leaf-file-name="initArgs.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/initArgs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="211">
+            <state relative-caret-position="799">
               <caret line="62" column="69" selection-start-line="62" selection-start-column="69" selection-end-line="62" selection-end-column="69" />
             </state>
           </provider>
@@ -34,7 +29,7 @@
       <file leaf-file-name="controller.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/controller.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
+            <state relative-caret-position="2924">
               <caret line="184" column="26" selection-start-line="184" selection-start-column="22" selection-end-line="184" selection-end-column="34" />
               <folding>
                 <element signature="e#0#40#0" expanded="true" />
@@ -46,8 +41,8 @@
       <file leaf-file-name="peers.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/project/peers.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="398">
-              <caret line="294" column="49" selection-start-line="294" selection-start-column="49" selection-end-line="294" selection-end-column="49" />
+            <state relative-caret-position="3767">
+              <caret line="497" column="43" selection-start-line="497" selection-start-column="43" selection-end-line="497" selection-end-column="43" />
             </state>
           </provider>
         </entry>
@@ -402,13 +397,6 @@
       <option name="presentableId" value="Default" />
       <updated>1526877812891</updated>
     </task>
-    <task id="LOCAL-00013" summary="TXView incorporated">
-      <created>1530526841024</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1530526841024</updated>
-    </task>
     <task id="LOCAL-00014" summary="Separate key creation included, reply to info separated by node">
       <created>1530582195866</created>
       <option name="number" value="00014" />
@@ -745,7 +733,14 @@
       <option name="project" value="LOCAL" />
       <updated>1536210900348</updated>
     </task>
-    <option name="localTasksCounter" value="62" />
+    <task id="LOCAL-00062" summary="Introduced disconnect peer for better error demo">
+      <created>1536888329831</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1536888329831</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -754,13 +749,13 @@
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.1928181" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5003903" side_tool="true" weight="0.36426118" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3281787" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.3298969" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.23195876" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3281787" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39862543" />
       <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.39862543" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -812,7 +807,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="Miner now respsonible to change date and nonce, removed check in node, moved safeBalance to wallet client" />
     <MESSAGE value="Bug fix in faucet on pubKey and reply when peer is missing" />
     <MESSAGE value="Created blocks/hash for faster verification and better visual" />
     <MESSAGE value="Fixed miner and block error due to refactoring, corrected peer" />
@@ -837,7 +831,8 @@
     <MESSAGE value="Insufficient balance rejects Tx immediately, no more unsuccessful TX" />
     <MESSAGE value="Cleared several TODO items, verify TX-hash between wallet and Node" />
     <MESSAGE value="Typo in genesis block file spacing removed" />
-    <option name="LAST_COMMIT_MESSAGE" value="Typo in genesis block file spacing removed" />
+    <MESSAGE value="Introduced disconnect peer for better error demo" />
+    <option name="LAST_COMMIT_MESSAGE" value="Introduced disconnect peer for better error demo" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1306,14 +1301,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/initArgs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="211">
+        <state relative-caret-position="799">
           <caret line="62" column="69" selection-start-line="62" selection-start-column="69" selection-end-line="62" selection-end-column="69" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/controller.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
+        <state relative-caret-position="2924">
           <caret line="184" column="26" selection-start-line="184" selection-start-column="22" selection-end-line="184" selection-end-column="34" />
           <folding>
             <element signature="e#0#40#0" expanded="true" />
@@ -1323,8 +1318,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/peers.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="398">
-          <caret line="294" column="49" selection-start-line="294" selection-start-column="49" selection-end-line="294" selection-end-column="49" />
+        <state relative-caret-position="3767">
+          <caret line="497" column="43" selection-start-line="497" selection-start-column="43" selection-end-line="497" selection-end-column="43" />
         </state>
       </provider>
     </entry>

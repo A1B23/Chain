@@ -278,7 +278,7 @@ class peers:
             return ""
         return "Already connecting to peer: " + newURL
 
-    def removePeerOption(self, newInURL, source, dest="peerOption"):
+    def removePeerOption(self, newInURL):
         newURL = getValidURL(newInURL, True)
         if newURL == "":
             return "Invalid URL: "+newInURL
@@ -495,7 +495,7 @@ class peers:
             if err.startswith("Already connected"):
                 return errMsg("Already connected to peer: " + url, 409)
         else:
-            err = self.removePeerOption(url, source)
+            err = self.removePeerOption(url)
             if len(err) == 0:
                 return setOK("Connection to peer removed")
 

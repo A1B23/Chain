@@ -115,7 +115,7 @@
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Balance')">Balance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','TxView')">TxView</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Peers')">NodeInfo</button>
-        <button class="tablinks maintab" onclick="openTab(event, 'maintab','safeBalance')">safeBalance</button>
+        <button class="tablinks maintab" onclick="openTab(event, 'maintab','safeBalance')">SafeBalance</button>
         <button class="tablinks maintab" onclick="openTab(event, 'maintab','Info')">Info</button>
 
         <br />
@@ -231,7 +231,7 @@
         </div>
         <div id="setPeer" class="tabcontent qTab">
             Peer full URL: <input type="text" id="paramPR" value='http://127.0.0.?:5555' size="55">
-            <input type="checkbox" name="paramPA"> Add<br />
+            <input type="checkbox" id="paramPA"> Add<br />
             <input type="hidden" id="paramPI" value='http://127.0.0.?:5555' size="55">
             <button class="tablinks txTab" onclick="JavaScript: setClrPeer('resultPI', 'paramPR','paramPI','paramPA');">Submit</button><br />
             <span id="resultPI">Command results....</span>
