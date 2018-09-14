@@ -180,7 +180,7 @@
         <div id="payPw"></div>
         <br />
         Maximum donation from this faucet: <span id="smax">0</span><br />
-        <input type="number" id="payAmount" value="1000000" min="100" size="20" max="1000000"> Payment amount<br />
+        <input type="number" id="payAmount" value="10000" min="100" size="20" max="1000000"> Payment amount<br />
         <input type="text" id="payMes" value="" size="20"> (Optional) Provide any messsage to recipient<br />
 
         <br /><br />
@@ -540,6 +540,7 @@
                 $("#TxHash").text(hash);
             } else {
                 doAlert(JSON.stringify(jsond), 0);
+                $("#TxHash").text(JSON.stringify(jsond));
             }
         }
 

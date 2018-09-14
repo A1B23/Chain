@@ -220,7 +220,6 @@ class wallet:
                 if len(colErr) > 0:
                     return errMsg(colErr)
                 signedTX, TxExpectedHash = self.signTx(privKey, recAddress, msg, value, fee, senderAddr, senderPK)
-                TxExpectedHash = "1"+TxExpectedHash
                 resps = c_peer.sendPOSTToPeers("transactions/send", signedTX)
                 if len(resps) == 0:
                     return errMsg("No peer reachable, please retry again or check peer settings...")

@@ -213,7 +213,7 @@
             <button class="tablinks qTab" onclick="JavaScript:openTab(event, 'qTab', 'nInfo');doDirect('info','NI')">Node Info</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerDat');doDirect('peers','PE')">Peers</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'peerList');doDirect('listNodes','PL')">Peer-Info</button>
-            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'setPeer')">Add Peer</button>
+            <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'setPeer')">Add/Rem Peer</button>
             <button class="tablinks qTab" onclick="JavaScript: openTab(event, 'qTab', 'cfg');doDirect('cfg','PC')">CfgInfo</button>
 
         </div>
@@ -231,8 +231,9 @@
         </div>
         <div id="setPeer" class="tabcontent qTab">
             Peer full URL: <input type="text" id="paramPR" value='http://127.0.0.?:5555' size="55">
+            <input type="checkbox" name="paramPA"> Add<br />
             <input type="hidden" id="paramPI" value='http://127.0.0.?:5555' size="55">
-            <button class="tablinks txTab" onclick="JavaScript: setPeer('resultPI', 'paramPR','paramPI');">Submit</button><br />
+            <button class="tablinks txTab" onclick="JavaScript: setClrPeer('resultPI', 'paramPR','paramPI','paramPA');">Submit</button><br />
             <span id="resultPI">Command results....</span>
         </div>
         <div id="cfg" class="tabcontent qTab">
@@ -752,6 +753,7 @@
                 $("#TxHash").text(hash);
             } else {
                 doAlert(JSON.stringify(jsond), 0);
+                $("#TxHash").text(JSON.stringify(jsond));
             }
         }
 

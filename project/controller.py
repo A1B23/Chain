@@ -176,12 +176,13 @@ def peers():
 
 
 @app.route('/peers/connect', methods=['POST'])
+@app.route('/peers/disconnect', methods=['POST'])
 # this is invoked by user to tell me that the other node exists at IP
 def peers_connect():
-    linkInfo = {}
     try:
         values = request.get_json()
-        return c_peer.peersConnect(request.host, values)
+        pt = request.path
+        return c_peer.peersConnect(request.host, values, "dis" not in pt)
     except Exception:
         return errMsg("JSON not decodeable")
 

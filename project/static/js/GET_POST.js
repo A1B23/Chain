@@ -193,8 +193,20 @@ function doPOST(url, updateField, getField) {
         return inDat;
 }
 
+function setClrPeer(out, data, use, add) {
+    setClearPeer(out, data, use, document.getElementById(use).checked);
+}
+
 function setPeer(out, data, use) {
+    setClearPeer(out, data, use, true);
+}
+
+function setClearPeer(out, data, use, add) {
     document.getElementById(out).innerHTML = "";
     document.getElementById(use).value = '{ "peerUrl": "' + document.getElementById(data).value + '" }';
-    doPOST('peers/connect', out, use);
+    if (add) {
+        doPOST('peers/connect', out, use);
+    } else {
+        doPOST('peers/disconnect', out, use);
+    }
 }

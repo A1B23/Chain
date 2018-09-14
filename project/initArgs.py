@@ -16,7 +16,7 @@ from copy import deepcopy
 import requests
 
 
-def finalise(host, peer, port, type):
+def finalise(host, peer, port):
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
     useVis = m_cfg['canTrack']
@@ -37,7 +37,7 @@ def finalise(host, peer, port, type):
             holdOn = False
         except Exception:
             print("Holding on for flask...")
-    onePeer = c_peer.registerPotentialPeer(peer, port)
+    c_peer.registerPotentialPeer(peer, port)
     thread = Thread(target=c_peer.checkEveryXSecs)
     thread.start()
     while m_cfg['checkingPeers'] == True:
@@ -60,7 +60,7 @@ def after_request(response):
     # to be more secure, should not allow '*' but only allow the local visualiser, but have not succeeded, so open all
     response.headers.add('Access-Control-Allow-Origin', '*')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
     return response
 
 
@@ -69,7 +69,7 @@ def main(typeIn):
     m_cfg['type'] = typeIn
     parser = ArgumentParser()
     host, port, peer = init(parser)
-    thread = Thread(target=finalise, args=(host, peer, port, typeIn))
+    thread = Thread(target=finalise, args=(host, peer, port))
     thread.start()
     app.run(host=host, port=port, threaded=True)
 

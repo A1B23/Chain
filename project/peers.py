@@ -278,6 +278,25 @@ class peers:
             return ""
         return "Already connecting to peer: " + newURL
 
+    def removePeerOption(self, newInURL, source, dest="peerOption"):
+        newURL = getValidURL(newInURL, True)
+        if newURL == "":
+            return "Invalid URL: "+newInURL
+
+        if newURL != m_info['nodeId']:
+            ret = "Not connected/registered anyway"
+            if newURL in m_cfg['peerOption']:
+                del m_cfg['peerOption'][newURL]
+                ret = ""
+            if newURL in m_cfg['activePeers']:
+                del m_cfg['activePeers'][newURL]
+                ret = ""
+            if newURL in m_cfg['shareToPeers']:
+                del m_cfg['shareToPeers'][newURL]
+                ret = ""
+            return ret
+        return "No self connection anyway: " + newURL
+
     def suitablePeer(self, peer, fastTrack=False):
         try:
             s1 = self.doGET(peer + "/info", fastTrack)
@@ -460,7 +479,7 @@ class peers:
 
             sleep(slp)
 
-    def peersConnect(self, source, values):
+    def peersConnect(self, source, values, isConnect):
         m, l, f = checkRequiredFields(['peerUrl'], values, [], False)
         if len(m) > 0:
             return errMsg("Missing field 'peerUrl' ")
@@ -469,11 +488,17 @@ class peers:
         if newURL == "":
             return errMsg("Invalid URL: "+url)
 
-        err = self.addPeerOption(url, source)
-        if len(err) == 0:
-            return setOK("Connection to peer registered")
-        if err.startswith("Already connected"):
-            return errMsg("Already connected to peer: " + url, 409)
+        if isConnect:
+            err = self.addPeerOption(url, source)
+            if len(err) == 0:
+                return setOK("Connection to peer registered")
+            if err.startswith("Already connected"):
+                return errMsg("Already connected to peer: " + url, 409)
+        else:
+            err = self.removePeerOption(url, source)
+            if len(err) == 0:
+                return setOK("Connection to peer removed")
+
         return errMsg(err)
 
     def listPeers(self):
