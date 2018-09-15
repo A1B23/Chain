@@ -1,6 +1,6 @@
 from project.nspec.blockchain.modelBC import m_AllBalances, m_staticBalanceInfo, m_pendingTX
 from project.models import defAdr, m_TemplateSingleBalance, m_info
-from project.utils import setOK, errMsg
+from project.utils import setOK, errMsg, d
 from copy import deepcopy
 
 
@@ -104,18 +104,22 @@ def confirmUpdateBalances(txList, isGenesis):
     for tx in txList:
         if tx['transactionDataHash'] in m_pendingTX:
             del m_pendingTX[tx['transactionDataHash']]
-    # TODO test that now invalid Tx are correctly removed, as another block and new balances applied
-    remTx = []
+    # now invalid Tx are correctly removed, as another block and new balances applied
+    d("test that now invalid Tx are correctly removed, as another block and new balances applied")
+    keepTx = {}
     for tx in m_pendingTX:
-        remTx.append(tx)
-        tmpBal = getBalance(tx['from'], remTx)
-        if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < tx['value'] + tx['fee']:
+        keepTx[tx] = deepcopy(m_pendingTX[tx])
+        d("Check for "+tx)
+        tmpBal = getBalance(m_pendingTX[tx]['from'], keepTx)
+        if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < m_pendingTX[tx]['value'] + m_pendingTX[tx]['fee']:
             # Not enough balance anymore to keep the TX alive
-            del remTx[-1]
+            d("Not enough balance anymore to keep the TX alive" + str("transferSuccessful" in m_pendingTX[tx]))
+            del keepTx[tx]
 
-    if len(remTx) != len(m_pendingTX):
+    if len(keepTx) != len(m_pendingTX):
         m_pendingTX.clear()
-        m_pendingTX.extend(remTx)
+        m_pendingTX.update(keepTx)
+        d("New number of TX left: "+str(len(keepTx)))
 
     return ""
 

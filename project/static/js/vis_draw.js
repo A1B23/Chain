@@ -1,7 +1,7 @@
 diffCol = ['black', 'orange', 'red', ',magenta', 'cyan', 'blue', 'purple'];
 
 function hintinit() {
-    allhint = { 'b': [] , 'm': []};
+    allhint = { 'b': [] , 'm': [], 'w': []};
 }
 
 
@@ -119,6 +119,10 @@ function annotateNode(typ, dom, node, cols) {
             var cfg = item['cfg']
             hint += "" + cfg['nonceCnt'];
             setColorNode('m', hint);
+        } else if (typ.startsWith("W") || typ.startsWith("*W")) {
+            var cfg = item['cfg']
+            hint += "" + cfg['lastBal'];
+            setColorNode('w', hint);
         }
         if (hint.length > 0) {
             ctx.fillText(hint, node.x - node.size * 2 / 3 - hint.length, node.y - 1.5 * node.size);

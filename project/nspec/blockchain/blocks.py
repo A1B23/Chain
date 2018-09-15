@@ -368,6 +368,7 @@ class blockchain:
                         d("this is info internal, so create thread and don't care result")
                         threadx = Thread(target=self.getMissingBlocksFromPeer, args=(blockInfo['nodeUrl'], blockInfo['blocksCount'], False, res))
                         threadx.start()
+                        return setOK("No one sees this answer anyway, but in case, we are processing blocks")
                 m_cfg['checkingChain'] = False
                 return errMsg("Invalid block received")  # for info this is ignored anyway
         except Exception:
@@ -394,7 +395,7 @@ class blockchain:
         return "Block not available/valid at " + peer, -1  # do not chnage it is checked outside
 
     def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry=2):
-        return self.getBlocksFromPeer(peer,upLimit,isAlert,gotBlock,retry,True)
+        return self.getBlocksFromPeer(peer, upLimit, isAlert, gotBlock, retry, True)
 
     def getBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry, isCheck):
         if isCheck and (self.status['getMissingBlocks'] is True):
@@ -402,29 +403,36 @@ class blockchain:
             return ""
         try:
             self.status['getMissingBlocks'] = True
-            d("Work on missing block"+peer)
+            d("Work on missing block: "+peer)
             while True:
                 if (upLimit > 1) and (upLimit <= len(m_Blocks)):
                     self.status['getMissingBlocks'] = False
                     m_cfg['chainLoaded'] = True
                     m_cfg['checkingChain'] = False
+                    d("Upper limit reached")
                     return ""
                 if len(gotBlock) > 0:
                     stat = 200
                     res = gotBlock
+                    d("directly use received block")
                     gotBlock = {}
                 else:
+                    d("get next block")
                     res, stat = self.getNextBlock(peer, 0)
                 if stat == 200:
+                    d("good block received")
                     if res['difficulty'] < m_info['currentDifficulty']:
                         m_cfg['checkingChain'] = False
+                        d("Invalid difficulty")
                         return "Invalid difficulty in block detected"
                     err = self.checkAndAddBlock(res, isAlert)
                     if len(err) > 0:
                         m_cfg['chainLoaded'] = True
                         m_cfg['checkingChain'] = False
+                        d("Invalid block")
                         return "Invalid block received"
                 else:
+                    d("no 200 reply from node to get block")
                     if stat == -1:  # special signal telling us no more blocks there
                         m_cfg['checkingChain'] = False
                         self.status['getMissingBlocks'] = False
@@ -436,7 +444,9 @@ class blockchain:
                         m_cfg['checkingChain'] = False
                         return "No valid information, stopped block updates."
         except Exception:
+            d("Exception occured in getBlocksFromPeer")
             self.status['getMissingBlocks'] = False
+        d("Checking failed in the end...")
         m_cfg['checkingChain'] = False
         m_cfg['chainLoaded'] = (len(m_Blocks) > 0)
         return "Verification failed"

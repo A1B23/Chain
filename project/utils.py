@@ -9,8 +9,10 @@ from flask import jsonify
 from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash, m_cfg
 from project.nspec.blockchain.modelBC import m_Blocks, m_pendingTX
 from project.nspec.miner.modelM import cfg
+from project.nspec.wallet.modelW import w_cfg
 
-#Call this for debuggin print to screen which needs to be removed at the end
+
+#Call this for debug print to screen which needs to be removed at the end
 def d(mes):
     print(mes)
     return mes
@@ -85,14 +87,24 @@ def isExplorer():
 
 
 def addCfg(m_ret):
+    # this part is only needed for the visualisation data during simulation
     if isBCNode():
         if m_cfg['chainInit'] is False:
             m_ret['chainHeight'] = len(m_Blocks)
-            m_ret['pendTX'] = len(m_pendingTX)
+            tot = 0
+            tot2 = 0
+            for tx in m_pendingTX:
+                tot2 = (tot2+int(tx,16)) % 65535
+                tot = tot + m_pendingTX[tx]['value']
+            m_ret['pendTX'] = str(len(m_pendingTX))+"@"+str(tot)+"("+str(tot2)+")"
+
             m_ret['blockHash'] = m_Blocks[-1]['blockHash']
-    if isMiner():
+    elif isMiner():
         m_ret['nonceCnt'] = str(cfg['nonceCnt']) + "/(..."+cfg['blockHash'][0:6]+")/" + \
                             cfg['dateCreated'][cfg['dateCreated'].index("T")+1:-1]
+    elif isWallet():
+        m_ret['lastBal'] = w_cfg['lastBal']
+
 
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):

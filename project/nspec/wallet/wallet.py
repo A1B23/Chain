@@ -5,7 +5,7 @@ from project.models import m_transaction_order, defSig
 from pycoin.ecdsa import generator_secp256k1, sign
 from project.utils import setOK, errMsg, putDataInOrder, getTime
 import sqlite3
-from project.nspec.wallet.modelW import m_db, regexWallet, m_balanceData
+from project.nspec.wallet.modelW import m_db, regexWallet, m_balanceData, w_cfg
 from contextlib import closing
 import re
 from project.nspec.blockchain.verify import verifyAddr
@@ -171,7 +171,7 @@ class wallet:
         cmd = cmd + " from Wallet where WName='" + wallet + "' AND "
         if keyRef[0] == "address":
             cmd = cmd + "address='"+keyRef[1]
-        elif keyRef[0] == "pubKey":
+        elif keyRef[0] == "publicKey":
             cmd = cmd + "pubKey='"+keyRef[1]
         elif keyRef[0] == "name":
             cmd = cmd + "KName='" + keyRef[1]
@@ -283,6 +283,7 @@ class wallet:
                 val, respCode = self.collectKeyBalance(key)
                 if respCode == 200:
                     self.sumBalance(bal, val)
+            w_cfg["lastBal"] = ""+str(bal['confirmedBalance'])+"/ "+str(bal['pendingBalance'])
             return setOK(bal)
         except Exception:
             return errMsg("Seems to have peer issues....")
