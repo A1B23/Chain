@@ -2,6 +2,7 @@ from project.nspec.blockchain.modelBC import m_AllBalances, m_staticBalanceInfo,
 from project.models import defAdr, m_TemplateSingleBalance, m_info
 from project.utils import setOK, errMsg, d
 from copy import deepcopy
+from project.pclass import c_peer
 
 
 def addNewRealBalance(addr, blockNo):
@@ -34,15 +35,16 @@ def updateTempBalance(txList, tempBalance, chkOnly=""):
         if chkOnly != "":
             if (chkOnly != afrom) and (chkOnly != ato):
                 continue
-        if afrom not in tempBalance:
-            tempBalance.update({afrom: 0})
+        if ("transferSuccessful" not in tx) or (tx["transferSuccessful"] is True):
+            if afrom not in tempBalance:
+                tempBalance.update({afrom: 0})
 
-        tempBalance[afrom] = tempBalance[afrom] - total #reduce by value + fee
+            tempBalance[afrom] = tempBalance[afrom] - total #reduce by value + fee
 
-        if ato not in tempBalance:
-            tempBalance.update({ato: value})
-        else:
-            tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
+            if ato not in tempBalance:
+                tempBalance.update({ato: value})
+            else:
+                tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
     return True
 
 
@@ -52,6 +54,7 @@ def updateConfirmedBalance(txList, isGenesis):
         afrom, ato, value, total, txhash = tx['from'], tx['to'], tx['value'], (tx['value']+tx['fee']), tx['transactionDataHash']
         # this can be called either during block setting up
         # or after receiving confirmed block
+
         if afrom not in tempBalance:
             if afrom not in m_AllBalances:
                 if isGenesis is False:
@@ -69,9 +72,12 @@ def updateConfirmedBalance(txList, isGenesis):
                 addNewRealBalance(afrom, 0)
             tempBalance.update({afrom: m_AllBalances[afrom]['curBalance']})
 
+        if ("transferSuccessful" in tx) and (tx["transferSuccessful"] is False):
+            continue
         # special case for coinbase needed
         if (afrom != defAdr) and (tempBalance[afrom] < total):
             return {}  # indicate invalid block, as all TX are supposed to be ok at this stage
+
 
         tempBalance[afrom] = tempBalance[afrom] - total  # reduce by value + fee
 
@@ -105,21 +111,16 @@ def confirmUpdateBalances(txList, isGenesis):
         if tx['transactionDataHash'] in m_pendingTX:
             del m_pendingTX[tx['transactionDataHash']]
     # now invalid Tx are correctly removed, as another block and new balances applied
-    d("test that now invalid Tx are correctly removed, as another block and new balances applied")
-    keepTx = {}
-    for tx in m_pendingTX:
-        keepTx[tx] = deepcopy(m_pendingTX[tx])
-        d("Check for "+tx)
-        tmpBal = getBalance(m_pendingTX[tx]['from'], keepTx)
-        if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < m_pendingTX[tx]['value'] + m_pendingTX[tx]['fee']:
-            # Not enough balance anymore to keep the TX alive
-            d("Not enough balance anymore to keep the TX alive" + str("transferSuccessful" in m_pendingTX[tx]))
-            del keepTx[tx]
-
-    if len(keepTx) != len(m_pendingTX):
-        m_pendingTX.clear()
-        m_pendingTX.update(keepTx)
-        d("New number of TX left: "+str(len(keepTx)))
+    if len(m_pendingTX) > 0:
+        d("test that now invalid Tx are correctly removed, as another block and new balances applied")
+        for tx in m_pendingTX:
+            d("Check for "+tx)
+            tmpBal = getBalanceUpTo(m_pendingTX[tx]['from'], m_pendingTX, tx)
+            if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < m_pendingTX[tx]['value'] + m_pendingTX[tx]['fee']:
+                # Not enough balance anymore to keep the TX alive
+                d("Not enough balance anymore to keep the TX alive, set TX not successFul")
+                m_pendingTX[tx]["transferSuccessful"] = False
+                c_peer.sendAsynchPOSTToPeers("/transactions/send", m_pendingTX[tx])
 
     return ""
 
@@ -155,21 +156,28 @@ def getBalanceRet(address):
 
 
 def getBalance(address, refTX=m_pendingTX):
+    return getBalanceUpTo(address, refTX,"")
+
+
+def getBalanceUpTo(address, refTX, upTo):
     ret = deepcopy(m_TemplateSingleBalance)
     if address in m_AllBalances:
         ret['confirmedBalance'] = m_AllBalances[address]['curBalance']
 
     for tx in refTX:
         if refTX[tx]['to'] == address:
-            #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
-            found = True
-            ret['pendingBalance'] = ret['pendingBalance'] + refTX[tx]['value']
+            # must check if it is a valid TX, not a below balance one as not signed
+            if ("transferSuccessful" not in refTX[tx]) or (refTX[tx]["transferSuccessful"] is True):
+                found = True
+                ret['pendingBalance'] = ret['pendingBalance'] + refTX[tx]['value']
         # The next might be outside spec, but makes sense to me, negative pending balance for spending
         if refTX[tx]['from'] == address:
-            #TODO must check if it is a valid TX, not a below balance one as not signed!!!??
-            found = True
-            ret['pendingBalance'] = ret['pendingBalance'] - (refTX[tx]['value']+refTX[tx]['fee'])
-
+            # must check if it is a valid TX, not a below balance one as not signed
+            if ("transferSuccessful" not in refTX[tx]) or (refTX[tx]["transferSuccessful"] is True):
+                found = True
+                ret['pendingBalance'] = ret['pendingBalance'] - (refTX[tx]['value']+refTX[tx]['fee'])
+        if (len(upTo) > 0) and (tx == upTo):
+            break
     return ret
 
 

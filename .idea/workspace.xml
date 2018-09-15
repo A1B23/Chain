@@ -2,15 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="cebf9d2d-a62e-42e7-96a7-c7c6c47f10f3" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/runTest.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/initArgs.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/initArgs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/balance.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/balance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/blocks.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/blocks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/modelW.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/modelW.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/wallet/wallet.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/static/js/vis_draw.js" beforeDir="false" afterPath="$PROJECT_DIR$/project/static/js/vis_draw.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/project/templates/visualise.html" beforeDir="false" afterPath="$PROJECT_DIR$/project/templates/visualise.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/project/nspec/blockchain/verify.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/nspec/blockchain/verify.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/project/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/project/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/runTest.py" beforeDir="false" afterPath="$PROJECT_DIR$/runTest.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,17 +22,20 @@
       <file leaf-file-name="initArgs.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/initArgs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="153">
-              <caret line="9" selection-start-line="9" selection-end-line="9" selection-end-column="28" />
+            <state relative-caret-position="68">
+              <caret line="79" column="55" selection-start-line="79" selection-start-column="55" selection-end-line="79" selection-end-column="55" />
+              <folding>
+                <element signature="e#0#74#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="runTest.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="runTest.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/runTest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="97">
-              <caret line="74" column="74" selection-start-line="74" selection-start-column="74" selection-end-line="74" selection-end-column="74" />
+            <state relative-caret-position="4">
+              <caret line="110" column="54" lean-forward="true" selection-start-line="110" selection-start-column="54" selection-end-line="110" selection-end-column="54" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -45,8 +46,8 @@
       <file leaf-file-name="blocks.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1">
-              <caret line="397" column="79" selection-start-line="397" selection-start-column="79" selection-end-line="397" selection-end-column="79" />
+            <state relative-caret-position="71">
+              <caret line="491" selection-start-line="491" selection-end-line="491" />
               <folding>
                 <element signature="e#0#86#0" expanded="true" />
               </folding>
@@ -54,11 +55,44 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="balance.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="blocknode.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="37">
+              <caret line="161" selection-start-line="161" selection-end-line="161" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="peers.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/peers.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="178">
+              <caret line="324" column="77" selection-start-line="324" selection-start-column="77" selection-end-line="324" selection-end-column="77" />
+              <folding>
+                <element signature="e#0#97#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="verify.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/verify.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="71">
+              <caret line="119" selection-start-line="119" selection-end-line="119" />
+              <folding>
+                <element signature="e#0#66#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="balance.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/balance.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2">
-              <caret line="121" column="52" selection-start-line="121" selection-start-column="52" selection-end-line="121" selection-end-column="52" />
+            <state relative-caret-position="7">
+              <caret line="72" column="30" lean-forward="true" selection-start-line="72" selection-start-column="30" selection-end-line="72" selection-end-column="30" />
               <folding>
                 <element signature="e#0#92#0" expanded="true" />
               </folding>
@@ -66,56 +100,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="modelW.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/nspec/wallet/modelW.py">
+      <file leaf-file-name="transact.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/transact.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="6" column="24" selection-start-line="6" selection-start-column="24" selection-end-line="6" selection-end-column="24" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="utils.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/utils.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="281">
-              <caret line="105" column="34" selection-start-line="105" selection-start-column="34" selection-end-line="105" selection-end-column="34" />
-              <folding>
-                <element signature="e#0#11#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="runMiner.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/runMiner.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="102">
-              <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="miner.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/nspec/miner/miner.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2380">
-              <caret line="152" column="41" selection-start-line="152" selection-start-column="26" selection-end-line="152" selection-end-column="41" />
-              <folding>
-                <element signature="e#0#14#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="wallet.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/project/nspec/wallet/wallet.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="100">
-              <caret line="285" column="66" selection-start-line="285" selection-start-column="66" selection-end-line="285" selection-end-column="66" />
-              <folding>
-                <element signature="e#0#121#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="178">
+              <caret line="55" column="18" selection-start-line="55" selection-start-column="18" selection-end-line="55" selection-end-column="18" />
             </state>
           </provider>
         </entry>
@@ -132,14 +121,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>pou</find>
-      <find>invalid '</find>
-      <find>def setOK</find>
-      <find>senderSignature</find>
-      <find>doPOST</find>
-      <find>\/allbal</find>
-      <find>curBalance</find>
-      <find>transactions/send</find>
       <find>getBalance</find>
       <find>wallet/list/b</find>
       <find>'pu</find>
@@ -157,11 +138,19 @@
       <find>:&quot;</find>
       <find>sleep</find>
       <find>m_pen</find>
-      <find>local chain</find>
-      <find>create thread</find>
+      <find />
+      <find />
       <find>checkAndAddBlock</find>
-      <find>as anoth</find>
+      <find />
+      <find>transferS</find>
+      <find>transferSuccessful</find>
+      <find>getMissingBlocksFromPeer</find>
+      <find>initPendingTX</find>
       <find>m_pendingTX</find>
+      <find>checkChainSituation</find>
+      <find>sendAsynchPOSTToPeers</find>
+      <find />
+      <find />
     </findStrings>
     <replaceStrings>
       <replace>setOK</replace>
@@ -172,7 +161,7 @@
       <replace>c_blockchain</replace>
       <replace>c_blockchainHandler</replace>
       <replace>verifyThenAddBlock</replace>
-      <replace>linkInfo = {}</replace>
+      <replace />
       <replace>peer</replace>
       <replace>m_AllBalances</replace>
       <replace>canTrack</replace>
@@ -183,7 +172,7 @@
       <replace>synchNotifyPeers</replace>
       <replace>asynchNotifyPeers</replace>
       <replace>forPeer</replace>
-      <replace>, &quot;</replace>
+      <replace />
     </replaceStrings>
     <dirStrings>
       <dir>C:\BlockChainSG\project_blockchain\PDPCCoindatahash</dir>
@@ -231,10 +220,8 @@
         <option value="$PROJECT_DIR$/project/templates/TabMiner_debug.html" />
         <option value="$PROJECT_DIR$/project/nspec/miner/miner.py" />
         <option value="$PROJECT_DIR$/project/nspec/wallet/transactions.py" />
-        <option value="$PROJECT_DIR$/project/nspec/blockchain/verify.py" />
         <option value="$PROJECT_DIR$/project/nspec/genesis/genesis.py" />
         <option value="$PROJECT_DIR$/project/nspec/faucet/faucet.py" />
-        <option value="$PROJECT_DIR$/project/initArgs.py" />
         <option value="$PROJECT_DIR$/project/peers.py" />
         <option value="$PROJECT_DIR$/project/RunTest.py" />
         <option value="$PROJECT_DIR$/runMiner.py" />
@@ -243,16 +230,17 @@
         <option value="$PROJECT_DIR$/project/nspec/wallet/modelW.py" />
         <option value="$PROJECT_DIR$/project/nspec/wallet/wallet.py" />
         <option value="$PROJECT_DIR$/project/nspec/blockchain/blocks.py" />
-        <option value="$PROJECT_DIR$/project/nspec/blockchain/balance.py" />
         <option value="$PROJECT_DIR$/runTest.py" />
+        <option value="$PROJECT_DIR$/project/nspec/blockchain/verify.py" />
+        <option value="$PROJECT_DIR$/project/initArgs.py" />
+        <option value="$PROJECT_DIR$/project/nspec/blockchain/balance.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="1" />
-    <option name="width" value="1757" />
-    <option name="height" value="785" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-9" />
+    <option name="width" value="1859" />
+    <option name="height" value="930" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -264,6 +252,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -294,13 +283,76 @@
               <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
               <item name="project" type="462c0819:PsiDirectoryNode" />
               <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="blocknode.py" type="8704e2dd:PyFileNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="blocknode.py" type="8704e2dd:PyFileNode" />
+              <item name="blockChainNode" type="dd8bbb05:PyElementNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="blocks.py" type="8704e2dd:PyFileNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="blocks.py" type="8704e2dd:PyFileNode" />
+              <item name="blockchain" type="dd8bbb05:PyElementNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="transact.py" type="8704e2dd:PyFileNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="transact.py" type="8704e2dd:PyFileNode" />
+              <item name="transactions" type="dd8bbb05:PyElementNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
+              <item name="blockchain" type="462c0819:PsiDirectoryNode" />
+              <item name="verify.py" type="8704e2dd:PyFileNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="project" type="462c0819:PsiDirectoryNode" />
+              <item name="nspec" type="462c0819:PsiDirectoryNode" />
               <item name="miner" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="PDPC_Coin" type="b2602c69:ProjectViewProjectNode" />
+              <item name="PDPC_Coin" type="462c0819:PsiDirectoryNode" />
+              <item name="runTest.py" type="8704e2dd:PyFileNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -442,8 +494,8 @@
     <recent_temporary>
       <list>
         <item itemvalue="Python.runTest" />
-        <item itemvalue="Python.runFaucet" />
         <item itemvalue="Python.runBC" />
+        <item itemvalue="Python.runFaucet" />
         <item itemvalue="Python.runWallet" />
         <item itemvalue="Python.runMiner" />
       </list>
@@ -459,13 +511,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1526877812891</updated>
-    </task>
-    <task id="LOCAL-00015" summary="Basic explorer framework in place, separated the POST into _debug files">
-      <created>1530681995558</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1530681995558</updated>
     </task>
     <task id="LOCAL-00016" summary="Bug fix missing blockdatahash, expand explorer vertical view">
       <created>1530692553885</created>
@@ -803,24 +848,30 @@
       <option name="project" value="LOCAL" />
       <updated>1536890279585</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="Completed doublespend tst (bugfix in node), added wallet bal in visual">
+      <created>1536983270381</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1536983270381</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-5" y="1" width="1171" height="523" extended-state="0" />
-    <editor active="true" />
+    <frame x="-6" y="0" width="1239" height="329" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21348314" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.22285715" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.5003903" side_tool="true" weight="0.36426118" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3281787" />
       <window_info anchor="bottom" id="Version Control" order="7" weight="0.3298969" />
       <window_info anchor="bottom" id="Python Console" order="9" weight="0.23195876" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.31463414" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="1.0" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.22164948" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49960968" weight="0.5498282" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -871,7 +922,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="SHOW_FILE_HISTORY_DETAILS" value="false" />
-    <MESSAGE value="Created blocks/hash for faster verification and better visual" />
     <MESSAGE value="Fixed miner and block error due to refactoring, corrected peer" />
     <MESSAGE value="Optimised visual script; start tokens URL dependent; small bug fix" />
     <MESSAGE value="Miner and peer and block bug fixes after refactor" />
@@ -896,7 +946,8 @@
     <MESSAGE value="Typo in genesis block file spacing removed" />
     <MESSAGE value="Introduced disconnect peer for better error demo" />
     <MESSAGE value="Bug fix in html to add/rem peer" />
-    <option name="LAST_COMMIT_MESSAGE" value="Bug fix in html to add/rem peer" />
+    <MESSAGE value="Completed doublespend tst (bugfix in node), added wallet bal in visual" />
+    <option name="LAST_COMMIT_MESSAGE" value="Completed doublespend tst (bugfix in node), added wallet bal in visual" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -918,17 +969,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py</url>
-          <line>155</line>
+          <line>156</line>
           <option name="timeStamp" value="1120" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/blockchain/balance.py</url>
-          <line>17</line>
+          <line>18</line>
           <option name="timeStamp" value="1121" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/blockchain/verify.py</url>
-          <line>34</line>
+          <line>39</line>
           <option name="timeStamp" value="1140" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -942,34 +993,54 @@
           <option name="timeStamp" value="1149" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py</url>
-          <line>161</line>
-          <option name="timeStamp" value="1163" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py</url>
-          <line>162</line>
-          <option name="timeStamp" value="1164" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py</url>
-          <line>490</line>
-          <option name="timeStamp" value="1168" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/blockchain/balance.py</url>
-          <line>57</line>
+          <line>60</line>
           <option name="timeStamp" value="1170" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/blockchain/balance.py</url>
-          <line>67</line>
+          <line>70</line>
           <option name="timeStamp" value="1171" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/runTest.py</url>
+          <line>135</line>
+          <option name="timeStamp" value="1200" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/runTest.py</url>
+          <line>133</line>
+          <option name="timeStamp" value="1201" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py</url>
+          <line>161</line>
+          <option name="timeStamp" value="1202" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py</url>
+          <line>162</line>
+          <option name="timeStamp" value="1203" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py</url>
+          <line>486</line>
+          <option name="timeStamp" value="1204" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/project/nspec/blockchain/verify.py</url>
+          <line>148</line>
+          <option name="timeStamp" value="1205" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py</url>
+          <line>492</line>
+          <option name="timeStamp" value="1206" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/project/nspec/blockchain/balance.py</url>
-          <line>108</line>
-          <option name="timeStamp" value="1182" />
+          <line>101</line>
+          <option name="timeStamp" value="1207" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -979,7 +1050,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="1200" />
+      <option name="time" value="1209" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -1110,13 +1181,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/modelBC.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1904">
-          <caret line="112" column="19" selection-start-line="112" selection-start-column="19" selection-end-line="112" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36-32/Lib/site-packages/werkzeug/local.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5831">
@@ -1173,13 +1237,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/transact.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-803">
-          <caret line="41" selection-start-line="41" selection-end-line="43" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/templates/TabWallet.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="272">
@@ -1225,23 +1282,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="578">
-          <caret line="47" column="16" selection-start-line="47" selection-start-column="16" selection-end-line="47" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/verify.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2805">
-          <caret line="173" selection-start-line="173" selection-end-line="175" selection-end-column="47" />
-          <folding>
-            <element signature="e#0#66#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runGenesis.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
@@ -1279,24 +1319,10 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/project/RunTest.py" />
-    <entry file="file://$PROJECT_DIR$/project/peers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="7" selection-start-line="7" selection-end-line="7" selection-end-column="15" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/runBC.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="442">
           <caret line="27" column="5" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/project/initArgs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" selection-start-line="9" selection-end-line="9" selection-end-column="28" />
         </state>
       </provider>
     </entry>
@@ -1341,16 +1367,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/project/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="281">
-          <caret line="105" column="34" selection-start-line="105" selection-start-column="34" selection-end-line="105" selection-end-column="34" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/wallet/modelW.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="102">
@@ -1360,7 +1376,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/wallet/wallet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="100">
+        <state relative-caret-position="4658">
           <caret line="285" column="66" selection-start-line="285" selection-start-column="66" selection-end-line="285" selection-end-column="66" />
           <folding>
             <element signature="e#0#121#0" expanded="true" />
@@ -1368,10 +1384,81 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/modelBC.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3536">
+          <caret line="208" column="15" selection-start-line="208" selection-start-column="15" selection-end-line="208" selection-end-column="15" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="500">
+          <caret line="95" column="22" selection-start-line="95" selection-start-column="22" selection-end-line="95" selection-end-column="22" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/transact.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="55" column="18" selection-start-line="55" selection-start-column="18" selection-end-line="55" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/peers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="178">
+          <caret line="324" column="77" selection-start-line="324" selection-start-column="77" selection-end-line="324" selection-end-column="77" />
+          <folding>
+            <element signature="e#0#97#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/initArgs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="79" column="55" selection-start-line="79" selection-start-column="55" selection-end-line="79" selection-end-column="55" />
+          <folding>
+            <element signature="e#0#74#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/runTest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4">
+          <caret line="110" column="54" lean-forward="true" selection-start-line="110" selection-start-column="54" selection-end-line="110" selection-end-column="54" />
+          <folding>
+            <element signature="e#0#11#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocknode.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="37">
+          <caret line="161" selection-start-line="161" selection-end-line="161" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/verify.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="71">
+          <caret line="119" selection-start-line="119" selection-end-line="119" />
+          <folding>
+            <element signature="e#0#66#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/blocks.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1">
-          <caret line="397" column="79" selection-start-line="397" selection-start-column="79" selection-end-line="397" selection-end-column="79" />
+        <state relative-caret-position="71">
+          <caret line="491" selection-start-line="491" selection-end-line="491" />
           <folding>
             <element signature="e#0#86#0" expanded="true" />
           </folding>
@@ -1380,20 +1467,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/project/nspec/blockchain/balance.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2">
-          <caret line="121" column="52" selection-start-line="121" selection-start-column="52" selection-end-line="121" selection-end-column="52" />
+        <state relative-caret-position="7">
+          <caret line="72" column="30" lean-forward="true" selection-start-line="72" selection-start-column="30" selection-end-line="72" selection-end-column="30" />
           <folding>
             <element signature="e#0#92#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/runTest.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="97">
-          <caret line="74" column="74" selection-start-line="74" selection-start-column="74" selection-end-line="74" selection-end-column="74" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
           </folding>
         </state>
       </provider>

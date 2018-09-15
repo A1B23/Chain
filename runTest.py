@@ -64,7 +64,11 @@ cmds = {
         ("Mine the first TX", "act"),
         ("Reconnect the doublespend node to the previous node to get its block and remove doublespend", "inf1"),
         ("n02", "POST", "/peers/connect", {"peerUrl": "http://127.0.0.4:5555"}, 200),
+        ("n04", "POST", "/peers/connect", {"peerUrl": "http://127.0.0.2:5555"}, 200),
         ("Wait for block being synchronised", "act"),
+        ("The node should now have a unsuccessful TX", "inf1"),
+        ("n02", "GETx0", "/transactions/pending", 200, {"data": "doublespend",
+                                                        "transferSuccessful": False, "value": 80}),
         ("w52", "GET", "/wallet/list/allbalance/withk/User", 200, {"confirmedBalance": 80, "pendingBalance": 0}),
         ("Confirm that instead of 80 coins only 50 coins moved to the other key","inf1"),
         ("The key sending the 50 has now 30 as 100-50-20 = 30","inf"),
@@ -101,7 +105,7 @@ def runSeq():
                     res = res + 1
                 if len(tst) > res + 1:
                     for exp in tst[res+1]:
-                        print("("+tst[0]+", expects: " + str(exp) + ": " + str(tst[res+1][exp])+")")
+                        print("("+tst[0]+" expects / " + str(exp) + ": " + str(tst[res+1][exp])+")")
                 res = 3
                 idx = -1
                 if tst[1] == "GET":
@@ -113,7 +117,7 @@ def runSeq():
                     ret = doPOST(urls[tst[0]] + tst[2], tst[3])
                     res = res + 1
                 elif tst[1] == "act":
-                    print("!!!! Confirm and press <Enter> once" + tst[0] + " ... ")
+                    print("!!!! Confirm and press <Enter> once: " + tst[0] + " ... ")
                     input().lower()
                     print("Continuing...")
                     continue
@@ -126,9 +130,9 @@ def runSeq():
                     continue
                 if len(tst) > res:
                     if ret.status_code != tst[res]:
-                        print("----- Unexpected status code")
+                        print("----- Unexpected status code: " + str(ret.status_code))
                 if len(tst) > res + 1:
-                    txt = ret.text
+                    txt = ret.text.replace(": false",": False").replace(": true",": True")
                     if idx > -1:
                         x = ast.literal_eval(txt)
                         if len(x) < idx:

@@ -122,7 +122,7 @@ class blockchain:
 
     def prepareNewCandidateBlock(self):
         m_candidateBlock.clear()
-        m_candidateBlock.update(deepcopy(m_static_emptyBlock)) # contains coinbase
+        m_candidateBlock.update(deepcopy(m_static_emptyBlock))  # contains coinbase
         bindex = len(m_Blocks)
         m_candidateBlock['index'] = bindex
         m_candidateBlock['prevBlockHash'] = m_Blocks[-1]['blockHash']
@@ -133,7 +133,8 @@ class blockchain:
         for txh in m_pendingTX:
             dx = deepcopy(m_pendingTX[txh])
             dx['minedInBlockIndex'] = bindex
-            dx['transferSuccessful'] = True
+            if 'transferSuccessful' not in dx:
+                dx['transferSuccessful'] = True
             m_candidateBlock['transactions'].append(dx)
 
     def handleChainBackTracking(self, peer):
@@ -392,7 +393,7 @@ class blockchain:
             if len(m) == 0:
                 if res['index'] == len(m_Blocks)+offset:
                     return res, stat
-        return "Block not available/valid at " + peer, -1  # do not chnage it is checked outside
+        return "Block not available/valid at " + peer, -1  # do not change it is checked outside
 
     def getMissingBlocksFromPeer(self, peer, upLimit, isAlert, gotBlock, retry=2):
         return self.getBlocksFromPeer(peer, upLimit, isAlert, gotBlock, retry, True)
@@ -496,7 +497,8 @@ class blockchain:
         self.prepareNewCandidateBlock()
         m_info['currentDifficulty'] = 5 #TODO shall we make the new difficulty flexible??? is hti sthe right place?
         m_info['blocksCount'] = len(m_Blocks)
-        m_info['cumulativeDifficulty'] = m_info['cumulativeDifficulty']*(block['difficulty']+1) #slides claim 16^ but even nakov chain does not follow
+        m_info['cumulativeDifficulty'] = m_info['cumulativeDifficulty']*(block['difficulty']+1)
+        # slides claim 16^ but even nakov chain does not seem to follow
         m_info['confirmedTransactions'] = m_info['confirmedTransactions'] + len(block['transactions'])
         m_info['pendingTransactions'] = len(m_pendingTX)
         return ""

@@ -20,9 +20,14 @@ def verifyBasicTX(trans, isCoinBase, ref):
         else:
             colErr = colErr + "and '" + x + "'"
     if l != 0:
-        # TODO still unclear about data structure so for test accept both
-        if (l != 1) or ("transactionDataHash" not in trans):
+        # only for cases of rejected TX we need to additionally check
+        if (l != 1):
             colErr = colErr + " Invalid number of fields in transaction"
+        else:
+            if "transferSuccessful" not in trans:
+                colErr = colErr + " Invalid number of fields in transaction"
+            else:
+                l = 0  # not used so far, but prepare for any changes later
     if colErr == "":  # final checks
         if len(trans['senderSignature']) != 2:
             colErr = colErr + " Invalid number of elements in 'senderSignature' field"
@@ -56,7 +61,7 @@ def verifyBasicTX(trans, isCoinBase, ref):
         if trans['value'] < 0:
             colErr = colErr + "Minimum value 0 micro-coins, you sent: " + str(trans['value'])
     if isCoinBase:
-        # TODO complete other coinbase checks
+        # TODO any other coinbase checks
         colErr = colErr + verifyPubKey(trans['senderPubKey'], True)
         if trans['from'] != defAdr:
             colErr = colErr + "Invalid from in Coinbase"
@@ -177,7 +182,8 @@ def receivedNewTransaction(trans, share):
 
         # Puts the transaction in the "pending transactions" pool
         m_pendingTX.update({trans['transactionDataHash']: deepcopy(trans)})
-        trans["transferSuccessful"] = True
+        if "transferSuccessful" not in trans:
+            trans["transferSuccessful"] = True
         trans["minedInBlockIndex"] = len(m_Blocks)
         m_candidateBlock['transactions'].append(deepcopy(trans))
         m_info['pendingTransactions'] = len(m_pendingTX)

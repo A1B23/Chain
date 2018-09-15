@@ -138,8 +138,8 @@ def checkSameFields(check, myReference, sameLen):
         colErr = "Invalid structure: field " + colErr + " is missing"
     if sameLen:
         if len(check) != len(myReference):
-            colErr = colErr + " Invalid number of fields in transaction"
-    return colErr
+            colErr = colErr + " Invalid number of fields found"
+    return colErr.strip()
 
 
 def makeResp(data, code=200):
