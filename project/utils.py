@@ -6,14 +6,27 @@ import hashlib
 import re
 from urllib.parse import urlparse
 from flask import jsonify
-from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash, m_cfg
+from project.models import defNodeID, m_info, m_candidateMiner_order, m_txorderForBlockHash, m_cfg, m_debug
 from project.nspec.blockchain.modelBC import m_Blocks, m_pendingTX
 from project.nspec.miner.modelM import cfg
 from project.nspec.wallet.modelW import w_cfg
 
 
 #Call this for debug print to screen which needs to be removed at the end
+def toFile(data, code=200):
+    if 'file' in m_debug:
+        try:
+            m_debug['file'].write("---\n")
+            if code != 200:
+                m_debug['file'].write(str(code)+" ")
+            m_debug['file'].write(str(data)+"\n")
+            m_debug['file'].flush()
+        except Exception:
+            i=0
+
+
 def d(mes):
+    toFile(mes)
     print(mes)
     return mes
 
@@ -94,7 +107,7 @@ def addCfg(m_ret):
             tot = 0
             tot2 = 0
             for tx in m_pendingTX:
-                tot2 = (tot2+int(tx,16)) % 65535
+                tot2 = (tot2+int(tx, 16)) % 65535
                 tot = tot + m_pendingTX[tx]['value']
             m_ret['pendTX'] = str(len(m_pendingTX))+"@"+str(tot)+"("+str(tot2)+")"
 
@@ -104,7 +117,6 @@ def addCfg(m_ret):
                             cfg['dateCreated'][cfg['dateCreated'].index("T")+1:-1]
     elif isWallet():
         m_ret['lastBal'] = w_cfg['lastBal']
-
 
 
 def checkRequiredFields(check, myReference, mandatoryList, shortenManadatory):
@@ -143,8 +155,10 @@ def checkSameFields(check, myReference, sameLen):
 
 
 def makeResp(data, code=200):
+    toFile("Response generated: ", code)
     respx = jsonify(data)
     respx.status_code = code
+    toFile(data)
     return respx
 
 

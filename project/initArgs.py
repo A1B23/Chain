@@ -5,7 +5,7 @@ from project.nspec.blockchain.verify import initPendingTX
 from time import sleep
 from project import app
 from argparse import ArgumentParser
-from project.models import m_cfg, m_info
+from project.models import m_cfg, m_info, m_debug
 from project.pclass import c_peer
 from threading import Thread
 import sys
@@ -20,6 +20,12 @@ def finalise(host, peer, port):
     # default for peers is exactly one, but if started up with more, more are supported
     # the argument sets the time how often the checks are made in seconds to verify if the peer still replies
     useVis = m_cfg['canTrack']
+    try:
+        if 'file' in m_debug:
+            xh = host.replace(":","").replace("/","").replace("http","").replace(".","")
+            m_debug['file'] = open("aaLog_"+m_info['type'].replace("\*","d")+ "_"+xh+"_"+m_info['nodeId']+"_log.dat", "w")
+    except Exception:
+        i=0
     # temporarily switch off any delay to allow peer initialisation to go ahead without delay
     m_cfg['canTrack'] = False
     if isBCNode():

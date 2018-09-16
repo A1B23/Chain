@@ -46,7 +46,7 @@ cmds = {
         ("Switch the wallet connection to the other node", "inf"),
         ("w52", "POST", "/peers/disconnect", {"peerUrl": "http://127.0.0.4:5555"}, 200),
         ("w52", "POST", "/peers/connect", {"peerUrl": "http://127.0.0.2:5555"}, 200),
-        ("Connection from wallet to node is there", "act"),
+        ("Connection from wallet to node is there, can pre-mine other node already", "act"),
         ("Wallet verifies that this new node does not know about first TX, so balance is still higher", "inf"),
         ("w52", "GET", "/wallet/list/allbalance/withk/User", 200, {"confirmedBalance": 100, "pendingBalance": 0}),
         ("Wallet now sends doublespend TX to itself (yeah, not a smart double spend...) at second node", "inf1"),
@@ -81,8 +81,17 @@ cmds = {
          "/wallet/list/balance/publicKey/withk/7e15c2789a6af71ab416cac27dd939aaa290992f187dc95acf8145164436d4550/User",
          200,
          {"confirmedBalance": 50, "pendingBalance": 0}),
+        ("Mine the block to see the unsuccessful TX is mined in the block (makes error, so 1 error ok!)","act"),
+        ("n02", "GET", "/blocks/3", 200, {"transactions": {}}),
     ]
 }
+
+totalErr = []
+
+
+def pin(mes):
+    print(mes)
+    totalErr.append(mes)
 
 
 def doPOST(url, data):
@@ -117,7 +126,7 @@ def runSeq():
                     ret = doPOST(urls[tst[0]] + tst[2], tst[3])
                     res = res + 1
                 elif tst[1] == "act":
-                    print("!!!! Confirm and press <Enter> once: " + tst[0] + " ... ")
+                    print("!!!! Confirm and press <Enter> once: '" + tst[0] + "' ... ")
                     input().lower()
                     print("Continuing...")
                     continue
@@ -130,31 +139,37 @@ def runSeq():
                     continue
                 if len(tst) > res:
                     if ret.status_code != tst[res]:
-                        print("----- Unexpected status code: " + str(ret.status_code))
+                        pin("----- Unexpected status code: " + str(ret.status_code))
                 if len(tst) > res + 1:
-                    txt = ret.text.replace(": false",": False").replace(": true",": True")
                     if idx > -1:
+                        txt = ret.text.replace(": false", ": False").replace(": true", ": True")
                         x = ast.literal_eval(txt)
                         if len(x) < idx:
-                            print("----- Answer too short, expected " + str(idx))
+                            pin("----- Answer too short, expected " + str(idx))
                             continue
                         js = x[idx]
                     else:
-                        js = json.loads(txt)
+                        js = json.loads(ret.text)
                     for exp in tst[res+1]:
                         if exp not in js:
-                            print("----- Missing: "+exp)
+                            pin("----- Missing item: "+exp)
                             continue
                         if js[exp] != tst[res+1][exp]:
-                            print("----- Invalid reply " + str(js[exp]) + " instead of " + str(tst[res+1][exp]) + " for "+ exp )
+                            pin("----- Invalid value " + str(js[exp]) + " instead of " + str(tst[res+1][exp]) + " for " + exp)
                             continue
                         print("+ " + str(exp) + ": " + str(js[exp]))
 
             print("**********************  Sequence completed: " + seq)
+            print("Total issues: " + len(totalErr))
+            for err in totalErr:
+                print(err)
     except Exception:
         print("***************************************************************")
         print("Exception occurred, ensure the nodes are all up and running ...")
         print("***************************************************************")
+        print("Total issues: " + len(totalErr))
+        for err in totalErr:
+            print(err)
         exit(-1)
 
 

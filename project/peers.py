@@ -1,4 +1,4 @@
-from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode, d, getValidURL
+from project.utils import checkRequiredFields, isABCNode, setOK, errMsg, isBCNode, d, getValidURL, toFile
 from threading import Thread
 from project.models import m_cfg, m_peerSkip, m_Delay, m_visualCFG, m_info, m_peerInfo
 from project.nspec.blockchain.modelBC import m_Blocks
@@ -20,12 +20,12 @@ class peers:
                     urlc= url
                     if url.startswith("http"):
                         urlc = url[url.index("//")+3:]
-                    if m_visualCFG['pattern'].search(urlc):
+                    if (m_visualCFG['pattern'] == ".") or (m_visualCFG['pattern'].search(urlc)):
                         id = random.randint(100, 10000000)
                         m_Delay.append({"delayID": id, "url": url, "json": json, "asynchPOST": isAsyncPost})
                         return id
         except Exception:
-            i=0
+            d("Make delay raised exception on: "+url+" is asynch:"+isAsyncPost)
         return -1
 
     def visualDelay(self, myDelay):
@@ -48,8 +48,13 @@ class peers:
             except Exception:  # means no ,m_Delay
                 myDelay = -1
 
-    def doPOST(self, url, data):
-        self.visualDelay(self.makeDelay(url, data, False))
+    def doPOSTx(self, url, data):
+        return self.doPOST(url, data, True)
+
+    def doPOST(self, url, data, isAsynch=False):
+        toFile("Start Post: " + url)
+        self.visualDelay(self.makeDelay(url, data, isAsynch))
+        toFile("End delay: " + url)
         return requests.post(url=url, json=data, headers={'accept': 'application/json'})
 
     def doGET(self, url, fastTrack=False):
@@ -67,24 +72,39 @@ class peers:
             if m_cfg[ptype][peer]['active'] is True:
                 try:
                     d("asynch: " + peer + url + str(data))
-                    self.doPOST(peer + url, data)
+                    self.doPOSTx(peer + url, data)
                     cnt = cnt + 1
                     if cnt > m_cfg['minPeers']:
                         break
                 except Exception:
                     m_cfg[ptype][peer]['numberFail'] = m_cfg[ptype][peer]['numberFail'] + 1
+                    d("Exception occurred when trying to asynch: "+ url + " type "+str(ptype))
 
         return cnt
 
     def asynchPOST(self, url, data):
-        if url[0] != "/":
-            url = "/"+url
-        sent = self.asAsynchPost('activePeers', url, data, 0)
-        if sent < m_cfg['minPeers']:
-            self.asAsynchPost('shareToPeers', url, data, sent)
+        try:
+            sent = 0
+            retry = 5
+            while sent == 0:
+                if url[0] != "/":
+                    url = "/"+url
+                sent = self.asAsynchPost('activePeers', url, data, sent)
+                if sent < m_cfg['minPeers']:
+                    sent = self.asAsynchPost('shareToPeers', url, data, sent)
+                if sent == 0:
+                    d("Asynch POST not sent to anyone, retryCnt: "+str(retry) + " for: "+ url)
+                    sleep(2)
+                    retry = retry - 1
+                    if retry <= 0:
+                        d("Give up trying to asynch at least one peer for:" + url)
+                        break
+        except Exception:
+            d("asynchPOST exception for "+url)
 
     def sendAsynchPOSTToPeers(self, url, data):
         thread = Thread(target=self.asynchPOST, args=(url, data))
+        toFile("asynch post requested for: "+url+ " with data: "+str(data))
         #TODO after some time, clear this buffer, maybe as part of checking peers availability?
         #TODO or alternatively by the size/len of it???
         #TODO cut the buffer short if POST is too long???

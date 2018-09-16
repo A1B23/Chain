@@ -1,4 +1,4 @@
-from project.utils import checkRequiredFields, errMsg, sha256ToHex
+from project.utils import checkRequiredFields, errMsg, sha256ToHex, d
 from project.nspec.blockchain.modelBC import m_stats, m_completeBlock, m_Blocks, m_staticTransactionRef
 from project.nspec.blockchain.modelBC import m_transaction, m_candidateBlock, m_pendingTX, m_BufferMinerCandidates
 from project.nspec.blockchain.balance import updateTempBalance, getBalance
@@ -20,12 +20,12 @@ def verifyBasicTX(trans, isCoinBase, ref):
         else:
             colErr = colErr + "and '" + x + "'"
     if l != 0:
-        # only for cases of rejected TX we need to additionally check
-        if (l != 1):
-            colErr = colErr + " Invalid number of fields in transaction"
+        # only for cases of rejected TX we need to additionally check the two separate fields
+        if (l != 2):
+            colErr = colErr + " Invalid number of fields in transaction: " + str(l) + str(trans)
         else:
-            if "transferSuccessful" not in trans:
-                colErr = colErr + " Invalid number of fields in transaction"
+            if ("transferSuccessful" not in trans) or ("transactionDataHash" not in trans):
+                colErr = colErr + " Problem with TX successfulField " + str(trans)
             else:
                 l = 0  # not used so far, but prepare for any changes later
     if colErr == "":  # final checks
@@ -69,6 +69,8 @@ def verifyBasicTX(trans, isCoinBase, ref):
         colErr = colErr + verifyAddr(trans['from'], trans['senderPubKey'])
     colErr = colErr + verifyAddr(trans['to'])
 
+    if len(colErr) > 0:
+        d("Verification problem: "+colErr)
     return colErr
 
 
@@ -175,10 +177,10 @@ def receivedNewTransaction(trans, share):
 
         if isUniqueTXInBlocks(hash) is False:
             return errMsg("TX is duplicate of TX in existing block")
-
-        tmpBal = getBalance(trans['from'])
-        if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < trans['value']+trans['fee']:
-            return errMsg("Not enough balance")
+        if ('transferSuccessful' not in trans) or (trans['transferSuccessful'] is True):
+            tmpBal = getBalance(trans['from'])
+            if tmpBal['confirmedBalance'] + tmpBal['pendingBalance'] < trans['value']+trans['fee']:
+                return errMsg("Not enough balance")
 
         # Puts the transaction in the "pending transactions" pool
         m_pendingTX.update({trans['transactionDataHash']: deepcopy(trans)})

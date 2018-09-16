@@ -120,7 +120,12 @@ def confirmUpdateBalances(txList, isGenesis):
                 # Not enough balance anymore to keep the TX alive
                 d("Not enough balance anymore to keep the TX alive, set TX not successFul")
                 m_pendingTX[tx]["transferSuccessful"] = False
-                c_peer.sendAsynchPOSTToPeers("/transactions/send", m_pendingTX[tx])
+                d("set tx false, now must send asynch")
+                try:
+                    c_peer.sendAsynchPOSTToPeers("/transactions/send", m_pendingTX[tx])
+                except Exception:
+                    d("asynch excrption detected")
+                d("asynch initiated, return")
 
     return ""
 
