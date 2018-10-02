@@ -19,15 +19,30 @@ def verifyBasicTX(trans, isCoinBase, ref):
             colErr = "Missing field(s): '" + x + "'"
         else:
             colErr = colErr + "and '" + x + "'"
-    if l != 0:
-        # only for cases of rejected TX we need to additionally check the two separate fields
-        if (l != 2):
-            colErr = colErr + " Invalid number of fields in transaction: " + str(l) + str(trans)
-        else:
-            if ("transferSuccessful" not in trans) or ("transactionDataHash" not in trans):
-                colErr = colErr + " Problem with TX successfulField " + str(trans)
-            else:
-                l = 0  # not used so far, but prepare for any changes later
+    # the entire check on the length has now been removed, because any addiitonal fields
+    # within the TX are allowed, instead of being strict to follow only the exact specification,
+    # such as to accept new forks which add new fields, but we do not accept missing fields
+    # and by accepting addiiotnal fields, the check for unsuccessful is also not needed anymore
+    # if l != 0:
+    #     # only for cases of rejected TX we need to additionally check the two separate fields
+    #     # if (l != 2):
+    #     #     colErr = colErr + " Invalid number of fields in transaction: " + str(l) + str(trans)
+    #     # else:
+    #     #     if ("transferSuccessful" not in trans) or ("transactionDataHash" not in trans):
+    #     #         colErr = colErr + " Problem with TX successfulField " + str(trans)
+    #     #     else:
+    #     #         l = 0  # not used so far, but prepare for any changes later
+    #     # note we only check for known issues. If the TX has other more fields, so be it
+    #     # because it could be from a fork
+    #     # the only currently known issue is that more fields appear in unsuccessful TX, so this must be confirmed
+    #     # a unsuccessful TX can have 2 or 3 more fields, depending the status it had when it was rejected
+    #     # original version had only allowed 2 and did not consider the case that it could have been mined
+    #     # and then the 'minedInBlock' also appears, so now we don't check length but just the two critical fields
+    #     if isCoinBase is False:
+    #         if 'transferSuccessful' in trans:
+    #             if (trans['transferSuccessful'] is True) or ("transactionDataHash" not in trans):
+    #                 colErr = colErr + "Problem with recognising TX as unsuccessful"
+
     if colErr == "":  # final checks
         if len(trans['senderSignature']) != 2:
             colErr = colErr + " Invalid number of elements in 'senderSignature' field"
@@ -201,6 +216,7 @@ def receivedNewTransaction(trans, share):
         return  # nothing returned, nothing sent
     return errMsg(colErr)
 
+## TODO using the public key to verify signature
 
 def initPendingTX():
     if firstTime[0] is True:

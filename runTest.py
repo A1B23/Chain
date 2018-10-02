@@ -160,14 +160,14 @@ def runSeq():
                         print("+ " + str(exp) + ": " + str(js[exp]))
 
             print("**********************  Sequence completed: " + seq)
-            print("Total issues: " + len(totalErr))
+            print("Total issues: " + str(len(totalErr)))
             for err in totalErr:
                 print(err)
     except Exception:
         print("***************************************************************")
         print("Exception occurred, ensure the nodes are all up and running ...")
         print("***************************************************************")
-        print("Total issues: " + len(totalErr))
+        print("Total issues: " + str(len(totalErr)))
         for err in totalErr:
             print(err)
         exit(-1)

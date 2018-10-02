@@ -45,7 +45,7 @@ def updateTempBalance(txList, tempBalance, chkOnly=""):
                 tempBalance.update({ato: value})
             else:
                 tempBalance[ato] = tempBalance[ato] + value #add only value, fee went to  miner
-    return True
+    return tempBalance
 
 
 def updateConfirmedBalance(txList, isGenesis):
@@ -135,14 +135,18 @@ def confirmRevertBalances(txList):
     # first we update the buffer info, and only if all pass
     # then update the actual balances involved
     # theoretically if it is our own block, all should be correct, but we check anyway
-    updBalance = updateConfirmedBalance(txList, False)
-    if len(updBalance) == 0:
-        #This should never happen!!!
-        return "Block rejected, invalid TX detected in: " + txList['transactionDataHash']
+    # the original logic failed in the double spend scenario, updated
+    # old updBalance = updateConfirmedBalance(txList, False)
+    # old if len(updBalance) == 0:
+    # old    #This should never happen!!!
+    # old    return "Block rejected, invalid TX detected in: " + txList['transactionDataHash']
 
+    # new note that the sign of balance must be inverted, as we remove TX!
+    updBalance = updateTempBalance(txList, {}, "")
     # all tx in this block are valid, so update actual balances based on the results from checking
     for addr in updBalance:
-        m_AllBalances[addr]['curBalance'] = m_AllBalances[addr]['curBalance'] - (updBalance[addr] - m_AllBalances[addr]['curBalance'])
+        # new note that the sign of balance must be inverted, as we remove TX!
+        m_AllBalances[addr]['curBalance'] = m_AllBalances[addr]['curBalance'] - updBalance[addr]
 
     # balances updated, re-install actual TX into pending list
     for tx in txList:
