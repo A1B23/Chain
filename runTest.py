@@ -173,4 +173,6 @@ def runSeq():
         exit(-1)
 
 
+print("!!!! Confirm and press <Enter> to start ... ")
+input().lower()
 runSeq()
