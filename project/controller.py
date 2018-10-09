@@ -17,6 +17,7 @@ c_MainIntf = mainInterface()
 
 
 def shutdown_server():
+    m_cfg['shutdown'] = True
     print("Down")
     func = request.environ.get('werkzeug.server.shutdown')
     if func is None:
@@ -30,7 +31,7 @@ def shutDown():
     except Exception:
         print("Smooth Shutdown failed")
     # return 'Server shutting down...'
-    sys.exit(1)
+    sys.exit(0)
 
 
 @app.route('/visualGet', methods=["GET"])
