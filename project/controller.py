@@ -11,8 +11,26 @@ from project.models import m_cfg, m_visualCFG, m_Delay, m_info, m_isPOST
 from project.nspec.blockchain.modelBC import m_pendingTX, m_BufferMinerCandidates, m_Blocks
 from project.nspec.blockchain.modelBC import m_AllBalances
 import re
+import sys
 
 c_MainIntf = mainInterface()
+
+
+def shutdown_server():
+    print("Down")
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+@app.route('/shutDown', methods=["POST"])
+def shutDown():
+    try:
+        shutdown_server()
+    except Exception:
+        print("Smooth Shutdown failed")
+    # return 'Server shutting down...'
+    sys.exit(1)
 
 
 @app.route('/visualGet', methods=["GET"])

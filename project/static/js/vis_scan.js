@@ -8,6 +8,41 @@ function newScan() {
     setTimeout(function () { reScan(true); }, 10);
 }
 
+function shutDown() {
+    collectPause();
+    collectSuspend();
+    setTimeout(function () { doDown(); }, 10);
+}
+
+function doDown() {
+    var ring = 0;
+    $("td[id*='opt']").each(function () {
+        var min = parseInt($(this).find("#IPMin")[0].value);
+        var max = parseInt($(this).find("#IPMax")[0].value);
+        var typ = $(this).find("#type")[0];
+        if ((min * max > 0) && (min > 0) && (min < 128) && (max < 128)) {
+            for (var ipx = min; ipx <= max; ipx++) {
+                scDown(ipx);
+            }
+        }
+        ring++;
+        //console.log("__________________________________" + ring);
+    });
+}
+
+function scDown(ip) {
+    try {
+        var port = 5555
+        var dom = "http://127.0.0." + ip + ":" + port;
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", dom+"/shutDown", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send("bye");
+    } catch (err) {
+        console.log("Error for doPOSTCfg" + url + " as " + err.message);
+    }
+}
+
 function scTime(xipx, xtyp, xring, xinit) {
     (function (xxipx, xxtyp, xxring, xxinit) {
         setTimeout(function () {
@@ -38,6 +73,8 @@ function reScan(init) {
         setTimeout(function () { reScan(false) }, 3000);
     }
 }
+
+
 
 function scanFor(ipIn, typIn, ringIn, init) {
     (function (ipIn, typIn, ringIn, init) {
