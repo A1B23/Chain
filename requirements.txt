@@ -14,7 +14,7 @@ flask-now==0.1.5
 Flask-WTF==0.14.2
 idna==2.6
 itsdangerous==0.24
-Jinja2==2.10
+Jinja2==2.11.3
 MarkupSafe==1.0
 nummaster==0.1.1
 pbkdf2==1.3
